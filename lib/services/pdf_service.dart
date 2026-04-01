@@ -1,6 +1,6 @@
 import 'dart:io';
-import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:image/image.dart' as img;
 import 'package:pdfrx/pdfrx.dart';
 
@@ -28,7 +28,14 @@ class PdfService {
     final image = pdfImage.createImageNF();
     pdfImage.dispose();
 
-    return _encodeImage(image, format, quality);
+    // 이미지 인코딩을 별도 isolate에서 실행하여 UI 끊김 방지
+    return compute(_encodeImageIsolate, _EncodeRequest(
+      pixels: image.toUint8List(),
+      width: image.width,
+      height: image.height,
+      format: format,
+      quality: quality,
+    ));
   }
 
   /// PDF 페이지들을 이미지 파일로 저장
@@ -44,9 +51,11 @@ class PdfService {
     final dir = Directory(outputDir);
     if (!dir.existsSync()) dir.createSync(recursive: true);
 
-    final ext = format.toLowerCase();
+    final ext = format.toUpperCase() == 'TIFF' ? 'tif' : format.toLowerCase();
     for (var i = 0; i < pageIndices.length; i++) {
       onProgress?.call(i + 1, pageIndices.length);
+      // UI가 진행률을 표시할 수 있도록 프레임 양보
+      await Future<void>.delayed(Duration.zero);
 
       final page = document.pages[pageIndices[i]];
       final bytes = await convertPageToImageBytes(
@@ -140,24 +149,48 @@ class PdfService {
     return sorted;
   }
 
-  static Uint8List _encodeImage(img.Image image, String format, int quality) {
-    switch (format.toUpperCase()) {
-      case 'PNG':
-        return Uint8List.fromList(img.encodePng(image));
-      case 'JPEG':
-      case 'JPG':
-        return Uint8List.fromList(img.encodeJpg(image, quality: quality));
-      case 'GIF':
-        return Uint8List.fromList(img.encodeGif(image));
-      case 'TIFF':
-        return Uint8List.fromList(img.encodeTiff(image));
-      case 'BMP':
-        return Uint8List.fromList(img.encodeBmp(image));
-      case 'WEBP':
-        // image 패키지는 WebP 인코딩을 지원하지 않으므로 PNG로 대체
-        return Uint8List.fromList(img.encodePng(image));
-      default:
-        throw ArgumentError('지원하지 않는 포맷: $format');
-    }
+}
+
+/// isolate 간 전달용 인코딩 요청 데이터
+class _EncodeRequest {
+  const _EncodeRequest({
+    required this.pixels,
+    required this.width,
+    required this.height,
+    required this.format,
+    required this.quality,
+  });
+  final Uint8List pixels;
+  final int width;
+  final int height;
+  final String format;
+  final int quality;
+}
+
+/// 별도 isolate에서 실행되는 이미지 인코딩 함수
+Uint8List _encodeImageIsolate(_EncodeRequest req) {
+  final image = img.Image.fromBytes(
+    width: req.width,
+    height: req.height,
+    bytes: req.pixels.buffer,
+    numChannels: 4,
+  );
+
+  switch (req.format.toUpperCase()) {
+    case 'PNG':
+      return Uint8List.fromList(img.encodePng(image));
+    case 'JPEG':
+    case 'JPG':
+      return Uint8List.fromList(img.encodeJpg(image, quality: req.quality));
+    case 'GIF':
+      return Uint8List.fromList(img.encodeGif(image));
+    case 'TIFF':
+      return Uint8List.fromList(img.encodeTiff(image));
+    case 'BMP':
+      return Uint8List.fromList(img.encodeBmp(image));
+    case 'WEBP':
+      return Uint8List.fromList(img.encodePng(image));
+    default:
+      throw ArgumentError('지원하지 않는 포맷: ${req.format}');
   }
 }
