@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'providers/pdf_provider.dart';
 import 'screens/empty_state_screen.dart';
 import 'screens/main_screen.dart';
+import 'screens/merge_screen.dart';
 import 'theme/app_theme.dart';
 import 'utils/constants.dart';
 import 'widgets/common/drop_overlay.dart';
@@ -55,10 +56,12 @@ class _DropWrapperState extends State<_DropWrapper> {
         final files = details.files;
         if (files.isEmpty) return;
 
-        // 첫 번째 PDF 파일만 열기
-        final pdfFiles =
-            files.where((f) => f.path.toLowerCase().endsWith('.pdf'));
-        if (pdfFiles.isEmpty) {
+        final pdfPaths = files
+            .where((f) => f.path.toLowerCase().endsWith('.pdf'))
+            .map((f) => f.path)
+            .toList();
+
+        if (pdfPaths.isEmpty) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('PDF 파일만 열 수 있습니다')),
@@ -67,9 +70,24 @@ class _DropWrapperState extends State<_DropWrapper> {
           return;
         }
 
+        // 여러 PDF → 병합 화면으로 이동
+        if (pdfPaths.length > 1) {
+          if (mounted) {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => MergeScreen(initialPaths: pdfPaths),
+              ),
+            );
+          }
+          return;
+        }
+
+        // 단일 PDF → PDF가 이미 열려있으면 무시
         final provider = context.read<PdfProvider>();
+        if (provider.hasDocument) return;
+
         final messenger = ScaffoldMessenger.of(context);
-        final success = await provider.loadPdf(pdfFiles.first.path);
+        final success = await provider.loadPdf(pdfPaths.first);
         if (!success && mounted) {
           messenger.showSnackBar(
             const SnackBar(content: Text('파일을 열 수 없습니다')),

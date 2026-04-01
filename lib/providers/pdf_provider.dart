@@ -14,7 +14,6 @@ class PdfProvider extends ChangeNotifier {
   String _fileName = '';
   String _fileSize = '';
   int _currentPage = 1;
-  double _zoom = 100;
   bool _isGridView = false;
   bool _isLoading = false;
   String? _error;
@@ -26,7 +25,6 @@ class PdfProvider extends ChangeNotifier {
   bool get hasDocument => _document != null;
   int get pageCount => _document?.pages.length ?? 0;
   int get currentPage => _currentPage;
-  double get zoom => _zoom;
   bool get isGridView => _isGridView;
   bool get isLoading => _isLoading;
   String? get error => _error;
@@ -58,7 +56,6 @@ class PdfProvider extends ChangeNotifier {
       _fileName = Uri.file(filePath).pathSegments.last;
       _fileSize = FileService.formatFileSize(bytes.length);
       _currentPage = 1;
-      _zoom = 100;
       _isLoading = false;
       notifyListeners();
       return true;
@@ -109,7 +106,6 @@ class PdfProvider extends ChangeNotifier {
     _fileName = '';
     _fileSize = '';
     _currentPage = 1;
-    _zoom = 100;
     _error = null;
     notifyListeners();
   }
@@ -124,15 +120,6 @@ class PdfProvider extends ChangeNotifier {
 
   void nextPage() => setPage(_currentPage + 1);
   void prevPage() => setPage(_currentPage - 1);
-
-  // === 줌 ===
-  void setZoom(double zoom) {
-    final clamped = zoom.clamp(25.0, 400.0);
-    if (clamped != _zoom) {
-      _zoom = clamped;
-      notifyListeners();
-    }
-  }
 
   // === 뷰 모드 ===
   void setGridView(bool isGrid) {

@@ -12,7 +12,9 @@ import '../theme/app_theme.dart';
 
 /// PDF 병합 전체화면
 class MergeScreen extends StatefulWidget {
-  const MergeScreen({super.key});
+  const MergeScreen({super.key, this.initialPaths});
+
+  final List<String>? initialPaths;
 
   @override
   State<MergeScreen> createState() => _MergeScreenState();
@@ -21,6 +23,39 @@ class MergeScreen extends StatefulWidget {
 class _MergeScreenState extends State<MergeScreen> {
   final _files = <_MergeFile>[];
   int _activeFileIndex = -1;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialPaths != null && widget.initialPaths!.isNotEmpty) {
+      _loadInitialFiles();
+    }
+  }
+
+  Future<void> _loadInitialFiles() async {
+    for (final path in widget.initialPaths!) {
+      try {
+        final bytes = await File(path).readAsBytes();
+        final doc = await PdfDocument.openData(bytes, sourceName: path);
+        final name = Uri.file(path).pathSegments.last;
+        final size = FileService.formatFileSize(bytes.length);
+
+        final file = _MergeFile(
+          path: path,
+          name: name,
+          size: size,
+          document: doc,
+        );
+        for (var i = 0; i < doc.pages.length; i++) {
+          file.selectedPages.add(i);
+        }
+        _files.add(file);
+      } catch (_) {}
+    }
+
+    if (_files.isNotEmpty) _activeFileIndex = 0;
+    if (mounted) setState(() {});
+  }
 
   int get _totalSelectedPages =>
       _files.fold(0, (sum, f) => sum + f.selectedPages.length);

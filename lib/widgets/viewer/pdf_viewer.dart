@@ -11,12 +11,14 @@ class PdfViewerWidget extends StatefulWidget {
     super.key,
     required this.pdfBytes,
     required this.sourceName,
+    required this.controller,
     required this.currentPage,
     required this.onPageChanged,
   });
 
   final Uint8List pdfBytes;
   final String sourceName;
+  final PdfViewerController controller;
   final int currentPage;
   final ValueChanged<int> onPageChanged;
 
@@ -25,24 +27,23 @@ class PdfViewerWidget extends StatefulWidget {
 }
 
 class _PdfViewerWidgetState extends State<PdfViewerWidget> {
-  final _controller = PdfViewerController();
   bool _syncing = false;
 
   @override
   void initState() {
     super.initState();
-    _controller.addListener(_onViewerChanged);
+    widget.controller.addListener(_onViewerChanged);
   }
 
   @override
   void dispose() {
-    _controller.removeListener(_onViewerChanged);
+    widget.controller.removeListener(_onViewerChanged);
     super.dispose();
   }
 
   void _onViewerChanged() {
-    if (_syncing || !_controller.isReady) return;
-    final viewerPage = _controller.pageNumber;
+    if (_syncing || !widget.controller.isReady) return;
+    final viewerPage = widget.controller.pageNumber;
     if (viewerPage != null && viewerPage != widget.currentPage) {
       widget.onPageChanged(viewerPage);
     }
@@ -51,10 +52,10 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
   @override
   void didUpdateWidget(PdfViewerWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Provider에서 페이지 변경 시 뷰어도 동기화
-    if (oldWidget.currentPage != widget.currentPage && _controller.isReady) {
+    if (oldWidget.currentPage != widget.currentPage &&
+        widget.controller.isReady) {
       _syncing = true;
-      _controller
+      widget.controller
           .goToPage(pageNumber: widget.currentPage)
           .then((_) => _syncing = false);
     }
@@ -67,7 +68,7 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
       child: PdfViewer.data(
         widget.pdfBytes,
         sourceName: widget.sourceName,
-        controller: _controller,
+        controller: widget.controller,
         params: PdfViewerParams(
           margin: AppTheme.spacingXl,
           backgroundColor: AppTheme.surfaceSecondary,
@@ -82,5 +83,4 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
       ),
     );
   }
-
 }

@@ -9,7 +9,9 @@ class ViewerToolbar extends StatelessWidget {
     required this.currentPage,
     required this.totalPages,
     required this.zoom,
-    required this.onZoomChanged,
+    required this.onZoomIn,
+    required this.onZoomOut,
+    required this.onFitWidth,
     required this.onPrev,
     required this.onNext,
   });
@@ -17,7 +19,9 @@ class ViewerToolbar extends StatelessWidget {
   final int currentPage;
   final int totalPages;
   final double zoom;
-  final ValueChanged<double> onZoomChanged;
+  final VoidCallback onZoomIn;
+  final VoidCallback onZoomOut;
+  final VoidCallback onFitWidth;
   final VoidCallback onPrev;
   final VoidCallback onNext;
 
@@ -64,11 +68,9 @@ class ViewerToolbar extends StatelessWidget {
 
           const Spacer(),
 
-          // 줌 컨트롤 (슬라이더 없이 심플)
+          // 줌 컨트롤
           IconButton(
-            onPressed: () {
-              if (zoom > 25) onZoomChanged(zoom - 25);
-            },
+            onPressed: onZoomOut,
             icon: const Icon(LucideIcons.minus, size: 14),
             color: AppTheme.foregroundSecondary,
             visualDensity: VisualDensity.compact,
@@ -87,9 +89,7 @@ class ViewerToolbar extends StatelessWidget {
           ),
           const SizedBox(width: AppTheme.spacingXs),
           IconButton(
-            onPressed: () {
-              if (zoom < 400) onZoomChanged(zoom + 25);
-            },
+            onPressed: onZoomIn,
             icon: const Icon(LucideIcons.plus, size: 14),
             color: AppTheme.foregroundSecondary,
             visualDensity: VisualDensity.compact,
@@ -101,7 +101,7 @@ class ViewerToolbar extends StatelessWidget {
 
           // 너비 맞춤
           GestureDetector(
-            onTap: () => onZoomChanged(100),
+            onTap: onFitWidth,
             child: const Text(
               '너비 맞춤',
               style: TextStyle(

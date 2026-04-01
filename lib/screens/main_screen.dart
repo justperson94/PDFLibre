@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:pdfrx/pdfrx.dart';
 import 'package:provider/provider.dart';
 
 import '../dialogs/convert_dialog.dart';
@@ -19,24 +20,52 @@ import '../widgets/viewer/zoom_controls.dart';
 import 'merge_screen.dart';
 
 /// 메인 화면 — PDF가 열려 있을 때 표시
-class MainScreen extends StatelessWidget {
+class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
 
-  Future<void> _openFile(BuildContext context) async {
+  @override
+  State<MainScreen> createState() => _MainScreenState();
+}
+
+class _MainScreenState extends State<MainScreen> {
+  final _viewerController = PdfViewerController();
+  double _displayZoom = 100;
+
+  @override
+  void initState() {
+    super.initState();
+    _viewerController.addListener(_onViewerZoomChanged);
+  }
+
+  @override
+  void dispose() {
+    _viewerController.removeListener(_onViewerZoomChanged);
+    super.dispose();
+  }
+
+  void _onViewerZoomChanged() {
+    if (!_viewerController.isReady) return;
+    final zoom = _viewerController.currentZoom * 100;
+    if ((zoom - _displayZoom).abs() > 0.5) {
+      setState(() => _displayZoom = zoom);
+    }
+  }
+
+  Future<void> _openFile() async {
     final path = await FileService.pickPdfFile();
-    if (path == null || !context.mounted) return;
+    if (path == null || !mounted) return;
 
     final provider = context.read<PdfProvider>();
     final success = await provider.loadPdf(path);
 
-    if (!success && context.mounted) {
-      showErrorDialog(context, onPickFile: () => _openFile(context));
+    if (!success && mounted) {
+      showErrorDialog(context, onPickFile: _openFile);
     }
   }
 
-  Future<void> _onConvert(BuildContext context) async {
+  Future<void> _onConvert() async {
     final result = await showConvertDialog(context);
-    if (result == null || !context.mounted) return;
+    if (result == null || !mounted) return;
 
     final pdf = context.read<PdfProvider>();
     if (pdf.document == null) return;
@@ -55,7 +84,7 @@ class MainScreen extends StatelessWidget {
       ),
     );
 
-    if (!context.mounted) return;
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
@@ -67,9 +96,9 @@ class MainScreen extends StatelessWidget {
     );
   }
 
-  Future<void> _onSplit(BuildContext context) async {
+  Future<void> _onSplit() async {
     final result = await showSplitDialog(context);
-    if (result == null || !context.mounted) return;
+    if (result == null || !mounted) return;
 
     final pdf = context.read<PdfProvider>();
     if (pdf.document == null) return;
@@ -77,9 +106,8 @@ class MainScreen extends StatelessWidget {
     final baseName = pdf.fileName.replaceAll('.pdf', '').replaceAll('.PDF', '');
 
     if (result.splitIndividual) {
-      // 개별 PDF — 디렉토리 선택
       final dir = await FileService.pickSaveDirectory();
-      if (dir == null || !context.mounted) return;
+      if (dir == null || !mounted) return;
 
       final success = await runWithProgressDialog(
         context: context,
@@ -96,7 +124,7 @@ class MainScreen extends StatelessWidget {
         },
       );
 
-      if (!context.mounted) return;
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -107,12 +135,11 @@ class MainScreen extends StatelessWidget {
         ),
       );
     } else {
-      // 하나의 PDF — 파일 저장
       final path = await FileService.pickSaveFile(
         defaultName: '${baseName}_분할.pdf',
         extension: 'pdf',
       );
-      if (path == null || !context.mounted) return;
+      if (path == null || !mounted) return;
 
       final success = await runWithProgressDialog(
         context: context,
@@ -128,11 +155,33 @@ class MainScreen extends StatelessWidget {
         },
       );
 
-      if (!context.mounted) return;
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(success ? 'PDF 분할이 완료되었습니다' : '분할 중 오류가 발생했습니다'),
+          content: Text(
+              success ? 'PDF 분할이 완료되었습니다' : '분할 중 오류가 발생했습니다'),
         ),
+      );
+    }
+  }
+
+  void _zoomIn() {
+    if (_viewerController.isReady) {
+      _viewerController.zoomUp();
+    }
+  }
+
+  void _zoomOut() {
+    if (_viewerController.isReady) {
+      _viewerController.zoomDown();
+    }
+  }
+
+  void _setZoom(double percent) {
+    if (_viewerController.isReady) {
+      _viewerController.setZoom(
+        _viewerController.centerPosition,
+        percent / 100,
       );
     }
   }
@@ -149,16 +198,14 @@ class MainScreen extends StatelessWidget {
               TopToolbar(
                 isGridView: pdf.isGridView,
                 onViewChanged: pdf.setGridView,
-                onOpenFile: () => _openFile(context),
-                onRotateCcw: () =>
-                    pdf.rotateCurrentPage(clockwise: false),
-                onRotateCw: () =>
-                    pdf.rotateCurrentPage(clockwise: true),
-                onSplit: () => _onSplit(context),
-                onMerge: () => Navigator.of(
-                  context,
-                ).push(MaterialPageRoute(builder: (_) => const MergeScreen())),
-                onConvert: () => _onConvert(context),
+                onOpenFile: _openFile,
+                onClose: pdf.closeDocument,
+                onRotateCcw: () => pdf.rotateCurrentPage(clockwise: false),
+                onRotateCw: () => pdf.rotateCurrentPage(clockwise: true),
+                onSplit: _onSplit,
+                onMerge: () => Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (_) => const MergeScreen())),
+                onConvert: _onConvert,
               ),
 
               // 메인 콘텐츠: 사이드바 + 뷰어
@@ -180,8 +227,10 @@ class MainScreen extends StatelessWidget {
                           ViewerToolbar(
                             currentPage: pdf.currentPage,
                             totalPages: pdf.pageCount,
-                            zoom: pdf.zoom,
-                            onZoomChanged: pdf.setZoom,
+                            zoom: _displayZoom,
+                            onZoomIn: _zoomIn,
+                            onZoomOut: _zoomOut,
+                            onFitWidth: () => _setZoom(100),
                             onPrev: pdf.prevPage,
                             onNext: pdf.nextPage,
                           ),
@@ -192,7 +241,9 @@ class MainScreen extends StatelessWidget {
                                 ? PdfViewerWidget(
                                     key: ValueKey(pdf.version),
                                     pdfBytes: pdf.pdfBytes!,
-                                    sourceName: pdf.fileName,
+                                    sourceName:
+                                        '${pdf.fileName}_v${pdf.version}',
+                                    controller: _viewerController,
                                     currentPage: pdf.currentPage,
                                     onPageChanged: pdf.setPage,
                                   )
@@ -215,20 +266,23 @@ class MainScreen extends StatelessWidget {
                       color: AppTheme.foregroundMuted,
                     ),
                     const SizedBox(width: AppTheme.spacingXs),
-                    Text(
-                      '${pdf.fileName}  |  ${pdf.fileSize}  |  ${pdf.pageCount} 페이지',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: AppTheme.foregroundMuted,
-                        fontWeight: FontWeight.w500,
+                    Flexible(
+                      child: Text(
+                        '${pdf.fileName}  |  ${pdf.fileSize}  |  ${pdf.pageCount} 페이지',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppTheme.foregroundMuted,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
                 ),
                 centerText: '페이지 ${pdf.currentPage} / ${pdf.pageCount}',
                 rightWidget: ZoomControls(
-                  zoom: pdf.zoom,
-                  onChanged: pdf.setZoom,
+                  zoom: _displayZoom,
+                  onChanged: _setZoom,
                 ),
               ),
             ],

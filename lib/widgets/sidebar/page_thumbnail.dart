@@ -55,7 +55,8 @@ class _PageThumbnailState extends State<PageThumbnail> {
     _loading = true;
 
     try {
-      const thumbWidth = 80.0;
+      // 2x 해상도로 렌더링하여 선명도 향상
+      const thumbWidth = 160.0;
       final scale = thumbWidth / widget.page.width;
       final thumbHeight = widget.page.height * scale;
 
@@ -86,6 +87,11 @@ class _PageThumbnailState extends State<PageThumbnail> {
 
   @override
   Widget build(BuildContext context) {
+    // 페이지 비율에 맞게 썸네일 크기 결정
+    final isLandscape = widget.page.width > widget.page.height;
+    final thumbWidth = isLandscape ? 64.0 : 48.0;
+    final thumbHeight = isLandscape ? 48.0 : 64.0;
+
     return InkWell(
       onTap: widget.onTap,
       child: Container(
@@ -110,8 +116,8 @@ class _PageThumbnailState extends State<PageThumbnail> {
           children: [
             // 썸네일 이미지
             Container(
-              width: 48,
-              height: 64,
+              width: thumbWidth,
+              height: thumbHeight,
               decoration: BoxDecoration(
                 color: AppTheme.surfacePrimary,
                 borderRadius: BorderRadius.circular(AppTheme.roundedSm),
@@ -124,7 +130,7 @@ class _PageThumbnailState extends State<PageThumbnail> {
               ),
               clipBehavior: Clip.antiAlias,
               child: _thumbnail != null
-                  ? RawImage(image: _thumbnail, fit: BoxFit.cover)
+                  ? RawImage(image: _thumbnail, fit: BoxFit.contain)
                   : const Center(
                       child: SizedBox(
                         width: 16,

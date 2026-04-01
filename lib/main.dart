@@ -7,7 +7,7 @@ import 'providers/pdf_provider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  pdfrxFlutterInitialize();
+  pdfrxFlutterInitialize(dismissPdfiumWasmWarnings: true);
   runApp(
     ChangeNotifierProvider(
       create: (_) => PdfProvider(),

@@ -13,6 +13,7 @@ class TopToolbar extends StatelessWidget {
     required this.isGridView,
     required this.onViewChanged,
     this.onOpenFile,
+    this.onClose,
     this.onRotateCcw,
     this.onRotateCw,
     this.onSplit,
@@ -23,6 +24,7 @@ class TopToolbar extends StatelessWidget {
   final bool isGridView;
   final ValueChanged<bool> onViewChanged;
   final VoidCallback? onOpenFile;
+  final VoidCallback? onClose;
   final VoidCallback? onRotateCcw;
   final VoidCallback? onRotateCw;
   final VoidCallback? onSplit;
@@ -60,6 +62,12 @@ class TopToolbar extends StatelessWidget {
             label: '파일 열기',
             iconColor: AppTheme.accentPrimary,
             onTap: onOpenFile,
+          ),
+          const SizedBox(width: AppTheme.spacingXs),
+          ToolbarButton(
+            icon: LucideIcons.x,
+            tooltip: '문서 닫기',
+            onTap: onClose,
           ),
 
           const Spacer(),
