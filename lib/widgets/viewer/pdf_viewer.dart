@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:pdfrx/pdfrx.dart';
 
@@ -7,12 +9,14 @@ import '../../theme/app_theme.dart';
 class PdfViewerWidget extends StatefulWidget {
   const PdfViewerWidget({
     super.key,
-    required this.filePath,
+    required this.pdfBytes,
+    required this.sourceName,
     required this.currentPage,
     required this.onPageChanged,
   });
 
-  final String filePath;
+  final Uint8List pdfBytes;
+  final String sourceName;
   final int currentPage;
   final ValueChanged<int> onPageChanged;
 
@@ -58,14 +62,11 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.filePath.isEmpty) {
-      return _buildPlaceholder();
-    }
-
     return Container(
       color: AppTheme.surfaceSecondary,
-      child: PdfViewer.file(
-        widget.filePath,
+      child: PdfViewer.data(
+        widget.pdfBytes,
+        sourceName: widget.sourceName,
         controller: _controller,
         params: PdfViewerParams(
           margin: AppTheme.spacingXl,
@@ -82,15 +83,4 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
     );
   }
 
-  Widget _buildPlaceholder() {
-    return Container(
-      color: AppTheme.surfaceSecondary,
-      child: const Center(
-        child: Text(
-          'PDF를 불러오는 중...',
-          style: TextStyle(color: AppTheme.foregroundMuted, fontSize: 14),
-        ),
-      ),
-    );
-  }
 }

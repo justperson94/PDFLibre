@@ -21,7 +21,7 @@ class EmptyStateScreen extends StatelessWidget {
     final success = await provider.loadPdf(path);
 
     if (!success && context.mounted) {
-      showErrorDialog(context);
+      showErrorDialog(context, onPickFile: () => _openFile(context));
     }
   }
 

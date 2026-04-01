@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -38,9 +39,10 @@ class _MergeScreenState extends State<MergeScreen> {
 
     for (final path in paths) {
       try {
-        final doc = await PdfDocument.openFile(path);
+        final bytes = await File(path).readAsBytes();
+        final doc = await PdfDocument.openData(bytes, sourceName: path);
         final name = Uri.file(path).pathSegments.last;
-        final size = await FileService.getFileSize(path);
+        final size = FileService.formatFileSize(bytes.length);
 
         final file = _MergeFile(
           path: path,

@@ -3,7 +3,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../theme/app_theme.dart';
 
-Future<void> showErrorDialog(BuildContext context) {
+Future<void> showErrorDialog(BuildContext context, {VoidCallback? onPickFile}) {
   return showDialog<void>(
     context: context,
     builder: (context) {
@@ -69,7 +69,10 @@ Future<void> showErrorDialog(BuildContext context) {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     OutlinedButton(
-                      onPressed: () => Navigator.of(context).pop(),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        onPickFile?.call();
+                      },
                       style: OutlinedButton.styleFrom(
                         minimumSize: const Size(110, 40),
                         shape: RoundedRectangleBorder(

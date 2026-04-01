@@ -30,7 +30,7 @@ class MainScreen extends StatelessWidget {
     final success = await provider.loadPdf(path);
 
     if (!success && context.mounted) {
-      showErrorDialog(context);
+      showErrorDialog(context, onPickFile: () => _openFile(context));
     }
   }
 
@@ -188,12 +188,15 @@ class MainScreen extends StatelessWidget {
 
                           // PDF 뷰어
                           Expanded(
-                            child: PdfViewerWidget(
-                              key: ValueKey(pdf.filePath),
-                              filePath: pdf.filePath,
-                              currentPage: pdf.currentPage,
-                              onPageChanged: pdf.setPage,
-                            ),
+                            child: pdf.pdfBytes != null
+                                ? PdfViewerWidget(
+                                    key: ValueKey(pdf.version),
+                                    pdfBytes: pdf.pdfBytes!,
+                                    sourceName: pdf.fileName,
+                                    currentPage: pdf.currentPage,
+                                    onPageChanged: pdf.setPage,
+                                  )
+                                : const SizedBox.shrink(),
                           ),
                         ],
                       ),
