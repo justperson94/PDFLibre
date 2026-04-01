@@ -29,6 +29,9 @@ class PdfViewerWidget extends StatefulWidget {
 class _PdfViewerWidgetState extends State<PdfViewerWidget> {
   bool _syncing = false;
 
+  /// 문서 리로드 시 복원할 줌 레벨 (null이면 기본 줌 사용)
+  double? _zoomToRestore;
+
   @override
   void initState() {
     super.initState();
@@ -59,6 +62,11 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
           .goToPage(pageNumber: widget.currentPage)
           .then((_) => _syncing = false);
     }
+    // sourceName이 변경되면 (회전 인코딩 완료) 현재 줌을 저장하여 복원
+    if (oldWidget.sourceName != widget.sourceName &&
+        widget.controller.isReady) {
+      _zoomToRestore = widget.controller.currentZoom;
+    }
   }
 
   @override
@@ -78,6 +86,14 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
             offset: Offset(0, 2),
           ),
           enableKeyboardNavigation: false,
+          // 문서 리로드 시 이전 줌 레벨 복원
+          calculateInitialZoom: _zoomToRestore != null
+              ? (document, controller, fitScale, coverScale) {
+                  final zoom = _zoomToRestore!;
+                  _zoomToRestore = null;
+                  return zoom;
+                }
+              : null,
         ),
         initialPageNumber: widget.currentPage,
       ),

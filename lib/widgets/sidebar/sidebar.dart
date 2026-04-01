@@ -78,7 +78,7 @@ class Sidebar extends StatelessWidget {
       itemBuilder: (context, index) {
         final page = index + 1;
         return PageThumbnail(
-          key: ValueKey('thumb_${index}_v${pdf.version}'),
+          key: ValueKey('thumb_$index'),
           page: document.pages[index],
           pageNumber: page,
           selected: page == selectedPage,

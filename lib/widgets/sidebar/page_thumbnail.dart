@@ -92,12 +92,9 @@ class _PageThumbnailState extends State<PageThumbnail> {
   @override
   Widget build(BuildContext context) {
     final rotation = widget.rotation % 360;
-    final isRotated90or270 = rotation == 90 || rotation == 270;
-    final pageIsLandscape = widget.page.width > widget.page.height;
-    // 회전 적용 후 실제 방향 결정 (XOR)
-    final effectiveLandscape = pageIsLandscape ^ isRotated90or270;
-    final thumbWidth = effectiveLandscape ? 64.0 : 48.0;
-    final thumbHeight = effectiveLandscape ? 48.0 : 64.0;
+
+    // 고정 크기 컨테이너 (회전과 무관하게 행 높이 일정)
+    const fixedSize = 64.0;
 
     Widget imageWidget = _thumbnail != null
         ? RawImage(image: _thumbnail, fit: BoxFit.contain)
@@ -123,6 +120,7 @@ class _PageThumbnailState extends State<PageThumbnail> {
     return InkWell(
       onTap: widget.onTap,
       child: Container(
+        height: fixedSize + AppTheme.spacingSm * 2,
         decoration: BoxDecoration(
           color: widget.selected
               ? AppTheme.accentPrimary.withValues(alpha: 0.1)
@@ -142,22 +140,30 @@ class _PageThumbnailState extends State<PageThumbnail> {
         ),
         child: Row(
           children: [
-            // 썸네일 이미지
-            Container(
-              width: thumbWidth,
-              height: thumbHeight,
-              decoration: BoxDecoration(
-                color: AppTheme.surfacePrimary,
-                borderRadius: BorderRadius.circular(AppTheme.roundedSm),
-                border: Border.all(
-                  color: widget.selected
-                      ? AppTheme.accentPrimary
-                      : AppTheme.borderSubtle,
-                  width: widget.selected ? 2 : 1,
+            // 고정 크기 썸네일 영역 — 내부에서 이미지를 중앙 정렬
+            SizedBox(
+              width: fixedSize,
+              height: fixedSize,
+              child: Center(
+                child: Container(
+                  constraints: const BoxConstraints(
+                    maxWidth: 64,
+                    maxHeight: 64,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppTheme.surfacePrimary,
+                    borderRadius: BorderRadius.circular(AppTheme.roundedSm),
+                    border: Border.all(
+                      color: widget.selected
+                          ? AppTheme.accentPrimary
+                          : AppTheme.borderSubtle,
+                      width: widget.selected ? 2 : 1,
+                    ),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: imageWidget,
                 ),
               ),
-              clipBehavior: Clip.antiAlias,
-              child: imageWidget,
             ),
             const SizedBox(width: AppTheme.spacingSm),
             Text(

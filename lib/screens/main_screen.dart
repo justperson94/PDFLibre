@@ -273,7 +273,6 @@ class _MainScreenState extends State<MainScreen> {
                           Expanded(
                             child: pdf.pdfBytes != null
                                 ? PdfViewerWidget(
-                                    key: ValueKey(pdf.viewerVersion),
                                     pdfBytes: pdf.pdfBytes!,
                                     sourceName:
                                         '${pdf.fileName}_v${pdf.viewerVersion}',
