@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:ui' as ui;
 
+import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:pdfrx/pdfrx.dart';
@@ -32,29 +33,10 @@ class _MergeScreenState extends State<MergeScreen> {
     }
   }
 
+  bool _isDragging = false;
+
   Future<void> _loadInitialFiles() async {
-    for (final path in widget.initialPaths!) {
-      try {
-        final bytes = await File(path).readAsBytes();
-        final doc = await PdfDocument.openData(bytes, sourceName: path);
-        final name = Uri.file(path).pathSegments.last;
-        final size = FileService.formatFileSize(bytes.length);
-
-        final file = _MergeFile(
-          path: path,
-          name: name,
-          size: size,
-          document: doc,
-        );
-        for (var i = 0; i < doc.pages.length; i++) {
-          file.selectedPages.add(i);
-        }
-        _files.add(file);
-      } catch (_) {}
-    }
-
-    if (_files.isNotEmpty) _activeFileIndex = 0;
-    if (mounted) setState(() {});
+    await _loadPaths(widget.initialPaths!);
   }
 
   int get _totalSelectedPages =>
@@ -68,10 +50,8 @@ class _MergeScreenState extends State<MergeScreen> {
     super.dispose();
   }
 
-  Future<void> _addFiles() async {
-    final paths = await FileService.pickMultiplePdfFiles();
-    if (paths.isEmpty || !mounted) return;
-
+  /// 파일 경로 목록에서 PDF 로드 (공통)
+  Future<void> _loadPaths(List<String> paths) async {
     for (final path in paths) {
       try {
         final bytes = await File(path).readAsBytes();
@@ -85,16 +65,14 @@ class _MergeScreenState extends State<MergeScreen> {
           size: size,
           document: doc,
         );
-        // 기본으로 전체 페이지 선택
         for (var i = 0; i < doc.pages.length; i++) {
           file.selectedPages.add(i);
         }
         _files.add(file);
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('파일을 열 수 없습니다: $path')));
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text('파일을 열 수 없습니다: $path')));
         }
       }
     }
@@ -103,6 +81,12 @@ class _MergeScreenState extends State<MergeScreen> {
       _activeFileIndex = 0;
     }
     if (mounted) setState(() {});
+  }
+
+  Future<void> _addFiles() async {
+    final paths = await FileService.pickMultiplePdfFiles();
+    if (paths.isEmpty || !mounted) return;
+    await _loadPaths(paths);
   }
 
   void _removeFile(int index) {
@@ -164,18 +148,61 @@ class _MergeScreenState extends State<MergeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppTheme.surfacePrimary,
-      body: Column(
-        children: [
-          _buildToolbar(),
-          const Divider(height: 1, color: AppTheme.borderSubtle),
-          Expanded(
-            child: _files.isEmpty ? _buildEmptyState() : _buildContent(),
-          ),
-          const Divider(height: 1, color: AppTheme.borderSubtle),
-          _buildBottomBar(),
-        ],
+    return DropTarget(
+      onDragEntered: (_) => setState(() => _isDragging = true),
+      onDragExited: (_) => setState(() => _isDragging = false),
+      onDragDone: (details) {
+        setState(() => _isDragging = false);
+        final pdfPaths = details.files
+            .where((f) => f.path.toLowerCase().endsWith('.pdf'))
+            .map((f) => f.path)
+            .toList();
+        if (pdfPaths.isNotEmpty) _loadPaths(pdfPaths);
+      },
+      child: Scaffold(
+        backgroundColor: AppTheme.surfacePrimary,
+        body: Stack(
+          children: [
+            Column(
+              children: [
+                _buildToolbar(),
+                const Divider(height: 1, color: AppTheme.borderSubtle),
+                Expanded(
+                  child:
+                      _files.isEmpty ? _buildEmptyState() : _buildContent(),
+                ),
+                const Divider(height: 1, color: AppTheme.borderSubtle),
+                _buildBottomBar(),
+              ],
+            ),
+            if (_isDragging)
+              Container(
+                color: AppTheme.accentPrimary.withValues(alpha: 0.1),
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        LucideIcons.filePlus,
+                        size: 48,
+                        color: AppTheme.accentPrimary.withValues(alpha: 0.7),
+                      ),
+                      const SizedBox(height: AppTheme.spacingMd),
+                      Text(
+                        'PDF 파일을 여기에 놓으세요',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color:
+                              AppTheme.accentPrimary.withValues(alpha: 0.7),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

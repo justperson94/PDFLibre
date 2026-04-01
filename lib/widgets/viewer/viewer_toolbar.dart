@@ -12,6 +12,7 @@ class ViewerToolbar extends StatelessWidget {
     required this.onZoomIn,
     required this.onZoomOut,
     required this.onFitWidth,
+    required this.onFitPage,
     required this.onPrev,
     required this.onNext,
   });
@@ -22,6 +23,7 @@ class ViewerToolbar extends StatelessWidget {
   final VoidCallback onZoomIn;
   final VoidCallback onZoomOut;
   final VoidCallback onFitWidth;
+  final VoidCallback onFitPage;
   final VoidCallback onPrev;
   final VoidCallback onNext;
 
@@ -99,11 +101,23 @@ class ViewerToolbar extends StatelessWidget {
           ),
           const SizedBox(width: AppTheme.spacingMd),
 
-          // 너비 맞춤
+          // 너비 맞춤 / 페이지 맞춤
           GestureDetector(
             onTap: onFitWidth,
             child: const Text(
               '너비 맞춤',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.accentPrimary,
+              ),
+            ),
+          ),
+          const SizedBox(width: AppTheme.spacingSm),
+          GestureDetector(
+            onTap: onFitPage,
+            child: const Text(
+              '페이지 맞춤',
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
