@@ -49,7 +49,11 @@ class _DropWrapperState extends State<_DropWrapper> {
   @override
   Widget build(BuildContext context) {
     return DropTarget(
-      onDragEntered: (_) => setState(() => _isDragging = true),
+      onDragEntered: (_) {
+        // PDF가 이미 열려있으면 오버레이 표시 안 함
+        if (context.read<PdfProvider>().hasDocument) return;
+        setState(() => _isDragging = true);
+      },
       onDragExited: (_) => setState(() => _isDragging = false),
       onDragDone: (details) async {
         setState(() => _isDragging = false);

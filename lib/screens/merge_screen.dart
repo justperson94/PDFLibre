@@ -381,12 +381,26 @@ class _MergeScreenState extends State<MergeScreen> {
                       ),
                       child: Row(
                         children: [
-                          Icon(
-                            LucideIcons.fileText,
-                            size: 20,
-                            color: active
-                                ? AppTheme.surfacePrimary
-                                : AppTheme.foregroundSecondary,
+                          // 첫 페이지 썸네일
+                          Container(
+                            width: 36,
+                            height: 48,
+                            decoration: BoxDecoration(
+                              color: AppTheme.surfacePrimary,
+                              borderRadius: BorderRadius.circular(
+                                AppTheme.roundedSm,
+                              ),
+                              border: Border.all(
+                                color: active
+                                    ? AppTheme.surfacePrimary
+                                        .withValues(alpha: 0.5)
+                                    : AppTheme.borderSubtle,
+                              ),
+                            ),
+                            clipBehavior: Clip.antiAlias,
+                            child: _PageGridThumbnail(
+                              page: file.document.pages.first,
+                            ),
                           ),
                           const SizedBox(width: AppTheme.spacingSm),
                           Expanded(
@@ -699,7 +713,7 @@ class _PageGridThumbnailState extends State<_PageGridThumbnail> {
     if (_loading) return;
     _loading = true;
     try {
-      const thumbWidth = 150.0;
+      const thumbWidth = 300.0;
       final scale = thumbWidth / widget.page.width;
       final thumbHeight = widget.page.height * scale;
 

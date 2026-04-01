@@ -186,6 +186,16 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
+  void _fitWidth() {
+    if (!_viewerController.isReady) return;
+    final page = _viewerController.pageNumber ?? 1;
+    final matrix =
+        _viewerController.calcMatrixFitWidthForPage(pageNumber: page);
+    if (matrix != null) {
+      _viewerController.goTo(matrix);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<PdfProvider>(
@@ -230,7 +240,7 @@ class _MainScreenState extends State<MainScreen> {
                             zoom: _displayZoom,
                             onZoomIn: _zoomIn,
                             onZoomOut: _zoomOut,
-                            onFitWidth: () => _setZoom(100),
+                            onFitWidth: _fitWidth,
                             onPrev: pdf.prevPage,
                             onNext: pdf.nextPage,
                           ),

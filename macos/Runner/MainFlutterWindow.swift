@@ -10,6 +10,9 @@ class MainFlutterWindow: NSWindow {
 
     RegisterGeneratedPlugins(registry: flutterViewController)
 
+    self.minSize = NSSize(width: 900, height: 600)
+    self.title = "PDFLibre"
+
     super.awakeFromNib()
   }
 }

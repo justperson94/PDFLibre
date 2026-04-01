@@ -84,14 +84,19 @@ class PdfProvider extends ChangeNotifier {
     newPages[pageIndex] = rotated;
     _document!.pages = newPages;
 
-    // 바이트 재생성 — PdfViewer가 회전된 버전을 로드하도록
+    // 바이트 재생성 후 문서 재오픈 — 회전 상태 동기화
     try {
       await _document!.assemble();
       final bytes = await _document!.encodePdf();
-      _pdfBytes = bytes;
+      _document!.dispose();
       _version++;
+      _document = await PdfDocument.openData(
+        bytes,
+        sourceName: '${_originalFilePath}_v$_version',
+      );
+      _pdfBytes = bytes;
     } catch (_) {
-      // 인코딩 실패 시에도 썸네일은 업데이트
+      _version++;
     }
 
     notifyListeners();
