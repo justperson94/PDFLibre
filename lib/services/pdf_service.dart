@@ -21,6 +21,7 @@ class PdfService {
     required String format,
     double dpi = 300,
     int quality = 85,
+    int rotation = 0,
   }) async {
     final pdfImage = await renderPage(page, dpi: dpi);
     if (pdfImage == null) throw Exception('페이지 렌더링에 실패했습니다');
@@ -28,13 +29,14 @@ class PdfService {
     final image = pdfImage.createImageNF();
     pdfImage.dispose();
 
-    // 이미지 인코딩을 별도 isolate에서 실행하여 UI 끊김 방지
+    // 이미지 인코딩(+회전)을 별도 isolate에서 실행하여 UI 끊김 방지
     return compute(_encodeImageIsolate, _EncodeRequest(
       pixels: image.toUint8List(),
       width: image.width,
       height: image.height,
       format: format,
       quality: quality,
+      rotation: rotation,
     ));
   }
 
@@ -42,6 +44,7 @@ class PdfService {
   static Future<void> convertPagesToImages({
     required PdfDocument document,
     required List<int> pageIndices,
+    Map<int, int> rotations = const {},
     required String outputDir,
     required String format,
     double dpi = 300,
@@ -57,12 +60,14 @@ class PdfService {
       // UI가 진행률을 표시할 수 있도록 프레임 양보
       await Future<void>.delayed(Duration.zero);
 
-      final page = document.pages[pageIndices[i]];
+      final pageIdx = pageIndices[i];
+      final page = document.pages[pageIdx];
       final bytes = await convertPageToImageBytes(
         page: page,
         format: format,
         dpi: dpi,
         quality: quality,
+        rotation: rotations[pageIdx] ?? 0,
       );
 
       final fileName = 'page_${pageIndices[i] + 1}.$ext';
@@ -74,10 +79,24 @@ class PdfService {
   static Future<Uint8List> splitPages({
     required PdfDocument source,
     required List<int> pageIndices,
+    Map<int, int> rotations = const {},
   }) async {
     final newDoc = await PdfDocument.createNew(sourceName: 'split.pdf');
     try {
-      newDoc.pages = pageIndices.map((i) => source.pages[i]).toList();
+      final pages = <PdfPage>[];
+      for (final i in pageIndices) {
+        var page = source.pages[i];
+        final rot = (rotations[i] ?? 0) % 360;
+        final turns = rot ~/ 90;
+        for (var t = 0; t < turns; t++) {
+          page = page.rotatedCW90();
+        }
+        pages.add(page);
+      }
+      newDoc.pages = pages;
+      if (rotations.isNotEmpty) {
+        await newDoc.assemble();
+      }
       return await newDoc.encodePdf();
     } finally {
       newDoc.dispose();
@@ -88,9 +107,14 @@ class PdfService {
   static Future<void> splitToFile({
     required PdfDocument source,
     required List<int> pageIndices,
+    Map<int, int> rotations = const {},
     required String outputPath,
   }) async {
-    final bytes = await splitPages(source: source, pageIndices: pageIndices);
+    final bytes = await splitPages(
+      source: source,
+      pageIndices: pageIndices,
+      rotations: rotations,
+    );
     await File(outputPath).writeAsBytes(bytes);
   }
 
@@ -159,22 +183,30 @@ class _EncodeRequest {
     required this.height,
     required this.format,
     required this.quality,
+    this.rotation = 0,
   });
   final Uint8List pixels;
   final int width;
   final int height;
   final String format;
   final int quality;
+  final int rotation;
 }
 
-/// 별도 isolate에서 실행되는 이미지 인코딩 함수
+/// 별도 isolate에서 실행되는 이미지 인코딩 함수 (회전 포함)
 Uint8List _encodeImageIsolate(_EncodeRequest req) {
-  final image = img.Image.fromBytes(
+  var image = img.Image.fromBytes(
     width: req.width,
     height: req.height,
     bytes: req.pixels.buffer,
     numChannels: 4,
   );
+
+  // 회전 메타데이터가 있으면 이미지 회전 적용
+  final rot = req.rotation % 360;
+  if (rot != 0) {
+    image = img.copyRotate(image, angle: rot);
+  }
 
   switch (req.format.toUpperCase()) {
     case 'PNG':

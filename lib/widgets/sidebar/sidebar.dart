@@ -20,7 +20,8 @@ class Sidebar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final document = context.watch<PdfProvider>().document;
+    final pdf = context.watch<PdfProvider>();
+    final document = pdf.document;
 
     return Container(
       width: 240,
@@ -63,7 +64,7 @@ class Sidebar extends StatelessWidget {
           ),
           Expanded(
             child: document != null
-                ? _buildPageList(document)
+                ? _buildPageList(document, pdf)
                 : const SizedBox.shrink(),
           ),
         ],
@@ -71,16 +72,18 @@ class Sidebar extends StatelessWidget {
     );
   }
 
-  Widget _buildPageList(PdfDocument document) {
+  Widget _buildPageList(PdfDocument document, PdfProvider pdf) {
     return ListView.builder(
       itemCount: pageCount,
       itemBuilder: (context, index) {
         final page = index + 1;
         return PageThumbnail(
+          key: ValueKey('thumb_${index}_v${pdf.version}'),
           page: document.pages[index],
           pageNumber: page,
           selected: page == selectedPage,
           onTap: () => onPageSelected(page),
+          rotation: pdf.getPageRotation(index),
         );
       },
     );

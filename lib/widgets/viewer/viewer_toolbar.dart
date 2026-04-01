@@ -12,7 +12,8 @@ class ViewerToolbar extends StatelessWidget {
     required this.onZoomIn,
     required this.onZoomOut,
     required this.onFitWidth,
-    required this.onFitPage,
+    required this.onActualSize,
+    required this.onFitHeight,
     required this.onPrev,
     required this.onNext,
   });
@@ -23,7 +24,8 @@ class ViewerToolbar extends StatelessWidget {
   final VoidCallback onZoomIn;
   final VoidCallback onZoomOut;
   final VoidCallback onFitWidth;
-  final VoidCallback onFitPage;
+  final VoidCallback onActualSize;
+  final VoidCallback onFitHeight;
   final VoidCallback onPrev;
   final VoidCallback onNext;
 
@@ -101,29 +103,33 @@ class ViewerToolbar extends StatelessWidget {
           ),
           const SizedBox(width: AppTheme.spacingMd),
 
-          // 너비 맞춤 / 페이지 맞춤
-          GestureDetector(
-            onTap: onFitWidth,
-            child: const Text(
-              '너비 맞춤',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: AppTheme.accentPrimary,
-              ),
-            ),
+          // 가로 맞춤 / 원본 크기 / 세로 맞춤
+          IconButton(
+            onPressed: onFitWidth,
+            icon: const Icon(LucideIcons.moveHorizontal, size: 16),
+            color: AppTheme.accentPrimary,
+            visualDensity: VisualDensity.compact,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+            tooltip: '가로 맞춤',
           ),
-          const SizedBox(width: AppTheme.spacingSm),
-          GestureDetector(
-            onTap: onFitPage,
-            child: const Text(
-              '페이지 맞춤',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: AppTheme.accentPrimary,
-              ),
-            ),
+          IconButton(
+            onPressed: onActualSize,
+            icon: const Icon(LucideIcons.maximize, size: 16),
+            color: AppTheme.accentPrimary,
+            visualDensity: VisualDensity.compact,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+            tooltip: '원본 크기 (100%)',
+          ),
+          IconButton(
+            onPressed: onFitHeight,
+            icon: const Icon(LucideIcons.moveVertical, size: 16),
+            color: AppTheme.accentPrimary,
+            visualDensity: VisualDensity.compact,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+            tooltip: '세로 맞춤',
           ),
         ],
       ),

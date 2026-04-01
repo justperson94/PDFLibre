@@ -76,6 +76,7 @@ class _MainScreenState extends State<MainScreen> {
       task: (onProgress) => PdfService.convertPagesToImages(
         document: pdf.document!,
         pageIndices: result.pageIndices,
+        rotations: pdf.rotations,
         outputDir: result.outputDir,
         format: result.format,
         dpi: result.dpi.toDouble(),
@@ -118,6 +119,7 @@ class _MainScreenState extends State<MainScreen> {
             await PdfService.splitToFile(
               source: pdf.document!,
               pageIndices: [result.pageIndices[i]],
+              rotations: pdf.rotations,
               outputPath: '$dir/${baseName}_${result.pageIndices[i] + 1}.pdf',
             );
           }
@@ -149,6 +151,7 @@ class _MainScreenState extends State<MainScreen> {
           await PdfService.splitToFile(
             source: pdf.document!,
             pageIndices: result.pageIndices,
+            rotations: pdf.rotations,
             outputPath: path,
           );
           onProgress(1, 1);
@@ -196,11 +199,20 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
-  void _fitPage() {
+  void _actualSize() {
+    if (_viewerController.isReady) {
+      _viewerController.setZoom(
+        _viewerController.centerPosition,
+        1.0,
+      );
+    }
+  }
+
+  void _fitHeight() {
     if (!_viewerController.isReady) return;
     final page = _viewerController.pageNumber ?? 1;
     final matrix =
-        _viewerController.calcMatrixForFit(pageNumber: page);
+        _viewerController.calcMatrixFitHeightForPage(pageNumber: page);
     if (matrix != null) {
       _viewerController.goTo(matrix);
     }
@@ -251,7 +263,8 @@ class _MainScreenState extends State<MainScreen> {
                             onZoomIn: _zoomIn,
                             onZoomOut: _zoomOut,
                             onFitWidth: _fitWidth,
-                            onFitPage: _fitPage,
+                            onActualSize: _actualSize,
+                            onFitHeight: _fitHeight,
                             onPrev: pdf.prevPage,
                             onNext: pdf.nextPage,
                           ),
@@ -260,10 +273,10 @@ class _MainScreenState extends State<MainScreen> {
                           Expanded(
                             child: pdf.pdfBytes != null
                                 ? PdfViewerWidget(
-                                    key: ValueKey(pdf.version),
+                                    key: ValueKey(pdf.viewerVersion),
                                     pdfBytes: pdf.pdfBytes!,
                                     sourceName:
-                                        '${pdf.fileName}_v${pdf.version}',
+                                        '${pdf.fileName}_v${pdf.viewerVersion}',
                                     controller: _viewerController,
                                     currentPage: pdf.currentPage,
                                     onPageChanged: pdf.setPage,

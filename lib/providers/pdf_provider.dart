@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -9,7 +10,9 @@ import '../services/file_service.dart';
 class PdfProvider extends ChangeNotifier {
   PdfDocument? _document;
   Uint8List? _pdfBytes;
+  Uint8List? _originalPdfBytes;
   int _version = 0;
+  int _viewerVersion = 0;
   String _originalFilePath = '';
   String _fileName = '';
   String _fileSize = '';
@@ -18,10 +21,15 @@ class PdfProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _error;
 
+  /// 페이지별 회전 각도 (0-indexed → 0, 90, 180, 270)
+  final Map<int, int> _rotations = {};
+  Timer? _encodeTimer;
+
   // === Getters ===
   PdfDocument? get document => _document;
   Uint8List? get pdfBytes => _pdfBytes;
   int get version => _version;
+  int get viewerVersion => _viewerVersion;
   bool get hasDocument => _document != null;
   int get pageCount => _document?.pages.length ?? 0;
   int get currentPage => _currentPage;
@@ -31,6 +39,10 @@ class PdfProvider extends ChangeNotifier {
   String get fileName => _fileName;
   String get fileSize => _fileSize;
   String get originalFilePath => _originalFilePath;
+  Map<int, int> get rotations => Map.unmodifiable(_rotations);
+
+  /// 특정 페이지의 회전 각도 반환
+  int getPageRotation(int pageIndex) => _rotations[pageIndex] ?? 0;
 
   /// PDF 파일 로드
   Future<bool> loadPdf(String filePath) async {
@@ -39,6 +51,7 @@ class PdfProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
+      _encodeTimer?.cancel();
       _document?.dispose();
       _document = null;
 
@@ -50,21 +63,26 @@ class PdfProvider extends ChangeNotifier {
       // Dart가 파일을 바이트로 읽고, pdfium에 바이트를 직접 전달 (macOS 샌드박스 우회)
       final bytes = await file.readAsBytes();
       _document = await PdfDocument.openData(bytes, sourceName: filePath);
+      _originalPdfBytes = bytes;
       _pdfBytes = bytes;
       _version++;
+      _viewerVersion++;
       _originalFilePath = filePath;
       _fileName = Uri.file(filePath).pathSegments.last;
       _fileSize = FileService.formatFileSize(bytes.length);
       _currentPage = 1;
+      _rotations.clear();
       _isLoading = false;
       notifyListeners();
       return true;
     } catch (e) {
       _document = null;
       _pdfBytes = null;
+      _originalPdfBytes = null;
       _originalFilePath = '';
       _fileName = '';
       _fileSize = '';
+      _rotations.clear();
       _isLoading = false;
       _error = e.toString();
       notifyListeners();
@@ -72,45 +90,83 @@ class PdfProvider extends ChangeNotifier {
     }
   }
 
-  /// 현재 페이지 회전
-  Future<void> rotateCurrentPage({required bool clockwise}) async {
+  /// 현재 페이지 회전 (메타데이터만 변경, 뷰어는 디바운스 인코딩)
+  void rotateCurrentPage({required bool clockwise}) {
     if (_document == null) return;
 
-    final pageIndex = _currentPage - 1;
-    final page = _document!.pages[pageIndex];
-    final rotated = clockwise ? page.rotatedCW90() : page.rotatedCCW90();
+    final idx = _currentPage - 1;
+    final current = _rotations[idx] ?? 0;
+    final delta = clockwise ? 90 : -90;
+    final newRotation = ((current + delta) % 360 + 360) % 360;
 
-    final newPages = List<PdfPage>.from(_document!.pages);
-    newPages[pageIndex] = rotated;
-    _document!.pages = newPages;
-
-    // 바이트 재생성 후 문서 재오픈 — 회전 상태 동기화
-    try {
-      await _document!.assemble();
-      final bytes = await _document!.encodePdf();
-      _document!.dispose();
-      _version++;
-      _document = await PdfDocument.openData(
-        bytes,
-        sourceName: '${_originalFilePath}_v$_version',
-      );
-      _pdfBytes = bytes;
-    } catch (_) {
-      _version++;
+    if (newRotation == 0) {
+      _rotations.remove(idx);
+    } else {
+      _rotations[idx] = newRotation;
     }
 
+    _version++;
     notifyListeners();
+
+    // 디바운스: 300ms 내 추가 회전 없으면 뷰어용 바이트 재생성
+    _encodeTimer?.cancel();
+    _encodeTimer = Timer(const Duration(milliseconds: 300), _rebuildViewerBytes);
+  }
+
+  /// 디바운스된 뷰어 바이트 재생성
+  Future<void> _rebuildViewerBytes() async {
+    if (_document == null || _originalPdfBytes == null) return;
+
+    if (_rotations.isEmpty) {
+      // 회전 없으면 원본 바이트 사용
+      if (!identical(_pdfBytes, _originalPdfBytes)) {
+        _pdfBytes = _originalPdfBytes;
+        _viewerVersion++;
+        notifyListeners();
+      }
+      return;
+    }
+
+    try {
+      final tempDoc = await PdfDocument.openData(
+        _originalPdfBytes!,
+        sourceName: 'temp_encode_$_viewerVersion',
+      );
+
+      final newPages = List<PdfPage>.from(tempDoc.pages);
+      for (final entry in _rotations.entries) {
+        var page = newPages[entry.key];
+        final turns = (entry.value % 360) ~/ 90;
+        for (var t = 0; t < turns; t++) {
+          page = page.rotatedCW90();
+        }
+        newPages[entry.key] = page;
+      }
+      tempDoc.pages = newPages;
+      await tempDoc.assemble();
+      final bytes = await tempDoc.encodePdf();
+      tempDoc.dispose();
+
+      _pdfBytes = bytes;
+      _viewerVersion++;
+      notifyListeners();
+    } catch (_) {
+      // 인코딩 실패 시 기존 바이트 유지
+    }
   }
 
   /// 문서 닫기
   void closeDocument() {
+    _encodeTimer?.cancel();
     _document?.dispose();
     _document = null;
     _pdfBytes = null;
+    _originalPdfBytes = null;
     _originalFilePath = '';
     _fileName = '';
     _fileSize = '';
     _currentPage = 1;
+    _rotations.clear();
     _error = null;
     notifyListeners();
   }
@@ -136,6 +192,7 @@ class PdfProvider extends ChangeNotifier {
 
   @override
   void dispose() {
+    _encodeTimer?.cancel();
     _document?.dispose();
     super.dispose();
   }

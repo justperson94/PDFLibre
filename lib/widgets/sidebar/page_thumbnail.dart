@@ -5,7 +5,7 @@ import 'package:pdfrx/pdfrx.dart';
 
 import '../../theme/app_theme.dart';
 
-/// 사이드바 페이지 썸네일 (실제 PDF 렌더링)
+/// 사이드바 페이지 썸네일 (실제 PDF 렌더링 + 회전 메타데이터 반영)
 class PageThumbnail extends StatefulWidget {
   const PageThumbnail({
     super.key,
@@ -13,12 +13,16 @@ class PageThumbnail extends StatefulWidget {
     required this.pageNumber,
     required this.selected,
     required this.onTap,
+    this.rotation = 0,
   });
 
   final PdfPage page;
   final int pageNumber;
   final bool selected;
   final VoidCallback onTap;
+
+  /// 회전 각도 (0, 90, 180, 270)
+  final int rotation;
 
   @override
   State<PageThumbnail> createState() => _PageThumbnailState();
@@ -87,10 +91,34 @@ class _PageThumbnailState extends State<PageThumbnail> {
 
   @override
   Widget build(BuildContext context) {
-    // 페이지 비율에 맞게 썸네일 크기 결정
-    final isLandscape = widget.page.width > widget.page.height;
-    final thumbWidth = isLandscape ? 64.0 : 48.0;
-    final thumbHeight = isLandscape ? 48.0 : 64.0;
+    final rotation = widget.rotation % 360;
+    final isRotated90or270 = rotation == 90 || rotation == 270;
+    final pageIsLandscape = widget.page.width > widget.page.height;
+    // 회전 적용 후 실제 방향 결정 (XOR)
+    final effectiveLandscape = pageIsLandscape ^ isRotated90or270;
+    final thumbWidth = effectiveLandscape ? 64.0 : 48.0;
+    final thumbHeight = effectiveLandscape ? 48.0 : 64.0;
+
+    Widget imageWidget = _thumbnail != null
+        ? RawImage(image: _thumbnail, fit: BoxFit.contain)
+        : const Center(
+            child: SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 1.5,
+                color: AppTheme.foregroundMuted,
+              ),
+            ),
+          );
+
+    // 회전이 있으면 RotatedBox 적용 (레이아웃 크기도 함께 변경)
+    if (rotation != 0 && _thumbnail != null) {
+      imageWidget = RotatedBox(
+        quarterTurns: rotation ~/ 90,
+        child: imageWidget,
+      );
+    }
 
     return InkWell(
       onTap: widget.onTap,
@@ -129,18 +157,7 @@ class _PageThumbnailState extends State<PageThumbnail> {
                 ),
               ),
               clipBehavior: Clip.antiAlias,
-              child: _thumbnail != null
-                  ? RawImage(image: _thumbnail, fit: BoxFit.contain)
-                  : const Center(
-                      child: SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 1.5,
-                          color: AppTheme.foregroundMuted,
-                        ),
-                      ),
-                    ),
+              child: imageWidget,
             ),
             const SizedBox(width: AppTheme.spacingSm),
             Text(
