@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.hwsong" "\0"
-            VALUE "FileDescription", "pdflibre" "\0"
+            VALUE "FileDescription", "PDFLibre" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "pdflibre" "\0"
+            VALUE "InternalName", "PDFLibre" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 com.hwsong. All rights reserved." "\0"
             VALUE "OriginalFilename", "pdflibre.exe" "\0"
-            VALUE "ProductName", "pdflibre" "\0"
+            VALUE "ProductName", "PDFLibre" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
