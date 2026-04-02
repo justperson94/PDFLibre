@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:pdfrx/pdfrx.dart';
 import 'package:provider/provider.dart';
@@ -7,6 +10,8 @@ import '../dialogs/convert_dialog.dart';
 import '../dialogs/error_dialog.dart';
 import '../dialogs/progress_dialog.dart';
 import '../dialogs/split_dialog.dart';
+import '../models/edit_command.dart';
+import '../providers/history_provider.dart';
 import '../providers/pdf_provider.dart';
 import '../services/file_service.dart';
 import '../services/pdf_service.dart';
@@ -58,8 +63,54 @@ class _MainScreenState extends State<MainScreen> {
     final provider = context.read<PdfProvider>();
     final success = await provider.loadPdf(path);
 
+    if (success && mounted) {
+      context.read<HistoryProvider>().clear();
+    }
     if (!success && mounted) {
       showErrorDialog(context, onPickFile: _openFile);
+    }
+  }
+
+  Future<void> _onSave() async {
+    final pdf = context.read<PdfProvider>();
+    if (pdf.pdfBytes == null) return;
+
+    final baseName = pdf.fileName.replaceAll('.pdf', '').replaceAll('.PDF', '');
+    final path = await FileService.pickSaveFile(
+      defaultName: '${baseName}_편집.pdf',
+      extension: 'pdf',
+    );
+    if (path == null || !mounted) return;
+
+    await File(path).writeAsBytes(pdf.pdfBytes!);
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('PDF 저장이 완료되었습니다')),
+    );
+  }
+
+  void _rotateCurrentPage({required bool clockwise}) {
+    final pdf = context.read<PdfProvider>();
+    if (pdf.document == null) return;
+    final originalIndex = pdf.getOriginalPageIndex(pdf.currentPage - 1);
+    context.read<HistoryProvider>().execute(
+      RotatePageCommand(pageIndex: originalIndex, clockwise: clockwise),
+      pdf,
+    );
+  }
+
+  void _undo() {
+    final history = context.read<HistoryProvider>();
+    if (history.canUndo) {
+      history.undo(context.read<PdfProvider>());
+    }
+  }
+
+  void _redo() {
+    final history = context.read<HistoryProvider>();
+    if (history.canRedo) {
+      history.redo(context.read<PdfProvider>());
     }
   }
 
@@ -219,7 +270,31 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<PdfProvider>(
+    return Shortcuts(
+      shortcuts: {
+        SingleActivator(LogicalKeyboardKey.keyZ, meta: true):
+            const _UndoIntent(),
+        SingleActivator(LogicalKeyboardKey.keyZ, meta: true, shift: true):
+            const _RedoIntent(),
+        SingleActivator(LogicalKeyboardKey.keyZ, control: true):
+            const _UndoIntent(),
+        SingleActivator(LogicalKeyboardKey.keyZ, control: true, shift: true):
+            const _RedoIntent(),
+      },
+      child: Actions(
+        actions: {
+          _UndoIntent: CallbackAction<_UndoIntent>(onInvoke: (_) {
+            _undo();
+            return null;
+          }),
+          _RedoIntent: CallbackAction<_RedoIntent>(onInvoke: (_) {
+            _redo();
+            return null;
+          }),
+        },
+        child: Focus(
+          autofocus: true,
+          child: Consumer<PdfProvider>(
       builder: (context, pdf, _) {
         return Scaffold(
           backgroundColor: AppTheme.surfacePrimary,
@@ -230,9 +305,17 @@ class _MainScreenState extends State<MainScreen> {
                 isGridView: pdf.isGridView,
                 onViewChanged: pdf.setGridView,
                 onOpenFile: _openFile,
-                onClose: pdf.closeDocument,
-                onRotateCcw: () => pdf.rotateCurrentPage(clockwise: false),
-                onRotateCw: () => pdf.rotateCurrentPage(clockwise: true),
+                onClose: () {
+                  pdf.closeDocument();
+                  context.read<HistoryProvider>().clear();
+                },
+                onSave: _onSave,
+                onRotateCcw: () => _rotateCurrentPage(clockwise: false),
+                onRotateCw: () => _rotateCurrentPage(clockwise: true),
+                onUndo: _undo,
+                onRedo: _redo,
+                canUndo: context.watch<HistoryProvider>().canUndo,
+                canRedo: context.watch<HistoryProvider>().canRedo,
                 onSplit: _onSplit,
                 onMerge: () => Navigator.of(context)
                     .push(MaterialPageRoute(builder: (_) => const MergeScreen())),
@@ -321,6 +404,17 @@ class _MainScreenState extends State<MainScreen> {
           ),
         );
       },
+    ),
+        ),
+      ),
     );
   }
+}
+
+class _UndoIntent extends Intent {
+  const _UndoIntent();
+}
+
+class _RedoIntent extends Intent {
+  const _RedoIntent();
 }

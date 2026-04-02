@@ -14,8 +14,13 @@ class TopToolbar extends StatelessWidget {
     required this.onViewChanged,
     this.onOpenFile,
     this.onClose,
+    this.onSave,
     this.onRotateCcw,
     this.onRotateCw,
+    this.onUndo,
+    this.onRedo,
+    this.canUndo = false,
+    this.canRedo = false,
     this.onSplit,
     this.onMerge,
     this.onConvert,
@@ -25,8 +30,13 @@ class TopToolbar extends StatelessWidget {
   final ValueChanged<bool> onViewChanged;
   final VoidCallback? onOpenFile;
   final VoidCallback? onClose;
+  final VoidCallback? onSave;
   final VoidCallback? onRotateCcw;
   final VoidCallback? onRotateCw;
+  final VoidCallback? onUndo;
+  final VoidCallback? onRedo;
+  final bool canUndo;
+  final bool canRedo;
   final VoidCallback? onSplit;
   final VoidCallback? onMerge;
   final VoidCallback? onConvert;
@@ -65,6 +75,12 @@ class TopToolbar extends StatelessWidget {
           ),
           const SizedBox(width: AppTheme.spacingXs),
           ToolbarButton(
+            icon: LucideIcons.save,
+            tooltip: '다른 이름으로 저장',
+            onTap: onSave,
+          ),
+          const SizedBox(width: AppTheme.spacingXs),
+          ToolbarButton(
             icon: LucideIcons.x,
             tooltip: '문서 닫기',
             onTap: onClose,
@@ -72,7 +88,21 @@ class TopToolbar extends StatelessWidget {
 
           const Spacer(),
 
-          // 가운데: 도구 버튼들
+          // 가운데: Undo/Redo + 도구 버튼들
+          ToolbarButton(
+            icon: LucideIcons.undo2,
+            tooltip: '실행 취소 (Ctrl+Z)',
+            onTap: canUndo ? onUndo : null,
+          ),
+          const SizedBox(width: AppTheme.spacingXs),
+          ToolbarButton(
+            icon: LucideIcons.redo2,
+            tooltip: '다시 실행 (Ctrl+Shift+Z)',
+            onTap: canRedo ? onRedo : null,
+          ),
+          const SizedBox(width: AppTheme.spacingSm),
+          Container(width: 1, height: 24, color: AppTheme.borderSubtle),
+          const SizedBox(width: AppTheme.spacingSm),
           ToolbarButton(
             icon: LucideIcons.rotateCcw,
             tooltip: '왼쪽으로 회전',

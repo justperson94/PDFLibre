@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:pdfrx/pdfrx.dart';
 import 'package:provider/provider.dart';
 
+import '../../models/edit_command.dart';
+import '../../providers/history_provider.dart';
 import '../../providers/pdf_provider.dart';
 import '../../theme/app_theme.dart';
 import 'page_thumbnail.dart';
@@ -64,7 +66,7 @@ class Sidebar extends StatelessWidget {
           ),
           Expanded(
             child: document != null
-                ? _buildPageList(document, pdf)
+                ? _buildPageList(context, document, pdf)
                 : const SizedBox.shrink(),
           ),
         ],
@@ -72,18 +74,38 @@ class Sidebar extends StatelessWidget {
     );
   }
 
-  Widget _buildPageList(PdfDocument document, PdfProvider pdf) {
-    return ListView.builder(
+  Widget _buildPageList(
+      BuildContext context, PdfDocument document, PdfProvider pdf) {
+    return ReorderableListView.builder(
+      buildDefaultDragHandles: false,
       itemCount: pageCount,
+      onReorder: (oldIndex, newIndex) {
+        // ReorderableListView는 제거 후 삽입이라 보정 필요
+        if (newIndex > oldIndex) newIndex--;
+        if (oldIndex == newIndex) return;
+        context.read<HistoryProvider>().execute(
+              ReorderPageCommand(oldIndex: oldIndex, newIndex: newIndex),
+              context.read<PdfProvider>(),
+            );
+      },
+      proxyDecorator: (child, index, animation) {
+        return Material(
+          elevation: 4,
+          color: AppTheme.sidebarBg,
+          child: child,
+        );
+      },
       itemBuilder: (context, index) {
-        final page = index + 1;
+        final displayPage = index + 1;
+        final originalIndex = pdf.getOriginalPageIndex(index);
         return PageThumbnail(
-          key: ValueKey('thumb_$index'),
-          page: document.pages[index],
-          pageNumber: page,
-          selected: page == selectedPage,
-          onTap: () => onPageSelected(page),
+          key: ValueKey('thumb_${pdf.pageOrder[index]}'),
+          page: document.pages[originalIndex],
+          pageNumber: originalIndex + 1,
+          selected: displayPage == selectedPage,
+          onTap: () => onPageSelected(displayPage),
           rotation: pdf.getPageRotation(index),
+          dragIndex: index,
         );
       },
     );

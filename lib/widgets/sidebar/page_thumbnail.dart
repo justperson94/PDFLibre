@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:pdfrx/pdfrx.dart';
 
 import '../../theme/app_theme.dart';
@@ -14,6 +15,7 @@ class PageThumbnail extends StatefulWidget {
     required this.selected,
     required this.onTap,
     this.rotation = 0,
+    this.dragIndex,
   });
 
   final PdfPage page;
@@ -23,6 +25,9 @@ class PageThumbnail extends StatefulWidget {
 
   /// 회전 각도 (0, 90, 180, 270)
   final int rotation;
+
+  /// 드래그 핸들용 인덱스 (null이면 드래그 비활성)
+  final int? dragIndex;
 
   @override
   State<PageThumbnail> createState() => _PageThumbnailState();
@@ -140,6 +145,19 @@ class _PageThumbnailState extends State<PageThumbnail> {
         ),
         child: Row(
           children: [
+            // 드래그 핸들
+            if (widget.dragIndex != null)
+              ReorderableDragStartListener(
+                index: widget.dragIndex!,
+                child: const Padding(
+                  padding: EdgeInsets.only(right: AppTheme.spacingXs),
+                  child: Icon(
+                    LucideIcons.gripVertical,
+                    size: 14,
+                    color: AppTheme.foregroundMuted,
+                  ),
+                ),
+              ),
             // 고정 크기 썸네일 영역 — 내부에서 이미지를 중앙 정렬
             SizedBox(
               width: fixedSize,
@@ -162,14 +180,17 @@ class _PageThumbnailState extends State<PageThumbnail> {
               ),
             ),
             const SizedBox(width: AppTheme.spacingSm),
-            Text(
-              '${widget.pageNumber} 페이지',
-              style: TextStyle(
-                fontSize: 13,
-                color: widget.selected
-                    ? AppTheme.accentPrimary
-                    : AppTheme.foregroundSecondary,
-                fontWeight: widget.selected ? FontWeight.w600 : FontWeight.w500,
+            Expanded(
+              child: Text(
+                '${widget.pageNumber} 페이지',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: widget.selected
+                      ? AppTheme.accentPrimary
+                      : AppTheme.foregroundSecondary,
+                  fontWeight: widget.selected ? FontWeight.w600 : FontWeight.w500,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],

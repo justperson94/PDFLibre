@@ -21,8 +21,12 @@ class PdfProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _error;
 
-  /// 페이지별 회전 각도 (0-indexed → 0, 90, 180, 270)
+  /// 페이지별 회전 각도 (원본 페이지 인덱스 → 0, 90, 180, 270)
   final Map<int, int> _rotations = {};
+
+  /// 페이지 표시 순서 (표시 인덱스 → 원본 페이지 인덱스)
+  List<int> _pageOrder = [];
+
   Timer? _encodeTimer;
 
   // === Getters ===
@@ -40,9 +44,14 @@ class PdfProvider extends ChangeNotifier {
   String get fileSize => _fileSize;
   String get originalFilePath => _originalFilePath;
   Map<int, int> get rotations => Map.unmodifiable(_rotations);
+  List<int> get pageOrder => List.unmodifiable(_pageOrder);
 
-  /// 특정 페이지의 회전 각도 반환
-  int getPageRotation(int pageIndex) => _rotations[pageIndex] ?? 0;
+  /// 표시 인덱스에 해당하는 원본 페이지 인덱스
+  int getOriginalPageIndex(int displayIndex) => _pageOrder[displayIndex];
+
+  /// 표시 인덱스 기준 회전 각도 반환
+  int getPageRotation(int displayIndex) =>
+      _rotations[_pageOrder[displayIndex]] ?? 0;
 
   /// PDF 파일 로드
   Future<bool> loadPdf(String filePath) async {
@@ -72,6 +81,7 @@ class PdfProvider extends ChangeNotifier {
       _fileSize = FileService.formatFileSize(bytes.length);
       _currentPage = 1;
       _rotations.clear();
+      _pageOrder = List.generate(_document!.pages.length, (i) => i);
       _isLoading = false;
       notifyListeners();
       return true;
@@ -83,6 +93,7 @@ class PdfProvider extends ChangeNotifier {
       _fileName = '';
       _fileSize = '';
       _rotations.clear();
+      _pageOrder = [];
       _isLoading = false;
       _error = e.toString();
       notifyListeners();
@@ -90,27 +101,57 @@ class PdfProvider extends ChangeNotifier {
     }
   }
 
-  /// 현재 페이지 회전 (메타데이터만 변경, 뷰어는 디바운스 인코딩)
-  void rotateCurrentPage({required bool clockwise}) {
+  /// 페이지 회전 적용 (커맨드 시스템용, 원본 페이지 인덱스 기준)
+  void applyRotation(int originalPageIndex, {required bool clockwise}) {
     if (_document == null) return;
 
-    final idx = _currentPage - 1;
-    final current = _rotations[idx] ?? 0;
+    final current = _rotations[originalPageIndex] ?? 0;
     final delta = clockwise ? 90 : -90;
     final newRotation = ((current + delta) % 360 + 360) % 360;
 
     if (newRotation == 0) {
-      _rotations.remove(idx);
+      _rotations.remove(originalPageIndex);
     } else {
-      _rotations[idx] = newRotation;
+      _rotations[originalPageIndex] = newRotation;
     }
 
     _version++;
     notifyListeners();
+    _scheduleRebuild();
+  }
 
-    // 디바운스: 300ms 내 추가 회전 없으면 뷰어용 바이트 재생성
+  /// 페이지 순서 변경 적용 (커맨드 시스템용, 표시 인덱스 기준)
+  void applyReorder(int oldDisplayIndex, int newDisplayIndex) {
+    if (_document == null) return;
+    if (oldDisplayIndex == newDisplayIndex) return;
+    if (oldDisplayIndex < 0 || oldDisplayIndex >= _pageOrder.length) return;
+    if (newDisplayIndex < 0 || newDisplayIndex >= _pageOrder.length) return;
+
+    final item = _pageOrder.removeAt(oldDisplayIndex);
+    _pageOrder.insert(newDisplayIndex, item);
+
+    // 현재 페이지가 이동한 페이지면 따라감
+    if (_currentPage == oldDisplayIndex + 1) {
+      _currentPage = newDisplayIndex + 1;
+    }
+
+    _version++;
+    notifyListeners();
+    _scheduleRebuild();
+  }
+
+  /// 뷰어 바이트 재생성 디바운스 스케줄
+  void _scheduleRebuild() {
     _encodeTimer?.cancel();
     _encodeTimer = Timer(const Duration(milliseconds: 300), _rebuildViewerBytes);
+  }
+
+  /// 페이지 순서가 기본 순서인지 확인
+  bool get _isDefaultOrder {
+    for (var i = 0; i < _pageOrder.length; i++) {
+      if (_pageOrder[i] != i) return false;
+    }
+    return true;
   }
 
   /// 디바운스된 뷰어 바이트 재생성
@@ -118,8 +159,7 @@ class PdfProvider extends ChangeNotifier {
     if (_document == null || _originalPdfBytes == null) return;
     final versionAtStart = _version;
 
-    if (_rotations.isEmpty) {
-      // 회전 없으면 원본 바이트 사용
+    if (_rotations.isEmpty && _isDefaultOrder) {
       if (!identical(_pdfBytes, _originalPdfBytes)) {
         _pdfBytes = _originalPdfBytes;
         _viewerVersion++;
@@ -129,26 +169,28 @@ class PdfProvider extends ChangeNotifier {
     }
 
     try {
-      final tempDoc = await PdfDocument.openData(
+      // 원본 문서에서 페이지를 읽어 별도 새 문서에 배치 (splitPages 패턴)
+      final sourceDoc = await PdfDocument.openData(
         _originalPdfBytes!,
-        sourceName: 'temp_encode',
+        sourceName: 'temp_source',
       );
+      final targetDoc = await PdfDocument.createNew(sourceName: 'temp_target');
 
-      final newPages = List<PdfPage>.from(tempDoc.pages);
-      for (final entry in _rotations.entries) {
-        var page = newPages[entry.key];
-        final turns = (entry.value % 360) ~/ 90;
+      final newPages = <PdfPage>[];
+      for (final origIdx in _pageOrder) {
+        var page = sourceDoc.pages[origIdx];
+        final turns = ((_rotations[origIdx] ?? 0) % 360) ~/ 90;
         for (var t = 0; t < turns; t++) {
           page = page.rotatedCW90();
         }
-        newPages[entry.key] = page;
+        newPages.add(page);
       }
-      tempDoc.pages = newPages;
-      await tempDoc.assemble();
-      final bytes = await tempDoc.encodePdf();
-      tempDoc.dispose();
+      targetDoc.pages = newPages;
+      await targetDoc.assemble();
+      final bytes = await targetDoc.encodePdf();
+      targetDoc.dispose();
+      sourceDoc.dispose();
 
-      // 인코딩 중 새 파일 로드 또는 추가 회전이 발생한 경우 결과 폐기
       if (_version != versionAtStart) return;
 
       _pdfBytes = bytes;
@@ -171,6 +213,7 @@ class PdfProvider extends ChangeNotifier {
     _fileSize = '';
     _currentPage = 1;
     _rotations.clear();
+    _pageOrder = [];
     _error = null;
     notifyListeners();
   }

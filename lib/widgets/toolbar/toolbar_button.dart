@@ -27,13 +27,16 @@ class _ToolbarButtonState extends State<ToolbarButton> {
 
   @override
   Widget build(BuildContext context) {
+    final enabled = widget.onTap != null;
+    final color = enabled ? widget.iconColor : AppTheme.foregroundMuted.withValues(alpha: 0.4);
+
     return Tooltip(
       message: widget.tooltip,
       child: MouseRegion(
-        onEnter: (_) => setState(() => _hovered = true),
-        onExit: (_) => setState(() => _hovered = false),
+        onEnter: enabled ? (_) => setState(() => _hovered = true) : null,
+        onExit: enabled ? (_) => setState(() => _hovered = false) : null,
         child: Material(
-          color: _hovered ? AppTheme.surfaceTertiary : Colors.transparent,
+          color: _hovered && enabled ? AppTheme.surfaceTertiary : Colors.transparent,
           borderRadius: BorderRadius.circular(AppTheme.roundedMd),
           child: InkWell(
             borderRadius: BorderRadius.circular(AppTheme.roundedMd),
@@ -49,14 +52,14 @@ class _ToolbarButtonState extends State<ToolbarButton> {
                   Icon(
                     widget.icon,
                     size: AppTheme.spacingMd + AppTheme.spacingXs,
-                    color: widget.iconColor,
+                    color: color,
                   ),
                   if (widget.label != null) ...[
                     const SizedBox(width: AppTheme.spacingXs),
                     Text(
                       widget.label!,
                       style: TextStyle(
-                        color: widget.iconColor,
+                        color: color,
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                       ),
