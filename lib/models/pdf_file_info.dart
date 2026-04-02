@@ -1,4 +1,4 @@
-/// PDF 파일 정보 모델
+/// PDF file information model
 class PdfFileInfo {
   final String filePath;
   final String fileName;

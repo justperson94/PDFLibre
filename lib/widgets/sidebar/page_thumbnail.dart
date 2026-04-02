@@ -6,7 +6,7 @@ import 'package:pdfrx/pdfrx.dart';
 
 import '../../theme/app_theme.dart';
 
-/// 사이드바 페이지 썸네일 (실제 PDF 렌더링 + 회전 메타데이터 반영)
+/// Sidebar page thumbnail (actual PDF rendering + rotation metadata)
 class PageThumbnail extends StatefulWidget {
   const PageThumbnail({
     super.key,
@@ -23,10 +23,10 @@ class PageThumbnail extends StatefulWidget {
   final bool selected;
   final VoidCallback onTap;
 
-  /// 회전 각도 (0, 90, 180, 270)
+  /// Rotation angle (0, 90, 180, 270)
   final int rotation;
 
-  /// 드래그 핸들용 인덱스 (null이면 드래그 비활성)
+  /// Index for drag handle (null disables dragging)
   final int? dragIndex;
 
   @override
@@ -64,7 +64,7 @@ class _PageThumbnailState extends State<PageThumbnail> {
     _loading = true;
 
     try {
-      // 2x 해상도로 렌더링하여 선명도 향상
+      // Render at higher resolution for better clarity
       const thumbWidth = 160.0;
       final scale = thumbWidth / widget.page.width;
       final thumbHeight = widget.page.height * scale;
@@ -88,7 +88,7 @@ class _PageThumbnailState extends State<PageThumbnail> {
         image.dispose();
       }
     } catch (_) {
-      // 렌더링 실패 시 placeholder 유지
+      // Keep placeholder on render failure
     } finally {
       _loading = false;
     }
@@ -98,7 +98,7 @@ class _PageThumbnailState extends State<PageThumbnail> {
   Widget build(BuildContext context) {
     final rotation = widget.rotation % 360;
 
-    // 고정 크기 컨테이너 (회전과 무관하게 행 높이 일정)
+    // Fixed size container (consistent row height regardless of rotation)
     const fixedSize = 64.0;
 
     Widget imageWidget = _thumbnail != null
@@ -114,7 +114,7 @@ class _PageThumbnailState extends State<PageThumbnail> {
             ),
           );
 
-    // 회전이 있으면 RotatedBox 적용 (레이아웃 크기도 함께 변경)
+    // Apply RotatedBox if rotated (layout size changes accordingly)
     if (rotation != 0 && _thumbnail != null) {
       imageWidget = RotatedBox(
         quarterTurns: rotation ~/ 90,
@@ -145,7 +145,7 @@ class _PageThumbnailState extends State<PageThumbnail> {
         ),
         child: Row(
           children: [
-            // 드래그 핸들
+            // Drag handle
             if (widget.dragIndex != null)
               ReorderableDragStartListener(
                 index: widget.dragIndex!,
@@ -158,7 +158,7 @@ class _PageThumbnailState extends State<PageThumbnail> {
                   ),
                 ),
               ),
-            // 고정 크기 썸네일 영역 — 내부에서 이미지를 중앙 정렬
+            // Fixed size thumbnail area -- image centered inside
             SizedBox(
               width: fixedSize,
               height: fixedSize,

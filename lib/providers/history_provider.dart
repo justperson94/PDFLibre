@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../models/edit_command.dart';
 import 'pdf_provider.dart';
 
-/// Undo/Redo 히스토리 관리
+/// Undo/Redo history management
 class HistoryProvider extends ChangeNotifier {
   static const _maxHistory = 50;
 
@@ -18,7 +18,7 @@ class HistoryProvider extends ChangeNotifier {
   String? get redoDescription =>
       _redoStack.isNotEmpty ? _redoStack.last.description : null;
 
-  /// 커맨드 실행 + 히스토리에 기록
+  /// Execute command and record in history
   void execute(EditCommand command, PdfProvider pdf) {
     command.execute(pdf);
     _undoStack.add(command);
@@ -29,7 +29,7 @@ class HistoryProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// 마지막 작업 되돌리기
+  /// Undo the last operation
   void undo(PdfProvider pdf) {
     if (!canUndo) return;
     final command = _undoStack.removeLast();
@@ -38,7 +38,7 @@ class HistoryProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// 되돌린 작업 다시 실행
+  /// Redo the previously undone operation
   void redo(PdfProvider pdf) {
     if (!canRedo) return;
     final command = _redoStack.removeLast();
@@ -47,7 +47,7 @@ class HistoryProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// 히스토리 초기화 (새 문서 로드 시)
+  /// Clear history (when loading a new document)
   void clear() {
     _undoStack.clear();
     _redoStack.clear();

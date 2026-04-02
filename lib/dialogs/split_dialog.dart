@@ -6,18 +6,18 @@ import '../providers/pdf_provider.dart';
 import '../services/pdf_service.dart';
 import '../theme/app_theme.dart';
 
-/// PDF 분할 결과
+/// PDF split result
 class SplitResult {
   const SplitResult({required this.pageIndices, required this.splitIndividual});
 
-  /// 0-based 페이지 인덱스
+  /// 0-based page indices
   final List<int> pageIndices;
 
-  /// true: 페이지별로 개별 PDF, false: 하나의 PDF로 추출
+  /// true: individual PDF per page, false: extract as single PDF
   final bool splitIndividual;
 }
 
-/// PDF 분할 다이얼로그
+/// PDF split dialog
 Future<SplitResult?> showSplitDialog(BuildContext context) {
   return showDialog<SplitResult>(
     context: context,
@@ -33,8 +33,8 @@ class _SplitDialog extends StatefulWidget {
 }
 
 class _SplitDialogState extends State<_SplitDialog> {
-  int _pageSelection = 0; // 0: 전체, 1: 현재, 2: 범위
-  int _splitMethod = 0; // 0: 하나의 PDF, 1: 개별 PDF
+  int _pageSelection = 0; // 0: all, 1: current, 2: range
+  int _splitMethod = 0; // 0: single PDF, 1: individual PDFs
   final _rangeController = TextEditingController();
 
   @override

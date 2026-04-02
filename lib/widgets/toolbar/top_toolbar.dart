@@ -6,7 +6,7 @@ import '../../utils/constants.dart';
 import 'toolbar_button.dart';
 import 'view_toggle.dart';
 
-/// 메인 화면 상단 툴바 (48px 높이)
+/// Main screen top toolbar (48px height)
 class TopToolbar extends StatelessWidget {
   const TopToolbar({
     super.key,
@@ -54,7 +54,7 @@ class TopToolbar extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // 왼쪽: 앱 이름 + 파일 열기
+          // Left: app name + open file
           const Text(
             AppConstants.appName,
             style: TextStyle(
@@ -88,7 +88,7 @@ class TopToolbar extends StatelessWidget {
 
           const Spacer(),
 
-          // 가운데: Undo/Redo + 도구 버튼들
+          // Center: Undo/Redo + tool buttons
           ToolbarButton(
             icon: LucideIcons.undo2,
             tooltip: '실행 취소 (Ctrl+Z)',
@@ -133,7 +133,7 @@ class TopToolbar extends StatelessWidget {
 
           const Spacer(),
 
-          // 오른쪽: 뷰 토글
+          // Right: view toggle
           Container(width: 1, height: 24, color: AppTheme.borderSubtle),
           const SizedBox(width: AppTheme.spacingMd),
           ViewToggle(isGrid: isGridView, onChanged: onViewChanged),

@@ -6,9 +6,9 @@ import 'package:pdfrx/pdfrx.dart';
 
 import '../dialogs/progress_dialog.dart';
 
-/// PDF 처리 서비스 (렌더링, 변환, 분할, 병합)
+/// PDF processing service (rendering, conversion, splitting, merging)
 class PdfService {
-  /// PDF 페이지를 이미지로 렌더링 (썸네일/미리보기용)
+  /// Render a PDF page as an image (for thumbnails/previews)
   static Future<PdfImage?> renderPage(PdfPage page, {double dpi = 150}) async {
     final scale = dpi / 72;
     return page.render(
@@ -17,7 +17,7 @@ class PdfService {
     );
   }
 
-  /// PDF 페이지를 지정 포맷의 이미지 바이트로 변환
+  /// Convert a PDF page to image bytes in the specified format
   static Future<Uint8List> convertPageToImageBytes({
     required PdfPage page,
     required String format,
@@ -26,12 +26,12 @@ class PdfService {
     int rotation = 0,
   }) async {
     final pdfImage = await renderPage(page, dpi: dpi);
-    if (pdfImage == null) throw Exception('페이지 렌더링에 실패했습니다');
+    if (pdfImage == null) throw Exception('Failed to render page');
 
     final image = pdfImage.createImageNF();
     pdfImage.dispose();
 
-    // 이미지 인코딩(+회전)을 별도 isolate에서 실행하여 UI 끊김 방지
+    // Run image encoding (+rotation) in a separate isolate to prevent UI jank
     return compute(_encodeImageIsolate, _EncodeRequest(
       pixels: image.toUint8List(),
       width: image.width,
@@ -42,7 +42,7 @@ class PdfService {
     ));
   }
 
-  /// PDF 페이지들을 이미지 파일로 저장
+  /// Save PDF pages as image files
   static Future<void> convertPagesToImages({
     required PdfDocument document,
     required List<int> pageIndices,
@@ -62,7 +62,7 @@ class PdfService {
       if (cancelToken?.isCancelled ?? false) return;
 
       onProgress?.call(i + 1, pageIndices.length);
-      // UI가 진행률을 표시할 수 있도록 프레임 양보
+      // Yield a frame so the UI can display progress
       await Future<void>.delayed(Duration.zero);
 
       final pageIdx = pageIndices[i];
@@ -82,7 +82,7 @@ class PdfService {
     }
   }
 
-  /// PDF 분할 — 지정된 페이지들을 새 PDF로 추출
+  /// Split PDF -- extract specified pages into a new PDF
   static Future<Uint8List> splitPages({
     required PdfDocument source,
     required List<int> pageIndices,
@@ -111,7 +111,7 @@ class PdfService {
     }
   }
 
-  /// PDF 분할 후 파일로 저장
+  /// Split PDF and save to file
   static Future<void> splitToFile({
     required PdfDocument source,
     required List<int> pageIndices,
@@ -126,7 +126,7 @@ class PdfService {
     await File(outputPath).writeAsBytes(bytes);
   }
 
-  /// PDF 병합 — 여러 문서의 페이지를 합쳐 새 PDF 생성
+  /// Merge PDF -- combine pages from multiple documents into a new PDF
   static Future<Uint8List> mergePages({required List<PdfPage> pages}) async {
     final newDoc = await PdfDocument.createNew(sourceName: 'merged.pdf');
     try {
@@ -137,7 +137,7 @@ class PdfService {
     }
   }
 
-  /// PDF 병합 후 파일로 저장
+  /// Merge PDF and save to file
   static Future<void> mergeToFile({
     required List<PdfPage> pages,
     required String outputPath,
@@ -146,7 +146,7 @@ class PdfService {
     await File(outputPath).writeAsBytes(bytes);
   }
 
-  /// 페이지 범위 문자열 파싱 ("1-3, 5, 7-10" → [0, 1, 2, 4, 6, 7, 8, 9])
+  /// Parse page range string ("1-3, 5, 7-10" -> [0, 1, 2, 4, 6, 7, 8, 9])
   static List<int> parsePageRange(String rangeStr, int totalPages) {
     final indices = <int>{};
     final parts = rangeStr.split(',');
@@ -158,12 +158,12 @@ class PdfService {
       if (trimmed.contains('-')) {
         final rangeParts = trimmed.split('-');
         if (rangeParts.length != 2) {
-          throw FormatException('잘못된 범위 형식: $trimmed');
+          throw FormatException('Invalid range format: $trimmed');
         }
         final start = int.parse(rangeParts[0].trim());
         final end = int.parse(rangeParts[1].trim());
         if (start < 1 || end > totalPages || start > end) {
-          throw RangeError('범위가 올바르지 않습니다: $trimmed (1~$totalPages)');
+          throw RangeError('Invalid range: $trimmed (1~$totalPages)');
         }
         for (var i = start; i <= end; i++) {
           indices.add(i - 1); // 0-based
@@ -171,7 +171,7 @@ class PdfService {
       } else {
         final page = int.parse(trimmed);
         if (page < 1 || page > totalPages) {
-          throw RangeError('페이지 번호가 올바르지 않습니다: $page (1~$totalPages)');
+          throw RangeError('Invalid page number: $page (1~$totalPages)');
         }
         indices.add(page - 1); // 0-based
       }
@@ -183,7 +183,7 @@ class PdfService {
 
 }
 
-/// isolate 간 전달용 인코딩 요청 데이터
+/// Encoding request data for passing between isolates
 class _EncodeRequest {
   const _EncodeRequest({
     required this.pixels,
@@ -201,7 +201,7 @@ class _EncodeRequest {
   final int rotation;
 }
 
-/// 별도 isolate에서 실행되는 이미지 인코딩 함수 (회전 포함)
+/// Image encoding function that runs in a separate isolate (includes rotation)
 Uint8List _encodeImageIsolate(_EncodeRequest req) {
   var image = img.Image.fromBytes(
     width: req.width,
@@ -210,7 +210,7 @@ Uint8List _encodeImageIsolate(_EncodeRequest req) {
     numChannels: 4,
   );
 
-  // 회전 메타데이터가 있으면 이미지 회전 적용
+  // Apply image rotation if rotation metadata is present
   final rot = req.rotation % 360;
   if (rot != 0) {
     image = img.copyRotate(image, angle: rot);
@@ -231,6 +231,6 @@ Uint8List _encodeImageIsolate(_EncodeRequest req) {
     case 'WEBP':
       return Uint8List.fromList(img.encodePng(image));
     default:
-      throw ArgumentError('지원하지 않는 포맷: ${req.format}');
+      throw ArgumentError('Unsupported format: ${req.format}');
   }
 }

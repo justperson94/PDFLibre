@@ -80,7 +80,7 @@ class Sidebar extends StatelessWidget {
       buildDefaultDragHandles: false,
       itemCount: pageCount,
       onReorder: (oldIndex, newIndex) {
-        // ReorderableListView는 제거 후 삽입이라 보정 필요
+        // ReorderableListView removes then inserts, so adjust the index
         if (newIndex > oldIndex) newIndex--;
         if (oldIndex == newIndex) return;
         context.read<HistoryProvider>().execute(

@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
 
-/// 취소 토큰 — 작업에서 주기적으로 확인하여 중단
+/// Cancel token -- checked periodically by the task to abort
 class CancelToken {
   bool _cancelled = false;
   bool get isCancelled => _cancelled;
   void cancel() => _cancelled = true;
 }
 
-/// 작업 진행률 다이얼로그를 표시하고 작업 실행
+/// Shows a progress dialog and runs the task.
 ///
-/// 작업 완료 시 true, 취소/에러 시 false 반환
+/// Returns true on completion, false on cancel/error.
 Future<bool> runWithProgressDialog({
   required BuildContext context,
   required String title,

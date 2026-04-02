@@ -50,7 +50,7 @@ class _DropWrapperState extends State<_DropWrapper> {
   Widget build(BuildContext context) {
     return DropTarget(
       onDragEntered: (_) {
-        // PDF가 이미 열려있으면 오버레이 표시 안 함
+        // Skip overlay if a PDF is already open
         if (context.read<PdfProvider>().hasDocument) return;
         setState(() => _isDragging = true);
       },
@@ -74,7 +74,7 @@ class _DropWrapperState extends State<_DropWrapper> {
           return;
         }
 
-        // 여러 PDF → 병합 화면으로 이동
+        // Multiple PDFs -> navigate to merge screen
         if (pdfPaths.length > 1) {
           if (mounted) {
             Navigator.of(context).push(
@@ -86,7 +86,7 @@ class _DropWrapperState extends State<_DropWrapper> {
           return;
         }
 
-        // 단일 PDF → PDF가 이미 열려있으면 무시
+        // Single PDF -> ignore if a PDF is already open
         final provider = context.read<PdfProvider>();
         if (provider.hasDocument) return;
 

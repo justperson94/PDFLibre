@@ -42,7 +42,7 @@ class ViewerToolbar extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // 페이지 네비게이션
+          // Page navigation
           IconButton(
             onPressed: onPrev,
             icon: const Icon(LucideIcons.chevronLeft, size: 16),
@@ -72,7 +72,7 @@ class ViewerToolbar extends StatelessWidget {
 
           const Spacer(),
 
-          // 줌 컨트롤
+          // Zoom controls
           IconButton(
             onPressed: onZoomOut,
             icon: const Icon(LucideIcons.minus, size: 14),
@@ -103,7 +103,7 @@ class ViewerToolbar extends StatelessWidget {
           ),
           const SizedBox(width: AppTheme.spacingMd),
 
-          // 가로 맞춤 / 원본 크기 / 세로 맞춤
+          // Fit width / Actual size / Fit height
           IconButton(
             onPressed: onFitWidth,
             icon: const Icon(LucideIcons.moveHorizontal, size: 16),

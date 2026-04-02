@@ -2,11 +2,11 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 
-/// 파일 선택 및 저장 서비스
+/// File picking and saving service
 class FileService {
   static String? _lastDirectory;
 
-  /// 마지막 사용 디렉토리에서 파일의 디렉토리 추출
+  /// Extract directory from file path and update last used directory
   static void _updateLastDirectory(String? path) {
     if (path == null) return;
     final lastSlash = path.lastIndexOf('/');
@@ -15,7 +15,7 @@ class FileService {
     }
   }
 
-  /// PDF 파일 선택 다이얼로그
+  /// PDF file picker dialog
   static Future<String?> pickPdfFile() async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
@@ -28,7 +28,7 @@ class FileService {
     return path;
   }
 
-  /// 여러 PDF 파일 선택 다이얼로그
+  /// Multiple PDF file picker dialog
   static Future<List<String>> pickMultiplePdfFiles() async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
@@ -46,7 +46,7 @@ class FileService {
     return paths;
   }
 
-  /// 저장 디렉토리 선택
+  /// Pick save directory
   static Future<String?> pickSaveDirectory() async {
     final dir = await FilePicker.platform.getDirectoryPath(
       dialogTitle: '저장 위치 선택',
@@ -56,7 +56,7 @@ class FileService {
     return dir;
   }
 
-  /// 저장 파일 경로 선택
+  /// Pick save file path
   static Future<String?> pickSaveFile({
     required String defaultName,
     String? extension,
@@ -72,7 +72,7 @@ class FileService {
     return result;
   }
 
-  /// 파일 크기를 읽기 쉬운 문자열로 변환
+  /// Format file size as a human-readable string
   static String formatFileSize(int bytes) {
     if (bytes < 1024) return '$bytes B';
     if (bytes < 1024 * 1024) {
@@ -81,7 +81,7 @@ class FileService {
     return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
   }
 
-  /// 파일 크기 조회
+  /// Get file size
   static Future<String> getFileSize(String filePath) async {
     final stat = await File(filePath).stat();
     return formatFileSize(stat.size);

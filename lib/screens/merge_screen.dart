@@ -11,7 +11,7 @@ import '../services/file_service.dart';
 import '../services/pdf_service.dart';
 import '../theme/app_theme.dart';
 
-/// PDF 병합 전체화면
+/// PDF merge full screen
 class MergeScreen extends StatefulWidget {
   const MergeScreen({super.key, this.initialPaths});
 
@@ -50,7 +50,7 @@ class _MergeScreenState extends State<MergeScreen> {
     super.dispose();
   }
 
-  /// 파일 경로 목록에서 PDF 로드 (공통)
+  /// Load PDFs from a list of file paths (shared helper)
   Future<void> _loadPaths(List<String> paths) async {
     for (final path in paths) {
       try {
@@ -104,7 +104,7 @@ class _MergeScreenState extends State<MergeScreen> {
   }
 
   Future<void> _merge() async {
-    // 선택된 페이지 수집
+    // Collect selected pages
     final pages = <PdfPage>[];
     for (final file in _files) {
       final sorted = file.selectedPages.toList()..sort();
@@ -408,7 +408,7 @@ class _MergeScreenState extends State<MergeScreen> {
                       ),
                       child: Row(
                         children: [
-                          // 첫 페이지 썸네일
+                          // First page thumbnail
                           Container(
                             width: 36,
                             height: 48,
@@ -460,7 +460,7 @@ class _MergeScreenState extends State<MergeScreen> {
                               ],
                             ),
                           ),
-                          // 삭제 버튼
+                          // Remove button
                           IconButton(
                             onPressed: () => _removeFile(i),
                             icon: Icon(
@@ -592,13 +592,13 @@ class _MergeScreenState extends State<MergeScreen> {
                         clipBehavior: Clip.antiAlias,
                         child: Stack(
                           children: [
-                            // PDF 페이지 썸네일
+                            // PDF page thumbnail
                             Positioned.fill(
                               child: _PageGridThumbnail(
                                 page: file.document.pages[index],
                               ),
                             ),
-                            // 체크박스
+                            // Checkbox
                             Positioned(
                               top: AppTheme.spacingXs,
                               left: AppTheme.spacingXs,
@@ -701,7 +701,7 @@ class _MergeScreenState extends State<MergeScreen> {
   }
 }
 
-/// 병합 화면 그리드용 PDF 페이지 썸네일
+/// PDF page thumbnail for merge screen grid
 class _PageGridThumbnail extends StatefulWidget {
   const _PageGridThumbnail({required this.page});
   final PdfPage page;
@@ -762,7 +762,7 @@ class _PageGridThumbnailState extends State<_PageGridThumbnail> {
         image.dispose();
       }
     } catch (_) {
-      // 렌더링 실패 시 placeholder 유지
+      // Keep placeholder on render failure
     } finally {
       _loading = false;
     }

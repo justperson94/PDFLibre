@@ -6,7 +6,7 @@ import 'package:pdfrx/pdfrx.dart';
 
 import '../services/file_service.dart';
 
-/// PDF 문서 상태 관리 프로바이더
+/// Provider for managing PDF document state
 class PdfProvider extends ChangeNotifier {
   PdfDocument? _document;
   Uint8List? _pdfBytes;
@@ -21,10 +21,10 @@ class PdfProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _error;
 
-  /// 페이지별 회전 각도 (원본 페이지 인덱스 → 0, 90, 180, 270)
+  /// Rotation angle per page (original page index -> 0, 90, 180, 270)
   final Map<int, int> _rotations = {};
 
-  /// 페이지 표시 순서 (표시 인덱스 → 원본 페이지 인덱스)
+  /// Page display order (display index -> original page index)
   List<int> _pageOrder = [];
 
   Timer? _encodeTimer;
@@ -46,14 +46,14 @@ class PdfProvider extends ChangeNotifier {
   Map<int, int> get rotations => Map.unmodifiable(_rotations);
   List<int> get pageOrder => List.unmodifiable(_pageOrder);
 
-  /// 표시 인덱스에 해당하는 원본 페이지 인덱스
+  /// Original page index for a given display index
   int getOriginalPageIndex(int displayIndex) => _pageOrder[displayIndex];
 
-  /// 표시 인덱스 기준 회전 각도 반환
+  /// Returns rotation angle for a given display index
   int getPageRotation(int displayIndex) =>
       _rotations[_pageOrder[displayIndex]] ?? 0;
 
-  /// PDF 파일 로드
+  /// Load a PDF file
   Future<bool> loadPdf(String filePath) async {
     _isLoading = true;
     _error = null;
@@ -69,7 +69,7 @@ class PdfProvider extends ChangeNotifier {
         throw FileSystemException('파일을 찾을 수 없습니다', filePath);
       }
 
-      // Dart가 파일을 바이트로 읽고, pdfium에 바이트를 직접 전달 (macOS 샌드박스 우회)
+      // Read file as bytes and pass directly to pdfium (bypasses macOS sandbox)
       final bytes = await file.readAsBytes();
       _document = await PdfDocument.openData(bytes, sourceName: filePath);
       _originalPdfBytes = bytes;
@@ -101,7 +101,7 @@ class PdfProvider extends ChangeNotifier {
     }
   }
 
-  /// 페이지 회전 적용 (커맨드 시스템용, 원본 페이지 인덱스 기준)
+  /// Apply page rotation (for command system, based on original page index)
   void applyRotation(int originalPageIndex, {required bool clockwise}) {
     if (_document == null) return;
 
@@ -116,11 +116,12 @@ class PdfProvider extends ChangeNotifier {
     }
 
     _version++;
+    debugPrint('[PDFLibre] Rotate page ${originalPageIndex + 1} ${clockwise ? 'CW' : 'CCW'} 90° → ${newRotation}°');
     notifyListeners();
     _scheduleRebuild();
   }
 
-  /// 페이지 순서 변경 적용 (커맨드 시스템용, 표시 인덱스 기준)
+  /// Apply page reorder (for command system, based on display index)
   void applyReorder(int oldDisplayIndex, int newDisplayIndex) {
     if (_document == null) return;
     if (oldDisplayIndex == newDisplayIndex) return;
@@ -130,23 +131,24 @@ class PdfProvider extends ChangeNotifier {
     final item = _pageOrder.removeAt(oldDisplayIndex);
     _pageOrder.insert(newDisplayIndex, item);
 
-    // 현재 페이지가 이동한 페이지면 따라감
+    // Follow the moved page if it was the current page
     if (_currentPage == oldDisplayIndex + 1) {
       _currentPage = newDisplayIndex + 1;
     }
 
     _version++;
+    debugPrint('[PDFLibre] Reorder page ${oldDisplayIndex + 1} → ${newDisplayIndex + 1}');
     notifyListeners();
     _scheduleRebuild();
   }
 
-  /// 뷰어 바이트 재생성 디바운스 스케줄
+  /// Schedule debounced viewer bytes rebuild
   void _scheduleRebuild() {
     _encodeTimer?.cancel();
     _encodeTimer = Timer(const Duration(milliseconds: 300), _rebuildViewerBytes);
   }
 
-  /// 페이지 순서가 기본 순서인지 확인
+  /// Check if page order is the default order
   bool get _isDefaultOrder {
     for (var i = 0; i < _pageOrder.length; i++) {
       if (_pageOrder[i] != i) return false;
@@ -154,7 +156,7 @@ class PdfProvider extends ChangeNotifier {
     return true;
   }
 
-  /// 디바운스된 뷰어 바이트 재생성
+  /// Debounced viewer bytes rebuild
   Future<void> _rebuildViewerBytes() async {
     if (_document == null || _originalPdfBytes == null) return;
     final versionAtStart = _version;
@@ -169,7 +171,7 @@ class PdfProvider extends ChangeNotifier {
     }
 
     try {
-      // 원본 문서에서 페이지를 읽어 별도 새 문서에 배치 (splitPages 패턴)
+      // Read pages from original document and place into a new document (splitPages pattern)
       final sourceDoc = await PdfDocument.openData(
         _originalPdfBytes!,
         sourceName: 'temp_source',
@@ -197,11 +199,11 @@ class PdfProvider extends ChangeNotifier {
       _viewerVersion++;
       notifyListeners();
     } catch (e) {
-      debugPrint('PDF 뷰어 바이트 재생성 실패: $e');
+      debugPrint('[PDFLibre] Rebuild viewer bytes failed: $e');
     }
   }
 
-  /// 문서 닫기
+  /// Close document
   void closeDocument() {
     _encodeTimer?.cancel();
     _document?.dispose();
@@ -218,7 +220,7 @@ class PdfProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // === 페이지 탐색 ===
+  // === Page navigation ===
   void setPage(int page) {
     if (page >= 1 && page <= pageCount && page != _currentPage) {
       _currentPage = page;
@@ -229,7 +231,7 @@ class PdfProvider extends ChangeNotifier {
   void nextPage() => setPage(_currentPage + 1);
   void prevPage() => setPage(_currentPage - 1);
 
-  // === 뷰 모드 ===
+  // === View mode ===
   void setGridView(bool isGrid) {
     if (_isGridView != isGrid) {
       _isGridView = isGrid;

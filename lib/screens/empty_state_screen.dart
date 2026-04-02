@@ -9,7 +9,7 @@ import '../theme/app_theme.dart';
 import '../utils/constants.dart';
 import '../widgets/common/status_bar.dart';
 
-/// 빈 상태 화면 — 앱 첫 실행 시 표시
+/// Empty state screen — displayed on initial app launch
 class EmptyStateScreen extends StatelessWidget {
   const EmptyStateScreen({super.key});
 
@@ -31,11 +31,11 @@ class EmptyStateScreen extends StatelessWidget {
       backgroundColor: AppTheme.surfacePrimary,
       body: Column(
         children: [
-          // 상단 툴바 (48px)
+          // Top toolbar (48px)
           _buildToolbar(context),
           const Divider(height: 1, color: AppTheme.borderSubtle),
 
-          // 중앙 콘텐츠
+          // Center content
           Expanded(
             child: Center(
               child: Column(
@@ -98,7 +98,7 @@ class EmptyStateScreen extends StatelessWidget {
             ),
           ),
 
-          // 하단 상태바 (32px)
+          // Bottom status bar (32px)
           const StatusBar(
             leftText: '준비됨',
             rightText: '${AppConstants.appName} ${AppConstants.appVersion}',

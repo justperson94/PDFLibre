@@ -24,7 +24,7 @@ import '../widgets/viewer/viewer_toolbar.dart';
 import '../widgets/viewer/zoom_controls.dart';
 import 'merge_screen.dart';
 
-/// 메인 화면 — PDF가 열려 있을 때 표시
+/// Main screen — displayed when a PDF is open
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
 
@@ -300,7 +300,7 @@ class _MainScreenState extends State<MainScreen> {
           backgroundColor: AppTheme.surfacePrimary,
           body: Column(
             children: [
-              // 상단 툴바 (48px)
+              // Top toolbar (48px)
               TopToolbar(
                 isGridView: pdf.isGridView,
                 onViewChanged: pdf.setGridView,
@@ -322,22 +322,22 @@ class _MainScreenState extends State<MainScreen> {
                 onConvert: _onConvert,
               ),
 
-              // 메인 콘텐츠: 사이드바 + 뷰어
+              // Main content: sidebar + viewer
               Expanded(
                 child: Row(
                   children: [
-                    // 사이드바 (240px)
+                    // Sidebar (240px)
                     Sidebar(
                       pageCount: pdf.pageCount,
                       selectedPage: pdf.currentPage,
                       onPageSelected: pdf.setPage,
                     ),
 
-                    // 뷰어 영역
+                    // Viewer area
                     Expanded(
                       child: Column(
                         children: [
-                          // 뷰어 서브 툴바 (36px)
+                          // Viewer sub-toolbar (36px)
                           ViewerToolbar(
                             currentPage: pdf.currentPage,
                             totalPages: pdf.pageCount,
@@ -351,7 +351,7 @@ class _MainScreenState extends State<MainScreen> {
                             onNext: pdf.nextPage,
                           ),
 
-                          // PDF 뷰어
+                          // PDF viewer
                           Expanded(
                             child: pdf.pdfBytes != null
                                 ? PdfViewerWidget(
@@ -371,7 +371,7 @@ class _MainScreenState extends State<MainScreen> {
                 ),
               ),
 
-              // 하단 상태바 (32px)
+              // Bottom status bar (32px)
               StatusBar(
                 leftWidget: Row(
                   children: [

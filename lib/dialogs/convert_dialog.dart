@@ -8,7 +8,7 @@ import '../services/pdf_service.dart';
 import '../theme/app_theme.dart';
 import '../utils/constants.dart';
 
-/// 이미지 변환 결과
+/// Image conversion result
 class ConvertResult {
   const ConvertResult({
     required this.pageIndices,
@@ -24,7 +24,7 @@ class ConvertResult {
   final String outputDir;
 }
 
-/// 이미지 변환 다이얼로그
+/// Image conversion dialog
 Future<ConvertResult?> showConvertDialog(BuildContext context) {
   return showDialog<ConvertResult>(
     context: context,
@@ -40,9 +40,9 @@ class _ConvertDialog extends StatefulWidget {
 }
 
 class _ConvertDialogState extends State<_ConvertDialog> {
-  int _pageSelection = 0; // 0: 전체, 1: 현재, 2: 범위
+  int _pageSelection = 0; // 0: all, 1: current, 2: range
   int _formatSelection = 0; // index into supportedImageFormats
-  int _dpiSelection = 2; // index: 0=72, 1=150, 2=300, 3=600, 4=직접입력
+  int _dpiSelection = 2; // index: 0=72, 1=150, 2=300, 3=600, 4=custom
   double _quality = 85;
   final _rangeController = TextEditingController();
   final _customDpiController = TextEditingController(text: '300');
@@ -78,7 +78,7 @@ class _ConvertDialogState extends State<_ConvertDialog> {
   }
 
   Future<void> _onConvert() async {
-    // 페이지 범위 검증
+    // Validate page range
     List<int> indices;
     try {
       indices = _getPageIndices();
@@ -95,14 +95,14 @@ class _ConvertDialogState extends State<_ConvertDialog> {
       return;
     }
 
-    // DPI 검증
+    // Validate DPI
     final dpi = _getDpi();
     if (dpi < 1 || dpi > 2400) {
       _showError('DPI는 1~2400 사이의 값을 입력해주세요');
       return;
     }
 
-    // 저장 디렉토리 선택
+    // Pick save directory
     final dir = await FileService.pickSaveDirectory();
     if (dir == null || !mounted) return;
 
@@ -135,11 +135,11 @@ class _ConvertDialogState extends State<_ConvertDialog> {
         height: 620,
         child: Column(
           children: [
-            // 헤더 (60px)
+            // Header (60px)
             _buildHeader(),
             const Divider(height: 1, color: AppTheme.borderSubtle),
 
-            // 본문 (scrollable)
+            // Body (scrollable)
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(AppTheme.spacingXl),
@@ -159,7 +159,7 @@ class _ConvertDialogState extends State<_ConvertDialog> {
             ),
 
             const Divider(height: 1, color: AppTheme.borderSubtle),
-            // 푸터 (59px)
+            // Footer (59px)
             _buildFooter(),
           ],
         ),

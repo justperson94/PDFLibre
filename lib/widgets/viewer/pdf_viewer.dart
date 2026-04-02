@@ -5,7 +5,7 @@ import 'package:pdfrx/pdfrx.dart';
 
 import '../../theme/app_theme.dart';
 
-/// 실제 PDF 렌더링 뷰어 (pdfrx 기반)
+/// PDF rendering viewer widget (based on pdfrx)
 class PdfViewerWidget extends StatefulWidget {
   const PdfViewerWidget({
     super.key,

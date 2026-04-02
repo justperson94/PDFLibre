@@ -1,18 +1,18 @@
 import '../providers/pdf_provider.dart';
 
-/// 편집 작업 추상 인터페이스 (Undo/Redo 패턴)
+/// Abstract interface for edit operations (Undo/Redo pattern)
 abstract class EditCommand {
-  /// 작업 설명 (예: "1페이지 시계방향 회전")
+  /// Operation description (e.g., "Rotate page 1 clockwise")
   String get description;
 
-  /// 작업 실행
+  /// Execute the operation
   void execute(PdfProvider pdf);
 
-  /// 작업 되돌리기
+  /// Undo the operation
   void undo(PdfProvider pdf);
 }
 
-/// 페이지 회전 커맨드
+/// Page rotation command
 class RotatePageCommand extends EditCommand {
   RotatePageCommand({required this.pageIndex, required this.clockwise});
 
@@ -34,7 +34,7 @@ class RotatePageCommand extends EditCommand {
   }
 }
 
-/// 페이지 순서 변경 커맨드
+/// Page reorder command
 class ReorderPageCommand extends EditCommand {
   ReorderPageCommand({required this.oldIndex, required this.newIndex});
 
