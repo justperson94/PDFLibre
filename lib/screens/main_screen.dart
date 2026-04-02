@@ -73,7 +73,7 @@ class _MainScreenState extends State<MainScreen> {
     final success = await runWithProgressDialog(
       context: context,
       title: '이미지로 변환 중...',
-      task: (onProgress) => PdfService.convertPagesToImages(
+      task: (onProgress, cancelToken) => PdfService.convertPagesToImages(
         document: pdf.document!,
         pageIndices: result.pageIndices,
         rotations: pdf.rotations,
@@ -82,19 +82,19 @@ class _MainScreenState extends State<MainScreen> {
         dpi: result.dpi.toDouble(),
         quality: result.quality,
         onProgress: onProgress,
+        cancelToken: cancelToken,
       ),
     );
 
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          success
-              ? '${result.pageIndices.length}개 페이지를 이미지로 변환했습니다'
-              : '변환 중 오류가 발생했습니다',
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+              '${result.pageIndices.length}개 페이지를 이미지로 변환했습니다'),
         ),
-      ),
-    );
+      );
+    }
   }
 
   Future<void> _onSplit() async {
@@ -113,8 +113,9 @@ class _MainScreenState extends State<MainScreen> {
       final success = await runWithProgressDialog(
         context: context,
         title: 'PDF 분할 중...',
-        task: (onProgress) async {
+        task: (onProgress, cancelToken) async {
           for (var i = 0; i < result.pageIndices.length; i++) {
+            if (cancelToken.isCancelled) return;
             onProgress(i + 1, result.pageIndices.length);
             await PdfService.splitToFile(
               source: pdf.document!,
@@ -127,15 +128,14 @@ class _MainScreenState extends State<MainScreen> {
       );
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            success
-                ? '${result.pageIndices.length}개 PDF로 분할했습니다'
-                : '분할 중 오류가 발생했습니다',
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                '${result.pageIndices.length}개 PDF로 분할했습니다'),
           ),
-        ),
-      );
+        );
+      }
     } else {
       final path = await FileService.pickSaveFile(
         defaultName: '${baseName}_분할.pdf',
@@ -146,7 +146,7 @@ class _MainScreenState extends State<MainScreen> {
       final success = await runWithProgressDialog(
         context: context,
         title: 'PDF 분할 중...',
-        task: (onProgress) async {
+        task: (onProgress, cancelToken) async {
           onProgress(0, 1);
           await PdfService.splitToFile(
             source: pdf.document!,
@@ -159,12 +159,11 @@ class _MainScreenState extends State<MainScreen> {
       );
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-              success ? 'PDF 분할이 완료되었습니다' : '분할 중 오류가 발생했습니다'),
-        ),
-      );
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('PDF 분할이 완료되었습니다')),
+        );
+      }
     }
   }
 

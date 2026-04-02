@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:image/image.dart' as img;
 import 'package:pdfrx/pdfrx.dart';
 
+import '../dialogs/progress_dialog.dart';
+
 /// PDF 처리 서비스 (렌더링, 변환, 분할, 병합)
 class PdfService {
   /// PDF 페이지를 이미지로 렌더링 (썸네일/미리보기용)
@@ -50,12 +52,15 @@ class PdfService {
     double dpi = 300,
     int quality = 85,
     void Function(int current, int total)? onProgress,
+    CancelToken? cancelToken,
   }) async {
     final dir = Directory(outputDir);
     if (!dir.existsSync()) dir.createSync(recursive: true);
 
     final ext = format.toUpperCase() == 'TIFF' ? 'tif' : format.toLowerCase();
     for (var i = 0; i < pageIndices.length; i++) {
+      if (cancelToken?.isCancelled ?? false) return;
+
       onProgress?.call(i + 1, pageIndices.length);
       // UI가 진행률을 표시할 수 있도록 프레임 양보
       await Future<void>.delayed(Duration.zero);
@@ -69,6 +74,8 @@ class PdfService {
         quality: quality,
         rotation: rotations[pageIdx] ?? 0,
       );
+
+      if (cancelToken?.isCancelled ?? false) return;
 
       final fileName = 'page_${pageIndices[i] + 1}.$ext';
       await File('$outputDir/$fileName').writeAsBytes(bytes);

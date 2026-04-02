@@ -129,7 +129,7 @@ class _MergeScreenState extends State<MergeScreen> {
     final success = await runWithProgressDialog(
       context: context,
       title: 'PDF 병합 중...',
-      task: (onProgress) async {
+      task: (onProgress, cancelToken) async {
         onProgress(0, 1);
         await PdfService.mergeToFile(pages: pages, outputPath: path);
         onProgress(1, 1);

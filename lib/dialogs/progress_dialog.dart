@@ -2,6 +2,13 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
 
+/// 취소 토큰 — 작업에서 주기적으로 확인하여 중단
+class CancelToken {
+  bool _cancelled = false;
+  bool get isCancelled => _cancelled;
+  void cancel() => _cancelled = true;
+}
+
 /// 작업 진행률 다이얼로그를 표시하고 작업 실행
 ///
 /// 작업 완료 시 true, 취소/에러 시 false 반환
@@ -10,6 +17,7 @@ Future<bool> runWithProgressDialog({
   required String title,
   required Future<void> Function(
     void Function(int current, int total) onProgress,
+    CancelToken cancelToken,
   )
   task,
 }) async {
@@ -25,8 +33,10 @@ class _ProgressDialog extends StatefulWidget {
   const _ProgressDialog({required this.title, required this.task});
 
   final String title;
-  final Future<void> Function(void Function(int current, int total) onProgress)
-  task;
+  final Future<void> Function(
+    void Function(int current, int total) onProgress,
+    CancelToken cancelToken,
+  ) task;
 
   @override
   State<_ProgressDialog> createState() => _ProgressDialogState();
@@ -35,6 +45,8 @@ class _ProgressDialog extends StatefulWidget {
 class _ProgressDialogState extends State<_ProgressDialog> {
   int _current = 0;
   int _total = 1;
+  final _cancelToken = CancelToken();
+  bool _cancelling = false;
 
   @override
   void initState() {
@@ -45,17 +57,24 @@ class _ProgressDialogState extends State<_ProgressDialog> {
   Future<void> _runTask() async {
     try {
       await widget.task((current, total) {
-        if (mounted) {
+        if (mounted && !_cancelling) {
           setState(() {
             _current = current;
             _total = total;
           });
         }
-      });
-      if (mounted) Navigator.of(context).pop(true);
+      }, _cancelToken);
+      if (mounted) {
+        Navigator.of(context).pop(!_cancelToken.isCancelled);
+      }
     } catch (_) {
       if (mounted) Navigator.of(context).pop(false);
     }
+  }
+
+  void _onCancel() {
+    _cancelToken.cancel();
+    setState(() => _cancelling = true);
   }
 
   @override
@@ -119,7 +138,9 @@ class _ProgressDialogState extends State<_ProgressDialog> {
                     ),
                     const SizedBox(height: AppTheme.spacingSm),
                     Text(
-                      '$_current / $_total 페이지 처리 중',
+                      _cancelling
+                          ? '취소 중...'
+                          : '$_current / $_total 페이지 처리 중',
                       style: const TextStyle(
                         fontSize: 13,
                         color: AppTheme.foregroundMuted,
@@ -143,10 +164,10 @@ class _ProgressDialogState extends State<_ProgressDialog> {
                     ),
                     side: const BorderSide(color: AppTheme.borderSubtle),
                   ),
-                  onPressed: () => Navigator.of(context).pop(false),
-                  child: const Text(
-                    '취소',
-                    style: TextStyle(color: AppTheme.foregroundSecondary),
+                  onPressed: _cancelling ? null : _onCancel,
+                  child: Text(
+                    _cancelling ? '취소 중...' : '취소',
+                    style: const TextStyle(color: AppTheme.foregroundSecondary),
                   ),
                 ),
               ),
