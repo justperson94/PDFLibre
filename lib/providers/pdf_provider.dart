@@ -116,6 +116,7 @@ class PdfProvider extends ChangeNotifier {
   /// 디바운스된 뷰어 바이트 재생성
   Future<void> _rebuildViewerBytes() async {
     if (_document == null || _originalPdfBytes == null) return;
+    final versionAtStart = _version;
 
     if (_rotations.isEmpty) {
       // 회전 없으면 원본 바이트 사용
@@ -130,7 +131,7 @@ class PdfProvider extends ChangeNotifier {
     try {
       final tempDoc = await PdfDocument.openData(
         _originalPdfBytes!,
-        sourceName: 'temp_encode_$_viewerVersion',
+        sourceName: 'temp_encode',
       );
 
       final newPages = List<PdfPage>.from(tempDoc.pages);
@@ -147,11 +148,14 @@ class PdfProvider extends ChangeNotifier {
       final bytes = await tempDoc.encodePdf();
       tempDoc.dispose();
 
+      // 인코딩 중 새 파일 로드 또는 추가 회전이 발생한 경우 결과 폐기
+      if (_version != versionAtStart) return;
+
       _pdfBytes = bytes;
       _viewerVersion++;
       notifyListeners();
-    } catch (_) {
-      // 인코딩 실패 시 기존 바이트 유지
+    } catch (e) {
+      debugPrint('PDF 뷰어 바이트 재생성 실패: $e');
     }
   }
 

@@ -101,7 +101,8 @@ class PdfService {
         pages.add(page);
       }
       newDoc.pages = pages;
-      if (rotations.isNotEmpty) {
+      final hasRotation = pageIndices.any((i) => (rotations[i] ?? 0) != 0);
+      if (hasRotation) {
         await newDoc.assemble();
       }
       return await newDoc.encodePdf();

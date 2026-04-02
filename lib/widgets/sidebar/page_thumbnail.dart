@@ -146,10 +146,6 @@ class _PageThumbnailState extends State<PageThumbnail> {
               height: fixedSize,
               child: Center(
                 child: Container(
-                  constraints: const BoxConstraints(
-                    maxWidth: 64,
-                    maxHeight: 64,
-                  ),
                   decoration: BoxDecoration(
                     color: AppTheme.surfacePrimary,
                     borderRadius: BorderRadius.circular(AppTheme.roundedSm),
