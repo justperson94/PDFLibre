@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../theme/app_theme.dart';
-import '../../utils/constants.dart';
+import '../common/app_logo.dart';
 import 'toolbar_button.dart';
 import 'view_toggle.dart';
 
@@ -54,15 +54,8 @@ class TopToolbar extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Left: app name + open file
-          const Text(
-            AppConstants.appName,
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
-              color: AppTheme.foregroundPrimary,
-            ),
-          ),
+          // Left: branded logo + open file
+          const AppLogo(),
           const SizedBox(width: AppTheme.spacingMd),
           Container(width: 1, height: 24, color: AppTheme.borderSubtle),
           const SizedBox(width: AppTheme.spacingMd),

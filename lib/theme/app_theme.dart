@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
+  // === Brand ===
+  static const brandBlue = Color(0xFF5A7EB5); // Logo "PDF" text color
+
   // === Accent ===
   static const accentPrimary = Color(0xFFEE6B5B); // Coral - CTA, active state
   static const accentHover = Color(0xFFD95A4A); // Hover/press state

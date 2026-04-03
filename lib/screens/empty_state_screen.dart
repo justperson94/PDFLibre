@@ -7,6 +7,7 @@ import '../providers/pdf_provider.dart';
 import '../services/file_service.dart';
 import '../theme/app_theme.dart';
 import '../utils/constants.dart';
+import '../widgets/common/app_logo.dart';
 import '../widgets/common/status_bar.dart';
 
 /// Empty state screen — displayed on initial app launch
@@ -31,22 +32,25 @@ class EmptyStateScreen extends StatelessWidget {
       backgroundColor: AppTheme.surfacePrimary,
       body: Column(
         children: [
-          // Top toolbar (48px)
-          _buildToolbar(context),
+          // Top toolbar (48px) — logo only, no duplicate open button
+          _buildToolbar(),
           const Divider(height: 1, color: AppTheme.borderSubtle),
 
-          // Center content
+          // Center content with drop zone
           Expanded(
             child: Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  // PDF document icon
                   const Icon(
                     LucideIcons.fileText,
-                    size: 48,
+                    size: 56,
                     color: AppTheme.foregroundMuted,
                   ),
                   const SizedBox(height: AppTheme.spacingXl),
+
+                  // Title
                   const Text(
                     'PDF 파일을 열어보세요',
                     style: TextStyle(
@@ -56,6 +60,8 @@ class EmptyStateScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: AppTheme.spacingSm),
+
+                  // Description
                   const Text(
                     '파일을 드래그하여 놓거나, 아래 버튼으로 열 수 있습니다',
                     textAlign: TextAlign.center,
@@ -66,6 +72,8 @@ class EmptyStateScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: AppTheme.spacingXl),
+
+                  // CTA button
                   FilledButton.icon(
                     onPressed: () => _openFile(context),
                     icon: const Icon(LucideIcons.folderOpen, size: 16),
@@ -81,11 +89,29 @@ class EmptyStateScreen extends StatelessWidget {
                       foregroundColor: AppTheme.surfacePrimary,
                       minimumSize: const Size(160, 44),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppTheme.roundedMd),
+                        borderRadius:
+                            BorderRadius.circular(AppTheme.roundedMd),
                       ),
                     ),
                   ),
                   const SizedBox(height: AppTheme.spacingMd),
+
+                  // Feature highlights
+                  const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _FeatureChip(icon: LucideIcons.rotateCw, label: '회전'),
+                      SizedBox(width: AppTheme.spacingSm),
+                      _FeatureChip(icon: LucideIcons.scissors, label: '분할'),
+                      SizedBox(width: AppTheme.spacingSm),
+                      _FeatureChip(icon: LucideIcons.merge, label: '병합'),
+                      SizedBox(width: AppTheme.spacingSm),
+                      _FeatureChip(icon: LucideIcons.image, label: '변환'),
+                    ],
+                  ),
+                  const SizedBox(height: AppTheme.spacingMd),
+
+                  // Supported format hint
                   const Text(
                     '지원 형식: .pdf',
                     style: TextStyle(
@@ -108,37 +134,49 @@ class EmptyStateScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildToolbar(BuildContext context) {
+  Widget _buildToolbar() {
     return Container(
       height: 48,
       padding: const EdgeInsets.symmetric(horizontal: AppTheme.spacingLg),
       color: AppTheme.toolbarBg,
-      child: Row(
+      child: const Row(
         children: [
-          const Text(
-            AppConstants.appName,
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
-              color: AppTheme.foregroundPrimary,
-            ),
-          ),
-          const SizedBox(width: AppTheme.spacingMd),
-          Container(width: 1, height: 24, color: AppTheme.borderSubtle),
-          const SizedBox(width: AppTheme.spacingMd),
-          TextButton.icon(
-            onPressed: () => _openFile(context),
-            icon: const Icon(LucideIcons.folderOpen, size: 16),
-            label: const Text(
-              '파일 열기',
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-            ),
-            style: TextButton.styleFrom(
-              foregroundColor: AppTheme.accentPrimary,
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppTheme.spacingSm,
-                vertical: AppTheme.spacingXs,
-              ),
+          AppLogo(),
+        ],
+      ),
+    );
+  }
+}
+
+class _FeatureChip extends StatelessWidget {
+  const _FeatureChip({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppTheme.spacingSm,
+        vertical: AppTheme.spacingXs,
+      ),
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceSecondary,
+        borderRadius: BorderRadius.circular(AppTheme.roundedMd),
+        border: Border.all(color: AppTheme.borderSubtle, width: 1),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: AppTheme.foregroundSecondary),
+          const SizedBox(width: AppTheme.spacingXs),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: AppTheme.foregroundSecondary,
             ),
           ),
         ],
