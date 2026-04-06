@@ -28,7 +28,7 @@ class _ToolbarButtonState extends State<ToolbarButton> {
   @override
   Widget build(BuildContext context) {
     final enabled = widget.onTap != null;
-    final color = enabled ? widget.iconColor : AppTheme.foregroundMuted.withValues(alpha: 0.4);
+    final color = enabled ? widget.iconColor : AppTheme.foregroundMuted.withValues(alpha: 0.65);
 
     return Tooltip(
       message: widget.tooltip,

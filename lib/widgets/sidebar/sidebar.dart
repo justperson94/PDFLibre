@@ -36,7 +36,7 @@ class Sidebar extends StatelessWidget {
       child: Column(
         children: [
           Container(
-            height: 48,
+            height: 36,
             padding: const EdgeInsets.symmetric(horizontal: AppTheme.spacingLg),
             decoration: const BoxDecoration(
               border: Border(
@@ -55,7 +55,7 @@ class Sidebar extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '$pageCount 페이지',
+                  '$pageCount',
                   style: const TextStyle(
                     fontSize: 13,
                     color: AppTheme.foregroundMuted,

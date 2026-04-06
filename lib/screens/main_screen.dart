@@ -15,6 +15,7 @@ import '../providers/history_provider.dart';
 import '../providers/pdf_provider.dart';
 import '../services/file_service.dart';
 import '../services/pdf_service.dart';
+import '../services/recent_files_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/common/status_bar.dart';
 import '../widgets/sidebar/sidebar.dart';
@@ -65,6 +66,7 @@ class _MainScreenState extends State<MainScreen> {
 
     if (success && mounted) {
       context.read<HistoryProvider>().clear();
+      RecentFilesService.add(path);
     }
     if (!success && mounted) {
       showErrorDialog(context, onPickFile: _openFile);
@@ -75,14 +77,22 @@ class _MainScreenState extends State<MainScreen> {
     final pdf = context.read<PdfProvider>();
     if (pdf.pdfBytes == null) return;
 
-    final baseName = pdf.fileName.replaceAll('.pdf', '').replaceAll('.PDF', '');
+    final baseName = _stripPdfExtension(pdf.fileName);
     final path = await FileService.pickSaveFile(
       defaultName: '${baseName}_편집.pdf',
       extension: 'pdf',
     );
     if (path == null || !mounted) return;
 
-    await File(path).writeAsBytes(pdf.pdfBytes!);
+    try {
+      await File(path).writeAsBytes(pdf.pdfBytes!);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('저장 실패: 파일을 쓸 수 없습니다 ($e)')),
+      );
+      return;
+    }
 
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
@@ -98,6 +108,36 @@ class _MainScreenState extends State<MainScreen> {
       RotatePageCommand(pageIndex: originalIndex, clockwise: clockwise),
       pdf,
     );
+  }
+
+  Future<void> _confirmClose() async {
+    final hasChanges = context.read<HistoryProvider>().canUndo;
+    if (hasChanges) {
+      final result = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('문서 닫기'),
+          content: const Text('저장하지 않은 변경사항이 있습니다.\n그래도 닫으시겠습니까?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('취소'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppTheme.danger,
+              ),
+              child: const Text('닫기'),
+            ),
+          ],
+        ),
+      );
+      if (result != true || !mounted) return;
+    }
+    if (!mounted) return;
+    context.read<PdfProvider>().closeDocument();
+    context.read<HistoryProvider>().clear();
   }
 
   void _undo() {
@@ -155,7 +195,7 @@ class _MainScreenState extends State<MainScreen> {
     final pdf = context.read<PdfProvider>();
     if (pdf.document == null) return;
 
-    final baseName = pdf.fileName.replaceAll('.pdf', '').replaceAll('.PDF', '');
+    final baseName = _stripPdfExtension(pdf.fileName);
 
     if (result.splitIndividual) {
       final dir = await FileService.pickSaveDirectory();
@@ -218,18 +258,6 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
-  void _zoomIn() {
-    if (_viewerController.isReady) {
-      _viewerController.zoomUp();
-    }
-  }
-
-  void _zoomOut() {
-    if (_viewerController.isReady) {
-      _viewerController.zoomDown();
-    }
-  }
-
   void _setZoom(double percent) {
     if (_viewerController.isReady) {
       _viewerController.setZoom(
@@ -280,6 +308,18 @@ class _MainScreenState extends State<MainScreen> {
             const _UndoIntent(),
         SingleActivator(LogicalKeyboardKey.keyZ, control: true, shift: true):
             const _RedoIntent(),
+        SingleActivator(LogicalKeyboardKey.keyO, meta: true):
+            const _OpenIntent(),
+        SingleActivator(LogicalKeyboardKey.keyO, control: true):
+            const _OpenIntent(),
+        SingleActivator(LogicalKeyboardKey.keyS, meta: true):
+            const _SaveIntent(),
+        SingleActivator(LogicalKeyboardKey.keyS, control: true):
+            const _SaveIntent(),
+        SingleActivator(LogicalKeyboardKey.keyW, meta: true):
+            const _CloseIntent(),
+        SingleActivator(LogicalKeyboardKey.keyW, control: true):
+            const _CloseIntent(),
       },
       child: Actions(
         actions: {
@@ -289,6 +329,18 @@ class _MainScreenState extends State<MainScreen> {
           }),
           _RedoIntent: CallbackAction<_RedoIntent>(onInvoke: (_) {
             _redo();
+            return null;
+          }),
+          _OpenIntent: CallbackAction<_OpenIntent>(onInvoke: (_) {
+            _openFile();
+            return null;
+          }),
+          _SaveIntent: CallbackAction<_SaveIntent>(onInvoke: (_) {
+            _onSave();
+            return null;
+          }),
+          _CloseIntent: CallbackAction<_CloseIntent>(onInvoke: (_) {
+            _confirmClose();
             return null;
           }),
         },
@@ -302,13 +354,8 @@ class _MainScreenState extends State<MainScreen> {
             children: [
               // Top toolbar (48px)
               TopToolbar(
-                isGridView: pdf.isGridView,
-                onViewChanged: pdf.setGridView,
                 onOpenFile: _openFile,
-                onClose: () {
-                  pdf.closeDocument();
-                  context.read<HistoryProvider>().clear();
-                },
+                onClose: _confirmClose,
                 onSave: _onSave,
                 onRotateCcw: () => _rotateCurrentPage(clockwise: false),
                 onRotateCw: () => _rotateCurrentPage(clockwise: true),
@@ -317,8 +364,14 @@ class _MainScreenState extends State<MainScreen> {
                 canUndo: context.watch<HistoryProvider>().canUndo,
                 canRedo: context.watch<HistoryProvider>().canRedo,
                 onSplit: _onSplit,
-                onMerge: () => Navigator.of(context)
-                    .push(MaterialPageRoute(builder: (_) => const MergeScreen())),
+                onMerge: () {
+                  final currentPath = context.read<PdfProvider>().originalFilePath;
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => MergeScreen(
+                      initialPaths: currentPath.isNotEmpty ? [currentPath] : null,
+                    ),
+                  ));
+                },
                 onConvert: _onConvert,
               ),
 
@@ -341,9 +394,6 @@ class _MainScreenState extends State<MainScreen> {
                           ViewerToolbar(
                             currentPage: pdf.currentPage,
                             totalPages: pdf.pageCount,
-                            zoom: _displayZoom,
-                            onZoomIn: _zoomIn,
-                            onZoomOut: _zoomOut,
                             onFitWidth: _fitWidth,
                             onActualSize: _actualSize,
                             onFitHeight: _fitHeight,
@@ -382,19 +432,31 @@ class _MainScreenState extends State<MainScreen> {
                     ),
                     const SizedBox(width: AppTheme.spacingXs),
                     Flexible(
-                      child: Text(
-                        '${pdf.fileName}  |  ${pdf.fileSize}  |  ${pdf.pageCount} 페이지',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: AppTheme.foregroundMuted,
-                          fontWeight: FontWeight.w500,
+                      child: Tooltip(
+                        message: pdf.fileName,
+                        child: Text(
+                          pdf.fileName,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppTheme.foregroundMuted,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(width: AppTheme.spacingSm),
+                    Text(
+                      '|  ${pdf.fileSize}  |  ${pdf.pageCount} 페이지',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppTheme.foregroundMuted,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
                 ),
-                centerText: '페이지 ${pdf.currentPage} / ${pdf.pageCount}',
+                centerText: '',
                 rightWidget: ZoomControls(
                   zoom: _displayZoom,
                   onChanged: _setZoom,
@@ -411,10 +473,30 @@ class _MainScreenState extends State<MainScreen> {
   }
 }
 
+String _stripPdfExtension(String fileName) {
+  final lower = fileName.toLowerCase();
+  if (lower.endsWith('.pdf')) {
+    return fileName.substring(0, fileName.length - 4);
+  }
+  return fileName;
+}
+
 class _UndoIntent extends Intent {
   const _UndoIntent();
 }
 
 class _RedoIntent extends Intent {
   const _RedoIntent();
+}
+
+class _OpenIntent extends Intent {
+  const _OpenIntent();
+}
+
+class _SaveIntent extends Intent {
+  const _SaveIntent();
+}
+
+class _CloseIntent extends Intent {
+  const _CloseIntent();
 }

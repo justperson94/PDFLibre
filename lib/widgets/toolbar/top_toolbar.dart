@@ -1,17 +1,18 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../theme/app_theme.dart';
 import '../common/app_logo.dart';
 import 'toolbar_button.dart';
-import 'view_toggle.dart';
+
+String _shortcutPrefix() => Platform.isMacOS ? 'Cmd' : 'Ctrl';
 
 /// Main screen top toolbar (48px height)
 class TopToolbar extends StatelessWidget {
   const TopToolbar({
     super.key,
-    required this.isGridView,
-    required this.onViewChanged,
     this.onOpenFile,
     this.onClose,
     this.onSave,
@@ -26,8 +27,6 @@ class TopToolbar extends StatelessWidget {
     this.onConvert,
   });
 
-  final bool isGridView;
-  final ValueChanged<bool> onViewChanged;
   final VoidCallback? onOpenFile;
   final VoidCallback? onClose;
   final VoidCallback? onSave;
@@ -43,9 +42,13 @@ class TopToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final macOsLeftPad = Platform.isMacOS ? 54.0 : 0.0;
     return Container(
       height: 48,
-      padding: const EdgeInsets.symmetric(horizontal: AppTheme.spacingLg),
+      padding: EdgeInsets.only(
+        left: AppTheme.spacingLg + macOsLeftPad,
+        right: AppTheme.spacingLg,
+      ),
       decoration: const BoxDecoration(
         color: AppTheme.toolbarBg,
         border: Border(
@@ -61,8 +64,8 @@ class TopToolbar extends StatelessWidget {
           const SizedBox(width: AppTheme.spacingMd),
           ToolbarButton(
             icon: LucideIcons.folderOpen,
-            tooltip: '파일 열기',
-            label: '파일 열기',
+            tooltip: '다른 파일 열기 (${_shortcutPrefix()}+O)',
+            label: '열기',
             iconColor: AppTheme.accentPrimary,
             onTap: onOpenFile,
           ),
@@ -84,13 +87,13 @@ class TopToolbar extends StatelessWidget {
           // Center: Undo/Redo + tool buttons
           ToolbarButton(
             icon: LucideIcons.undo2,
-            tooltip: '실행 취소 (Ctrl+Z)',
+            tooltip: '실행 취소 (${_shortcutPrefix()}+Z)',
             onTap: canUndo ? onUndo : null,
           ),
           const SizedBox(width: AppTheme.spacingXs),
           ToolbarButton(
             icon: LucideIcons.redo2,
-            tooltip: '다시 실행 (Ctrl+Shift+Z)',
+            tooltip: '다시 실행 (${_shortcutPrefix()}+Shift+Z)',
             onTap: canRedo ? onRedo : null,
           ),
           const SizedBox(width: AppTheme.spacingSm),
@@ -113,23 +116,25 @@ class TopToolbar extends StatelessWidget {
           ToolbarButton(
             icon: LucideIcons.scissors,
             tooltip: '분할',
+            label: '분할',
             onTap: onSplit,
           ),
           const SizedBox(width: AppTheme.spacingXs),
-          ToolbarButton(icon: LucideIcons.merge, tooltip: '병합', onTap: onMerge),
+          ToolbarButton(
+            icon: LucideIcons.merge,
+            tooltip: '병합',
+            label: '병합',
+            onTap: onMerge,
+          ),
           const SizedBox(width: AppTheme.spacingXs),
           ToolbarButton(
             icon: LucideIcons.image,
             tooltip: '이미지로 변환',
+            label: '변환',
             onTap: onConvert,
           ),
 
           const Spacer(),
-
-          // Right: view toggle
-          Container(width: 1, height: 24, color: AppTheme.borderSubtle),
-          const SizedBox(width: AppTheme.spacingMd),
-          ViewToggle(isGrid: isGridView, onChanged: onViewChanged),
         ],
       ),
     );

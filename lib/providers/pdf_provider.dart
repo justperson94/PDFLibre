@@ -171,7 +171,6 @@ class PdfProvider extends ChangeNotifier {
     }
 
     try {
-      // Read pages from original document and place into a new document (splitPages pattern)
       final sourceDoc = await PdfDocument.openData(
         _originalPdfBytes!,
         sourceName: 'temp_source',

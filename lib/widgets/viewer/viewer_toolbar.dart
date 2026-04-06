@@ -8,9 +8,6 @@ class ViewerToolbar extends StatelessWidget {
     super.key,
     required this.currentPage,
     required this.totalPages,
-    required this.zoom,
-    required this.onZoomIn,
-    required this.onZoomOut,
     required this.onFitWidth,
     required this.onActualSize,
     required this.onFitHeight,
@@ -20,9 +17,6 @@ class ViewerToolbar extends StatelessWidget {
 
   final int currentPage;
   final int totalPages;
-  final double zoom;
-  final VoidCallback onZoomIn;
-  final VoidCallback onZoomOut;
   final VoidCallback onFitWidth;
   final VoidCallback onActualSize;
   final VoidCallback onFitHeight;
@@ -71,37 +65,6 @@ class ViewerToolbar extends StatelessWidget {
           ),
 
           const Spacer(),
-
-          // Zoom controls
-          IconButton(
-            onPressed: onZoomOut,
-            icon: const Icon(LucideIcons.minus, size: 14),
-            color: AppTheme.foregroundSecondary,
-            visualDensity: VisualDensity.compact,
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
-            tooltip: '축소',
-          ),
-          const SizedBox(width: AppTheme.spacingXs),
-          Text(
-            '${zoom.round()}%',
-            style: const TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: AppTheme.foregroundSecondary,
-            ),
-          ),
-          const SizedBox(width: AppTheme.spacingXs),
-          IconButton(
-            onPressed: onZoomIn,
-            icon: const Icon(LucideIcons.plus, size: 14),
-            color: AppTheme.foregroundSecondary,
-            visualDensity: VisualDensity.compact,
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
-            tooltip: '확대',
-          ),
-          const SizedBox(width: AppTheme.spacingMd),
 
           // Fit width / Actual size / Fit height
           IconButton(
