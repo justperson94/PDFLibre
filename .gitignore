@@ -43,3 +43,9 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Working / scratch assets (not shipped)
+Gemini_Generated_Image_*.png
+/app_logo.png
+/assets/app_icon_square.png
+/ui_sample_from_pencil/*_backup_*.pen
