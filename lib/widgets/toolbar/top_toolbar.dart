@@ -46,13 +46,9 @@ class TopToolbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = context.s;
-    final macOsLeftPad = Platform.isMacOS ? 54.0 : 0.0;
     return Container(
       height: 48,
-      padding: EdgeInsets.only(
-        left: AppTheme.spacingLg + macOsLeftPad,
-        right: AppTheme.spacingLg,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: AppTheme.spacingLg),
       decoration: const BoxDecoration(
         color: AppTheme.toolbarBg,
         border: Border(

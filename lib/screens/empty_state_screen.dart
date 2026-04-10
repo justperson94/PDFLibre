@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
@@ -253,13 +251,9 @@ class _EmptyStateScreenState extends State<EmptyStateScreen> {
   }
 
   Widget _buildToolbar(S s) {
-    final macOsLeftPad = Platform.isMacOS ? 54.0 : 0.0;
     return Container(
       height: 48,
-      padding: EdgeInsets.only(
-        left: AppTheme.spacingLg + macOsLeftPad,
-        right: AppTheme.spacingLg,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: AppTheme.spacingLg),
       color: AppTheme.toolbarBg,
       child: Row(
         children: [
