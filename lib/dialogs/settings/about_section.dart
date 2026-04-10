@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../l10n/strings.dart';
@@ -14,6 +13,16 @@ class AboutSection extends StatelessWidget {
 
   static const _githubUrl = 'https://github.com/justperson94/PDFLibre';
   static const _buildNumber = 1;
+
+  static Future<void> _openUrl(String url) async {
+    if (Platform.isMacOS) {
+      await Process.run('open', [url]);
+    } else if (Platform.isWindows) {
+      await Process.run('start', [url], runInShell: true);
+    } else if (Platform.isLinux) {
+      await Process.run('xdg-open', [url]);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -98,16 +107,7 @@ class AboutSection extends StatelessWidget {
           _InfoRow(
             label: 'GitHub',
             valueWidget: InkWell(
-              onTap: () async {
-                await Clipboard.setData(const ClipboardData(text: _githubUrl));
-                if (!context.mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(s.githubCopied),
-                    duration: const Duration(seconds: 2),
-                  ),
-                );
-              },
+              onTap: () => _openUrl(_githubUrl),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: const [
@@ -121,7 +121,11 @@ class AboutSection extends StatelessWidget {
                     ),
                   ),
                   SizedBox(width: 6),
-                  Icon(LucideIcons.copy, size: 12, color: AppTheme.brandBlue),
+                  Icon(
+                    LucideIcons.externalLink,
+                    size: 12,
+                    color: AppTheme.brandBlue,
+                  ),
                 ],
               ),
             ),
