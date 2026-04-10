@@ -6,12 +6,13 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../theme/app_theme.dart';
 import '../../utils/constants.dart';
+import '../../widgets/common/app_logo.dart';
 
 /// 정보 section — app metadata, GitHub link, open-source licenses.
 class AboutSection extends StatelessWidget {
   const AboutSection({super.key});
 
-  static const _githubUrl = 'https://github.com/hwsong/PDFLibre';
+  static const _githubUrl = 'https://github.com/justperson94/PDFLibre';
   static const _buildNumber = 1;
 
   @override
@@ -25,7 +26,7 @@ class AboutSection extends StatelessWidget {
           _buildInfoCard(context),
           const SizedBox(height: AppTheme.spacingMd),
           const Text(
-            '© 2026 hwsong · MIT License',
+            '© 2026 justperson94 · MIT License',
             style: TextStyle(fontSize: 11, color: AppTheme.foregroundMuted),
           ),
         ],
@@ -36,17 +37,13 @@ class AboutSection extends StatelessWidget {
   Widget _buildBrand() {
     return Column(
       children: [
-        Container(
-          width: 72,
-          height: 72,
-          decoration: BoxDecoration(
-            color: AppTheme.accentPrimary,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: const Icon(
-            LucideIcons.fileText,
-            size: 40,
-            color: AppTheme.surfacePrimary,
+        ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Image.asset(
+            'assets/app_icon.png',
+            width: 72,
+            height: 72,
+            fit: BoxFit.contain,
           ),
         ),
         const SizedBox(height: AppTheme.spacingMd),
@@ -114,7 +111,7 @@ class AboutSection extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: const [
                   Text(
-                    'github.com/hwsong/PDFLibre',
+                    'github.com/justperson94/PDFLibre',
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
@@ -136,7 +133,7 @@ class AboutSection extends StatelessWidget {
                 context: context,
                 applicationName: AppConstants.appName,
                 applicationVersion: AppConstants.appVersion,
-                applicationLegalese: '© 2026 hwsong · MIT License',
+                applicationLegalese: '© 2026 justperson94 · MIT License',
               ),
               borderRadius: BorderRadius.circular(AppTheme.roundedSm),
               child: Container(
