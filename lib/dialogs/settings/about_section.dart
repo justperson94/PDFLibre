@@ -31,20 +31,20 @@ class AboutSection extends StatelessWidget {
       padding: const EdgeInsets.all(AppTheme.spacingXl),
       child: Column(
         children: [
-          _buildBrand(s),
+          _buildBrand(context, s),
           const SizedBox(height: AppTheme.spacingLg),
           _buildInfoCard(context, s),
           const SizedBox(height: AppTheme.spacingMd),
-          const Text(
+          Text(
             '© 2026 justperson94 · MIT License',
-            style: TextStyle(fontSize: 11, color: AppTheme.foregroundMuted),
+            style: TextStyle(fontSize: 11, color: context.colors.foregroundMuted),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildBrand(S s) {
+  Widget _buildBrand(BuildContext context, S s) {
     return Column(
       children: [
         ClipRRect(
@@ -59,13 +59,13 @@ class AboutSection extends StatelessWidget {
         const SizedBox(height: AppTheme.spacingMd),
         Row(
           mainAxisSize: MainAxisSize.min,
-          children: const [
+          children: [
             Text(
               'PDF',
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.w700,
-                color: AppTheme.brandBlue,
+                color: context.colors.brandBlue,
               ),
             ),
             Text(
@@ -73,7 +73,7 @@ class AboutSection extends StatelessWidget {
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.w700,
-                color: AppTheme.accentPrimary,
+                color: context.colors.accentPrimary,
               ),
             ),
           ],
@@ -81,7 +81,7 @@ class AboutSection extends StatelessWidget {
         const SizedBox(height: AppTheme.spacingXs),
         Text(
           s.appTagline,
-          style: const TextStyle(fontSize: 12, color: AppTheme.foregroundMuted),
+          style: TextStyle(fontSize: 12, color: context.colors.foregroundMuted),
         ),
       ],
     );
@@ -91,8 +91,8 @@ class AboutSection extends StatelessWidget {
     return Container(
       width: 440,
       decoration: BoxDecoration(
-        color: AppTheme.surfaceSecondary,
-        border: Border.all(color: AppTheme.borderSubtle),
+        color: context.colors.surfaceSecondary,
+        border: Border.all(color: context.colors.borderSubtle),
         borderRadius: BorderRadius.circular(AppTheme.roundedMd),
       ),
       child: Column(
@@ -101,36 +101,36 @@ class AboutSection extends StatelessWidget {
             label: s.version,
             value: '${AppConstants.appVersion} (build $_buildNumber)',
           ),
-          const Divider(height: 1, color: AppTheme.borderSubtle),
+          Divider(height: 1, color: context.colors.borderSubtle),
           _InfoRow(label: s.platform, value: _platformLabel()),
-          const Divider(height: 1, color: AppTheme.borderSubtle),
+          Divider(height: 1, color: context.colors.borderSubtle),
           _InfoRow(
             label: 'GitHub',
             valueWidget: InkWell(
               onTap: () => _openUrl(_githubUrl),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
-                children: const [
+                children: [
                   Text(
                     'github.com/justperson94/PDFLibre',
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
-                      color: AppTheme.brandBlue,
+                      color: context.colors.brandBlue,
                       decoration: TextDecoration.underline,
                     ),
                   ),
-                  SizedBox(width: 6),
+                  const SizedBox(width: 6),
                   Icon(
                     LucideIcons.externalLink,
                     size: 12,
-                    color: AppTheme.brandBlue,
+                    color: context.colors.brandBlue,
                   ),
                 ],
               ),
             ),
           ),
-          const Divider(height: 1, color: AppTheme.borderSubtle),
+          Divider(height: 1, color: context.colors.borderSubtle),
           _InfoRow(
             label: s.openSourceLicenses,
             valueWidget: InkWell(
@@ -147,16 +147,16 @@ class AboutSection extends StatelessWidget {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: AppTheme.surfacePrimary,
-                  border: Border.all(color: AppTheme.borderSubtle),
+                  color: context.colors.surfacePrimary,
+                  border: Border.all(color: context.colors.borderSubtle),
                   borderRadius: BorderRadius.circular(AppTheme.roundedSm),
                 ),
                 child: Text(
                   s.viewLicenses,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w500,
-                    color: AppTheme.foregroundPrimary,
+                    color: context.colors.foregroundPrimary,
                   ),
                 ),
               ),
@@ -191,19 +191,19 @@ class _InfoRow extends StatelessWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
-              color: AppTheme.foregroundSecondary,
+              color: context.colors.foregroundSecondary,
             ),
           ),
           const Spacer(),
           valueWidget ??
               Text(
                 value!,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
-                  color: AppTheme.foregroundPrimary,
+                  color: context.colors.foregroundPrimary,
                 ),
               ),
         ],

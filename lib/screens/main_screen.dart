@@ -131,6 +131,7 @@ class _MainScreenState extends State<MainScreen> {
       final result = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
+          backgroundColor: ctx.colors.surfacePrimary,
           title: Text(s.closeDocTitle),
           content: Text(s.unsavedChanges),
           actions: [
@@ -140,7 +141,7 @@ class _MainScreenState extends State<MainScreen> {
             ),
             FilledButton(
               onPressed: () => Navigator.pop(ctx, true),
-              style: FilledButton.styleFrom(backgroundColor: AppTheme.danger),
+              style: FilledButton.styleFrom(backgroundColor: ctx.colors.danger),
               child: Text(s.close),
             ),
           ],
@@ -408,7 +409,7 @@ class _MainScreenState extends State<MainScreen> {
             builder: (context, pdf, _) {
               final s = context.s;
               return Scaffold(
-                backgroundColor: AppTheme.surfacePrimary,
+                backgroundColor: context.colors.surfacePrimary,
                 body: Column(
                   children: [
                     // Top toolbar (48px)
@@ -491,10 +492,10 @@ class _MainScreenState extends State<MainScreen> {
                     StatusBar(
                       leftWidget: Row(
                         children: [
-                          const Icon(
+                          Icon(
                             LucideIcons.fileText,
                             size: 14,
-                            color: AppTheme.foregroundMuted,
+                            color: context.colors.foregroundMuted,
                           ),
                           const SizedBox(width: AppTheme.spacingXs),
                           Flexible(
@@ -502,9 +503,9 @@ class _MainScreenState extends State<MainScreen> {
                               message: pdf.fileName,
                               child: Text(
                                 pdf.fileName,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 12,
-                                  color: AppTheme.foregroundMuted,
+                                  color: context.colors.foregroundMuted,
                                   fontWeight: FontWeight.w500,
                                 ),
                                 overflow: TextOverflow.ellipsis,
@@ -514,9 +515,9 @@ class _MainScreenState extends State<MainScreen> {
                           const SizedBox(width: AppTheme.spacingSm),
                           Text(
                             s.statusInfo(pdf.fileSize, pdf.pageCount),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 12,
-                              color: AppTheme.foregroundMuted,
+                              color: context.colors.foregroundMuted,
                               fontWeight: FontWeight.w500,
                             ),
                           ),

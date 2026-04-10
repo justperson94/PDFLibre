@@ -27,13 +27,14 @@ class ViewerToolbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = context.s;
+    final c = context.colors;
     return Container(
       height: 36,
       padding: const EdgeInsets.symmetric(horizontal: AppTheme.spacingLg),
-      decoration: const BoxDecoration(
-        color: AppTheme.surfacePrimary,
+      decoration: BoxDecoration(
+        color: c.surfacePrimary,
         border: Border(
-          bottom: BorderSide(color: AppTheme.borderSubtle, width: 1),
+          bottom: BorderSide(color: c.borderSubtle, width: 1),
         ),
       ),
       child: Row(
@@ -42,7 +43,7 @@ class ViewerToolbar extends StatelessWidget {
           IconButton(
             onPressed: onPrev,
             icon: const Icon(LucideIcons.chevronLeft, size: 16),
-            color: AppTheme.foregroundSecondary,
+            color: c.foregroundSecondary,
             visualDensity: VisualDensity.compact,
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
@@ -50,16 +51,16 @@ class ViewerToolbar extends StatelessWidget {
           ),
           Text(
             s.pageOf(currentPage, totalPages),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: AppTheme.foregroundPrimary,
+              color: c.foregroundPrimary,
             ),
           ),
           IconButton(
             onPressed: onNext,
             icon: const Icon(LucideIcons.chevronRight, size: 16),
-            color: AppTheme.foregroundSecondary,
+            color: c.foregroundSecondary,
             visualDensity: VisualDensity.compact,
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
@@ -72,7 +73,7 @@ class ViewerToolbar extends StatelessWidget {
           IconButton(
             onPressed: onFitWidth,
             icon: const Icon(LucideIcons.moveHorizontal, size: 16),
-            color: AppTheme.accentPrimary,
+            color: c.accentPrimary,
             visualDensity: VisualDensity.compact,
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
@@ -81,7 +82,7 @@ class ViewerToolbar extends StatelessWidget {
           IconButton(
             onPressed: onActualSize,
             icon: const Icon(LucideIcons.maximize, size: 16),
-            color: AppTheme.accentPrimary,
+            color: c.accentPrimary,
             visualDensity: VisualDensity.compact,
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
@@ -90,7 +91,7 @@ class ViewerToolbar extends StatelessWidget {
           IconButton(
             onPressed: onFitHeight,
             icon: const Icon(LucideIcons.moveVertical, size: 16),
-            color: AppTheme.accentPrimary,
+            color: c.accentPrimary,
             visualDensity: VisualDensity.compact,
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(minWidth: 28, minHeight: 28),

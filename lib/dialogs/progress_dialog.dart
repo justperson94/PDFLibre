@@ -88,9 +88,10 @@ class _ProgressDialogState extends State<_ProgressDialog> {
     return PopScope(
       canPop: false,
       child: Dialog(
+        backgroundColor: context.colors.surfacePrimary,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppTheme.roundedXl),
-          side: const BorderSide(color: AppTheme.borderSubtle),
+          side: BorderSide(color: context.colors.borderSubtle),
         ),
         child: SizedBox(
           width: 420,
@@ -104,10 +105,10 @@ class _ProgressDialogState extends State<_ProgressDialog> {
                   children: [
                     Text(
                       widget.title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: AppTheme.foregroundPrimary,
+                        color: context.colors.foregroundPrimary,
                       ),
                     ),
                     const SizedBox(height: AppTheme.spacingLg),
@@ -121,9 +122,9 @@ class _ProgressDialogState extends State<_ProgressDialog> {
                             child: LinearProgressIndicator(
                               value: progress,
                               minHeight: 6,
-                              backgroundColor: AppTheme.borderSubtle,
-                              valueColor: const AlwaysStoppedAnimation<Color>(
-                                AppTheme.accentPrimary,
+                              backgroundColor: context.colors.borderSubtle,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                context.colors.accentPrimary,
                               ),
                             ),
                           ),
@@ -131,10 +132,10 @@ class _ProgressDialogState extends State<_ProgressDialog> {
                         const SizedBox(width: AppTheme.spacingMd),
                         Text(
                           '$percent%',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            color: AppTheme.accentPrimary,
+                            color: context.colors.accentPrimary,
                           ),
                         ),
                       ],
@@ -144,15 +145,15 @@ class _ProgressDialogState extends State<_ProgressDialog> {
                       _cancelling
                           ? s.cancelling
                           : s.progressText(_current, _total),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
-                        color: AppTheme.foregroundMuted,
+                        color: context.colors.foregroundMuted,
                       ),
                     ),
                   ],
                 ),
               ),
-              const Divider(height: 1, color: AppTheme.borderSubtle),
+              Divider(height: 1, color: context.colors.borderSubtle),
               Container(
                 height: 52,
                 padding: const EdgeInsets.symmetric(
@@ -165,12 +166,12 @@ class _ProgressDialogState extends State<_ProgressDialog> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(AppTheme.roundedMd),
                     ),
-                    side: const BorderSide(color: AppTheme.borderSubtle),
+                    side: BorderSide(color: context.colors.borderSubtle),
                   ),
                   onPressed: _cancelling ? null : _onCancel,
                   child: Text(
                     _cancelling ? s.cancelling : s.cancel,
-                    style: const TextStyle(color: AppTheme.foregroundSecondary),
+                    style: TextStyle(color: context.colors.foregroundSecondary),
                   ),
                 ),
               ),

@@ -13,6 +13,7 @@ class DropOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = context.s;
+    final c = context.colors;
     return Center(
       child: Container(
         margin: const EdgeInsets.all(AppTheme.spacingXl * 2),
@@ -23,7 +24,7 @@ class DropOverlay extends StatelessWidget {
         decoration: BoxDecoration(
           color: _overlayBg,
           borderRadius: BorderRadius.circular(AppTheme.roundedXl),
-          border: Border.all(color: AppTheme.accentPrimary, width: 2),
+          border: Border.all(color: c.accentPrimary, width: 2),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -35,17 +36,17 @@ class DropOverlay extends StatelessWidget {
                 color: _iconBg,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 LucideIcons.download,
                 size: 32,
-                color: AppTheme.accentPrimary,
+                color: c.accentPrimary,
               ),
             ),
             const SizedBox(height: AppTheme.spacingXl),
             Text(
               s.dropHere,
-              style: const TextStyle(
-                color: AppTheme.foregroundPrimary,
+              style: TextStyle(
+                color: c.foregroundPrimary,
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
               ),
@@ -53,8 +54,8 @@ class DropOverlay extends StatelessWidget {
             const SizedBox(height: AppTheme.spacingSm),
             Text(
               s.dropDescription,
-              style: const TextStyle(
-                color: AppTheme.foregroundSecondary,
+              style: TextStyle(
+                color: c.foregroundSecondary,
                 fontSize: 14,
               ),
             ),
@@ -62,16 +63,16 @@ class DropOverlay extends StatelessWidget {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(
+                Icon(
                   LucideIcons.fileText,
                   size: 16,
-                  color: AppTheme.foregroundMuted,
+                  color: c.foregroundMuted,
                 ),
                 const SizedBox(width: AppTheme.spacingSm),
                 Text(
                   s.supportedFormat,
-                  style: const TextStyle(
-                    color: AppTheme.foregroundMuted,
+                  style: TextStyle(
+                    color: c.foregroundMuted,
                     fontSize: 13,
                   ),
                 ),

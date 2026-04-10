@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import 'l10n/strings.dart';
 import 'providers/pdf_provider.dart';
+import 'providers/settings_provider.dart';
 import 'screens/empty_state_screen.dart';
 import 'screens/main_screen.dart';
 import 'screens/merge_screen.dart';
@@ -17,20 +18,47 @@ class PDFLibreApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final baseTheme = ThemeData.light(useMaterial3: false);
+    final settings = context.watch<SettingsProvider>();
+
+    final ThemeMode themeMode;
+    switch (settings.themeMode) {
+      case AppThemeMode.light:
+        themeMode = ThemeMode.light;
+        break;
+      case AppThemeMode.dark:
+        themeMode = ThemeMode.dark;
+        break;
+      case AppThemeMode.system:
+        themeMode = ThemeMode.system;
+        break;
+    }
+
+    final lightBase = ThemeData.light(useMaterial3: false);
+    final darkBase = ThemeData.dark(useMaterial3: false);
 
     return MaterialApp(
       title: AppConstants.appName,
       debugShowCheckedModeBanner: false,
-      themeMode: ThemeMode.light,
-      theme: baseTheme.copyWith(
-        scaffoldBackgroundColor: AppTheme.surfacePrimary,
-        textTheme: GoogleFonts.interTextTheme(baseTheme.textTheme),
-        colorScheme: baseTheme.colorScheme.copyWith(
-          primary: AppTheme.accentPrimary,
-          surface: AppTheme.surfacePrimary,
-          onSurface: AppTheme.foregroundPrimary,
+      themeMode: themeMode,
+      theme: lightBase.copyWith(
+        scaffoldBackgroundColor: AppColors.light.surfacePrimary,
+        textTheme: GoogleFonts.interTextTheme(lightBase.textTheme),
+        colorScheme: lightBase.colorScheme.copyWith(
+          primary: AppColors.light.accentPrimary,
+          surface: AppColors.light.surfacePrimary,
+          onSurface: AppColors.light.foregroundPrimary,
         ),
+        extensions: const [AppColors.light],
+      ),
+      darkTheme: darkBase.copyWith(
+        scaffoldBackgroundColor: AppColors.dark.surfacePrimary,
+        textTheme: GoogleFonts.interTextTheme(darkBase.textTheme),
+        colorScheme: darkBase.colorScheme.copyWith(
+          primary: AppColors.dark.accentPrimary,
+          surface: AppColors.dark.surfacePrimary,
+          onSurface: AppColors.dark.foregroundPrimary,
+        ),
+        extensions: const [AppColors.dark],
       ),
       home: const _DropWrapper(),
     );
@@ -109,7 +137,7 @@ class _DropWrapperState extends State<_DropWrapper> {
               return const EmptyStateScreen();
             },
           ),
-          if (_isDragging) const DropOverlay(),
+          if (_isDragging) DropOverlay(),
         ],
       ),
     );

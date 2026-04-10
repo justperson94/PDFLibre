@@ -10,9 +10,10 @@ Future<void> showErrorDialog(BuildContext context, {VoidCallback? onPickFile}) {
     builder: (context) {
       final s = context.s;
       return Dialog(
+        backgroundColor: context.colors.surfacePrimary,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppTheme.roundedXl),
-          side: const BorderSide(color: AppTheme.borderSubtle, width: 1),
+          side: BorderSide(color: context.colors.borderSubtle, width: 1),
         ),
         child: SizedBox(
           width: 420,
@@ -30,38 +31,38 @@ Future<void> showErrorDialog(BuildContext context, {VoidCallback? onPickFile}) {
                       width: 64,
                       height: 64,
                       decoration: BoxDecoration(
-                        color: AppTheme.accentPrimary.withValues(alpha: 0.1),
+                        color: context.colors.accentPrimary.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(
+                      child: Icon(
                         LucideIcons.alertTriangle,
-                        color: AppTheme.accentPrimary,
+                        color: context.colors.accentPrimary,
                         size: 28,
                       ),
                     ),
                     const SizedBox(height: AppTheme.spacingLg),
                     Text(
                       s.errorDialogTitle,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
-                        color: AppTheme.foregroundPrimary,
+                        color: context.colors.foregroundPrimary,
                       ),
                     ),
                     const SizedBox(height: AppTheme.spacingMd),
                     Text(
                       s.errorDialogBody,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
-                        color: AppTheme.foregroundSecondary,
+                        color: context.colors.foregroundSecondary,
                         height: 1.5,
                       ),
                     ),
                   ],
                 ),
               ),
-              const Divider(height: 1, color: AppTheme.borderSubtle),
+              Divider(height: 1, color: context.colors.borderSubtle),
               Container(
                 height: 56,
                 padding: const EdgeInsets.symmetric(
@@ -82,16 +83,16 @@ Future<void> showErrorDialog(BuildContext context, {VoidCallback? onPickFile}) {
                             AppTheme.roundedMd,
                           ),
                         ),
-                        side: const BorderSide(color: AppTheme.borderSubtle),
-                        foregroundColor: AppTheme.foregroundSecondary,
+                        side: BorderSide(color: context.colors.borderSubtle),
+                        foregroundColor: context.colors.foregroundSecondary,
                       ),
                       child: Text(s.pickAnotherFile),
                     ),
                     const SizedBox(width: AppTheme.spacingSm),
                     FilledButton(
                       style: FilledButton.styleFrom(
-                        backgroundColor: AppTheme.accentPrimary,
-                        foregroundColor: AppTheme.surfacePrimary,
+                        backgroundColor: context.colors.accentPrimary,
+                        foregroundColor: context.colors.surfacePrimary,
                         minimumSize: const Size(80, 40),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(

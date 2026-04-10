@@ -27,12 +27,14 @@ class Sidebar extends StatelessWidget {
     final pdf = context.watch<PdfProvider>();
     final document = pdf.document;
 
+    final colors = context.colors;
+
     return Container(
       width: 240,
-      decoration: const BoxDecoration(
-        color: AppTheme.sidebarBg,
+      decoration: BoxDecoration(
+        color: colors.sidebarBg,
         border: Border(
-          right: BorderSide(color: AppTheme.borderSubtle, width: 1),
+          right: BorderSide(color: colors.borderSubtle, width: 1),
         ),
       ),
       child: Column(
@@ -40,9 +42,9 @@ class Sidebar extends StatelessWidget {
           Container(
             height: 36,
             padding: const EdgeInsets.symmetric(horizontal: AppTheme.spacingLg),
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               border: Border(
-                bottom: BorderSide(color: AppTheme.borderSubtle, width: 1),
+                bottom: BorderSide(color: colors.borderSubtle, width: 1),
               ),
             ),
             child: Row(
@@ -50,17 +52,17 @@ class Sidebar extends StatelessWidget {
               children: [
                 Text(
                   s.page,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: AppTheme.foregroundPrimary,
+                    color: colors.foregroundPrimary,
                   ),
                 ),
                 Text(
                   '$pageCount',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
-                    color: AppTheme.foregroundMuted,
+                    color: colors.foregroundMuted,
                   ),
                 ),
               ],
@@ -94,7 +96,7 @@ class Sidebar extends StatelessWidget {
         );
       },
       proxyDecorator: (child, index, animation) {
-        return Material(elevation: 4, color: AppTheme.sidebarBg, child: child);
+        return Material(elevation: 4, color: context.colors.sidebarBg, child: child);
       },
       itemBuilder: (context, index) {
         final displayPage = index + 1;

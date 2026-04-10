@@ -63,15 +63,16 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.colors;
     return Container(
-      color: AppTheme.surfaceSecondary,
+      color: c.surfaceSecondary,
       child: PdfViewer.data(
         widget.pdfBytes,
         sourceName: widget.sourceName,
         controller: widget.controller,
         params: PdfViewerParams(
           margin: AppTheme.spacingXl,
-          backgroundColor: AppTheme.surfaceSecondary,
+          backgroundColor: c.surfaceSecondary,
           pageDropShadow: const BoxShadow(
             color: Color(0x1A000000),
             blurRadius: 12,

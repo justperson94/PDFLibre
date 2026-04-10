@@ -12,40 +12,41 @@ class ZoomControls extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const iconSize = 14.0;
+    final c = context.colors;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Icon(
+        Icon(
           LucideIcons.minus,
           size: iconSize,
-          color: AppTheme.foregroundSecondary,
+          color: c.foregroundSecondary,
         ),
         SizedBox(
           width: 120,
           child: SliderTheme(
             data: SliderTheme.of(context).copyWith(
-              activeTrackColor: AppTheme.accentPrimary,
-              inactiveTrackColor: AppTheme.borderSubtle,
-              thumbColor: AppTheme.accentPrimary,
-              overlayColor: AppTheme.accentPrimary.withValues(alpha: 0.15),
+              activeTrackColor: c.accentPrimary,
+              inactiveTrackColor: c.borderSubtle,
+              thumbColor: c.accentPrimary,
+              overlayColor: c.accentPrimary.withValues(alpha: 0.15),
               trackHeight: 3,
             ),
             child: Slider(min: 25, max: 400, value: zoom, onChanged: onChanged),
           ),
         ),
-        const Icon(
+        Icon(
           LucideIcons.plus,
           size: iconSize,
-          color: AppTheme.foregroundSecondary,
+          color: c.foregroundSecondary,
         ),
         const SizedBox(width: AppTheme.spacingSm),
         Text(
           '${zoom.round()}%',
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w500,
-            color: AppTheme.foregroundMuted,
+            color: c.foregroundMuted,
           ),
         ),
       ],

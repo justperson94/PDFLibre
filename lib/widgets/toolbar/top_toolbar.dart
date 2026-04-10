@@ -49,10 +49,10 @@ class TopToolbar extends StatelessWidget {
     return Container(
       height: 48,
       padding: const EdgeInsets.symmetric(horizontal: AppTheme.spacingLg),
-      decoration: const BoxDecoration(
-        color: AppTheme.toolbarBg,
+      decoration: BoxDecoration(
+        color: context.colors.toolbarBg,
         border: Border(
-          bottom: BorderSide(color: AppTheme.borderSubtle, width: 1),
+          bottom: BorderSide(color: context.colors.borderSubtle, width: 1),
         ),
       ),
       child: Row(
@@ -60,13 +60,13 @@ class TopToolbar extends StatelessWidget {
           // Left: branded logo + open file
           const AppLogo(),
           const SizedBox(width: AppTheme.spacingMd),
-          Container(width: 1, height: 24, color: AppTheme.borderSubtle),
+          Container(width: 1, height: 24, color: context.colors.borderSubtle),
           const SizedBox(width: AppTheme.spacingMd),
           ToolbarButton(
             icon: LucideIcons.folderOpen,
             tooltip: s.openFileTooltip(_shortcutPrefix()),
             label: s.openLabel,
-            iconColor: AppTheme.accentPrimary,
+            iconColor: context.colors.accentPrimary,
             onTap: onOpenFile,
           ),
           const SizedBox(width: AppTheme.spacingXs),
@@ -97,7 +97,7 @@ class TopToolbar extends StatelessWidget {
             onTap: canRedo ? onRedo : null,
           ),
           const SizedBox(width: AppTheme.spacingSm),
-          Container(width: 1, height: 24, color: AppTheme.borderSubtle),
+          Container(width: 1, height: 24, color: context.colors.borderSubtle),
           const SizedBox(width: AppTheme.spacingSm),
           ToolbarButton(
             icon: LucideIcons.rotateCcw,
@@ -111,7 +111,7 @@ class TopToolbar extends StatelessWidget {
             onTap: onRotateCw,
           ),
           const SizedBox(width: AppTheme.spacingSm),
-          Container(width: 1, height: 24, color: AppTheme.borderSubtle),
+          Container(width: 1, height: 24, color: context.colors.borderSubtle),
           const SizedBox(width: AppTheme.spacingSm),
           ToolbarButton(
             icon: LucideIcons.scissors,

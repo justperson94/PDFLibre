@@ -48,10 +48,11 @@ class _ToggleIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Tooltip(
       message: tooltip,
       child: Material(
-        color: selected ? AppTheme.surfaceTertiary : Colors.transparent,
+        color: selected ? colors.surfaceTertiary : Colors.transparent,
         borderRadius: BorderRadius.circular(AppTheme.roundedMd),
         child: InkWell(
           borderRadius: BorderRadius.circular(AppTheme.roundedMd),
@@ -62,8 +63,8 @@ class _ToggleIconButton extends StatelessWidget {
               icon,
               size: AppTheme.spacingMd + AppTheme.spacingXs,
               color: selected
-                  ? AppTheme.accentPrimary
-                  : AppTheme.foregroundSecondary,
+                  ? colors.accentPrimary
+                  : colors.foregroundSecondary,
             ),
           ),
         ),

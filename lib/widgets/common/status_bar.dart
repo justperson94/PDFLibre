@@ -20,17 +20,18 @@ class StatusBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const textStyle = TextStyle(
+    final c = context.colors;
+    final textStyle = TextStyle(
       fontSize: 12,
-      color: AppTheme.foregroundMuted,
+      color: c.foregroundMuted,
       fontWeight: FontWeight.w500,
     );
 
     return Container(
       height: 32,
-      decoration: const BoxDecoration(
-        color: AppTheme.toolbarBg,
-        border: Border(top: BorderSide(color: AppTheme.borderSubtle, width: 1)),
+      decoration: BoxDecoration(
+        color: c.toolbarBg,
+        border: Border(top: BorderSide(color: c.borderSubtle, width: 1)),
       ),
       padding: const EdgeInsets.symmetric(horizontal: AppTheme.spacingLg),
       child: Row(
@@ -40,7 +41,7 @@ class StatusBar extends StatelessWidget {
             child: Center(
               child: Text(
                 centerText,
-                style: textStyle.copyWith(color: AppTheme.foregroundSecondary),
+                style: textStyle.copyWith(color: c.foregroundSecondary),
               ),
             ),
           ),
@@ -52,7 +53,7 @@ class StatusBar extends StatelessWidget {
                   Text(
                     rightText,
                     style: textStyle.copyWith(
-                      color: AppTheme.foregroundSecondary,
+                      color: c.foregroundSecondary,
                     ),
                   ),
             ),

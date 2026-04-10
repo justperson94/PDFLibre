@@ -72,17 +72,17 @@ class _EmptyStateScreenState extends State<EmptyStateScreen> {
   Widget build(BuildContext context) {
     final s = context.s;
     return Scaffold(
-      backgroundColor: AppTheme.surfacePrimary,
+      backgroundColor: context.colors.surfacePrimary,
       body: Column(
         children: [
           // Top toolbar (48px) — logo only
           _buildToolbar(s),
-          const Divider(height: 1, color: AppTheme.borderSubtle),
+          Divider(height: 1, color: context.colors.borderSubtle),
 
           // Center content with drop zone
           Expanded(
             child: Container(
-              color: AppTheme.surfaceSecondary,
+              color: context.colors.surfaceSecondary,
               child: Center(
                 child: SingleChildScrollView(
                   child: Padding(
@@ -97,39 +97,39 @@ class _EmptyStateScreenState extends State<EmptyStateScreen> {
                             vertical: 40,
                           ),
                           decoration: BoxDecoration(
-                            color: AppTheme.surfacePrimary,
+                            color: context.colors.surfacePrimary,
                             borderRadius: BorderRadius.circular(
                               AppTheme.roundedXl,
                             ),
                             border: Border.all(
-                              color: AppTheme.borderSubtle,
+                              color: context.colors.borderSubtle,
                               width: 1.5,
                             ),
                           ),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(
+                              Icon(
                                 LucideIcons.fileText,
                                 size: 56,
-                                color: AppTheme.foregroundMuted,
+                                color: context.colors.foregroundMuted,
                               ),
                               const SizedBox(height: AppTheme.spacingXl),
                               Text(
                                 s.openPdfPrompt,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.w700,
-                                  color: AppTheme.foregroundPrimary,
+                                  color: context.colors.foregroundPrimary,
                                 ),
                               ),
                               const SizedBox(height: AppTheme.spacingSm),
                               Text(
                                 s.openPdfHint,
                                 textAlign: TextAlign.center,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 14,
-                                  color: AppTheme.foregroundSecondary,
+                                  color: context.colors.foregroundSecondary,
                                   height: 1.5,
                                 ),
                               ),
@@ -148,8 +148,8 @@ class _EmptyStateScreenState extends State<EmptyStateScreen> {
                                   ),
                                 ),
                                 style: FilledButton.styleFrom(
-                                  backgroundColor: AppTheme.accentPrimary,
-                                  foregroundColor: AppTheme.surfacePrimary,
+                                  backgroundColor: context.colors.accentPrimary,
+                                  foregroundColor: context.colors.surfacePrimary,
                                   minimumSize: const Size(180, 44),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(
@@ -185,9 +185,9 @@ class _EmptyStateScreenState extends State<EmptyStateScreen> {
                               const SizedBox(height: AppTheme.spacingMd),
                               Text(
                                 s.multiFileMergeHint,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 12,
-                                  color: AppTheme.foregroundMuted,
+                                  color: context.colors.foregroundMuted,
                                 ),
                               ),
                             ],
@@ -222,19 +222,19 @@ class _EmptyStateScreenState extends State<EmptyStateScreen> {
       width: 400,
       padding: const EdgeInsets.all(AppTheme.spacingLg),
       decoration: BoxDecoration(
-        color: AppTheme.surfacePrimary,
+        color: context.colors.surfacePrimary,
         borderRadius: BorderRadius.circular(AppTheme.roundedXl),
-        border: Border.all(color: AppTheme.borderSubtle, width: 1),
+        border: Border.all(color: context.colors.borderSubtle, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             s.recentFiles,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: AppTheme.foregroundPrimary,
+              color: context.colors.foregroundPrimary,
             ),
           ),
           const SizedBox(height: AppTheme.spacingSm),
@@ -254,17 +254,17 @@ class _EmptyStateScreenState extends State<EmptyStateScreen> {
     return Container(
       height: 48,
       padding: const EdgeInsets.symmetric(horizontal: AppTheme.spacingLg),
-      color: AppTheme.toolbarBg,
+      color: context.colors.toolbarBg,
       child: Row(
         children: [
           const AppLogo(),
           const Spacer(),
           IconButton(
             onPressed: () => showSettingsDialog(context),
-            icon: const Icon(
+            icon: Icon(
               LucideIcons.settings,
               size: 18,
-              color: AppTheme.foregroundSecondary,
+              color: context.colors.foregroundSecondary,
             ),
             tooltip: s.settings,
             splashRadius: 16,
@@ -294,18 +294,18 @@ class _RecentFileItem extends StatelessWidget {
         ),
         child: Row(
           children: [
-            const Icon(
+            Icon(
               LucideIcons.fileText,
               size: 14,
-              color: AppTheme.foregroundMuted,
+              color: context.colors.foregroundMuted,
             ),
             const SizedBox(width: AppTheme.spacingSm),
             Expanded(
               child: Text(
                 fileName,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13,
-                  color: AppTheme.foregroundSecondary,
+                  color: context.colors.foregroundSecondary,
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
@@ -336,14 +336,14 @@ class _FeatureChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: AppTheme.foregroundSecondary),
+          Icon(icon, size: 14, color: context.colors.foregroundSecondary),
           const SizedBox(width: AppTheme.spacingXs),
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w500,
-              color: AppTheme.foregroundSecondary,
+              color: context.colors.foregroundSecondary,
             ),
           ),
         ],

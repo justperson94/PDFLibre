@@ -127,9 +127,10 @@ class _ConvertDialogState extends State<_ConvertDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
+      backgroundColor: context.colors.surfacePrimary,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppTheme.roundedXl),
-        side: const BorderSide(color: AppTheme.borderSubtle),
+        side: BorderSide(color: context.colors.borderSubtle),
       ),
       child: SizedBox(
         width: 520,
@@ -138,7 +139,7 @@ class _ConvertDialogState extends State<_ConvertDialog> {
           children: [
             // Header (60px)
             _buildHeader(),
-            const Divider(height: 1, color: AppTheme.borderSubtle),
+            Divider(height: 1, color: context.colors.borderSubtle),
 
             // Body (scrollable)
             Expanded(
@@ -159,7 +160,7 @@ class _ConvertDialogState extends State<_ConvertDialog> {
               ),
             ),
 
-            const Divider(height: 1, color: AppTheme.borderSubtle),
+            Divider(height: 1, color: context.colors.borderSubtle),
             // Footer (59px)
             _buildFooter(),
           ],
@@ -177,17 +178,17 @@ class _ConvertDialogState extends State<_ConvertDialog> {
         children: [
           Text(
             s.convertTitle,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w700,
-              color: AppTheme.foregroundPrimary,
+              color: context.colors.foregroundPrimary,
             ),
           ),
           const Spacer(),
           IconButton(
             onPressed: () => Navigator.of(context).pop(),
             icon: const Icon(LucideIcons.x, size: 20),
-            color: AppTheme.foregroundSecondary,
+            color: context.colors.foregroundSecondary,
             tooltip: s.close,
           ),
         ],
@@ -206,18 +207,18 @@ class _ConvertDialogState extends State<_ConvertDialog> {
           children: [
             Text(
               s.pageSelection,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: AppTheme.foregroundPrimary,
+                color: context.colors.foregroundPrimary,
               ),
             ),
             const Spacer(),
             Text(
               s.totalPages(pdf.pageCount),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12,
-                color: AppTheme.foregroundMuted,
+                color: context.colors.foregroundMuted,
               ),
             ),
           ],
@@ -237,13 +238,13 @@ class _ConvertDialogState extends State<_ConvertDialog> {
                   ),
                   decoration: BoxDecoration(
                     color: selected
-                        ? AppTheme.accentPrimary
-                        : AppTheme.surfaceSecondary,
+                        ? context.colors.accentPrimary
+                        : context.colors.surfaceSecondary,
                     borderRadius: BorderRadius.circular(AppTheme.roundedMd),
                     border: Border.all(
                       color: selected
-                          ? AppTheme.accentPrimary
-                          : AppTheme.borderSubtle,
+                          ? context.colors.accentPrimary
+                          : context.colors.borderSubtle,
                     ),
                   ),
                   child: Text(
@@ -252,8 +253,8 @@ class _ConvertDialogState extends State<_ConvertDialog> {
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
                       color: selected
-                          ? AppTheme.surfacePrimary
-                          : AppTheme.foregroundSecondary,
+                          ? context.colors.surfacePrimary
+                          : context.colors.foregroundSecondary,
                     ),
                   ),
                 ),
@@ -267,23 +268,23 @@ class _ConvertDialogState extends State<_ConvertDialog> {
             controller: _rangeController,
             decoration: InputDecoration(
               hintText: s.rangeHint,
-              hintStyle: const TextStyle(
-                color: AppTheme.foregroundMuted,
+              hintStyle: TextStyle(
+                color: context.colors.foregroundMuted,
                 fontSize: 13,
               ),
               filled: true,
-              fillColor: AppTheme.surfaceSecondary,
+              fillColor: context.colors.surfaceSecondary,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(AppTheme.roundedMd),
-                borderSide: const BorderSide(color: AppTheme.borderSubtle),
+                borderSide: BorderSide(color: context.colors.borderSubtle),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(AppTheme.roundedMd),
-                borderSide: const BorderSide(color: AppTheme.borderSubtle),
+                borderSide: BorderSide(color: context.colors.borderSubtle),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(AppTheme.roundedMd),
-                borderSide: const BorderSide(color: AppTheme.accentPrimary),
+                borderSide: BorderSide(color: context.colors.accentPrimary),
               ),
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: AppTheme.spacingMd,
@@ -303,10 +304,10 @@ class _ConvertDialogState extends State<_ConvertDialog> {
       children: [
         Text(
           s.outputFormat,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: AppTheme.foregroundPrimary,
+            color: context.colors.foregroundPrimary,
           ),
         ),
         const SizedBox(height: AppTheme.spacingSm),
@@ -326,13 +327,13 @@ class _ConvertDialogState extends State<_ConvertDialog> {
                 ),
                 decoration: BoxDecoration(
                   color: selected
-                      ? AppTheme.accentPrimary
-                      : AppTheme.surfaceSecondary,
+                      ? context.colors.accentPrimary
+                      : context.colors.surfaceSecondary,
                   borderRadius: BorderRadius.circular(AppTheme.roundedMd),
                   border: Border.all(
                     color: selected
-                        ? AppTheme.accentPrimary
-                        : AppTheme.borderSubtle,
+                        ? context.colors.accentPrimary
+                        : context.colors.borderSubtle,
                   ),
                 ),
                 child: Text(
@@ -341,8 +342,8 @@ class _ConvertDialogState extends State<_ConvertDialog> {
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
                     color: selected
-                        ? AppTheme.surfacePrimary
-                        : AppTheme.foregroundSecondary,
+                        ? context.colors.surfacePrimary
+                        : context.colors.foregroundSecondary,
                   ),
                 ),
               ),
@@ -363,10 +364,10 @@ class _ConvertDialogState extends State<_ConvertDialog> {
           children: [
             Text(
               s.resolutionDpi,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: AppTheme.foregroundPrimary,
+                color: context.colors.foregroundPrimary,
               ),
             ),
             const Spacer(),
@@ -374,10 +375,10 @@ class _ConvertDialogState extends State<_ConvertDialog> {
               _dpiSelection < _dpiPresets.length
                   ? '${_dpiPresets[_dpiSelection]}'
                   : '',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: AppTheme.foregroundSecondary,
+                color: context.colors.foregroundSecondary,
               ),
             ),
           ],
@@ -397,13 +398,13 @@ class _ConvertDialogState extends State<_ConvertDialog> {
                 ),
                 decoration: BoxDecoration(
                   color: selected
-                      ? AppTheme.accentPrimary
-                      : AppTheme.surfaceSecondary,
+                      ? context.colors.accentPrimary
+                      : context.colors.surfaceSecondary,
                   borderRadius: BorderRadius.circular(AppTheme.roundedMd),
                   border: Border.all(
                     color: selected
-                        ? AppTheme.accentPrimary
-                        : AppTheme.borderSubtle,
+                        ? context.colors.accentPrimary
+                        : context.colors.borderSubtle,
                   ),
                 ),
                 child: Text(
@@ -412,8 +413,8 @@ class _ConvertDialogState extends State<_ConvertDialog> {
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
                     color: selected
-                        ? AppTheme.surfacePrimary
-                        : AppTheme.foregroundSecondary,
+                        ? context.colors.surfacePrimary
+                        : context.colors.foregroundSecondary,
                   ),
                 ),
               ),
@@ -429,23 +430,23 @@ class _ConvertDialogState extends State<_ConvertDialog> {
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
                 hintText: s.dpiValue,
-                hintStyle: const TextStyle(
-                  color: AppTheme.foregroundMuted,
+                hintStyle: TextStyle(
+                  color: context.colors.foregroundMuted,
                   fontSize: 13,
                 ),
                 filled: true,
-                fillColor: AppTheme.surfaceSecondary,
+                fillColor: context.colors.surfaceSecondary,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(AppTheme.roundedMd),
-                  borderSide: const BorderSide(color: AppTheme.borderSubtle),
+                  borderSide: BorderSide(color: context.colors.borderSubtle),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(AppTheme.roundedMd),
-                  borderSide: const BorderSide(color: AppTheme.borderSubtle),
+                  borderSide: BorderSide(color: context.colors.borderSubtle),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(AppTheme.roundedMd),
-                  borderSide: const BorderSide(color: AppTheme.accentPrimary),
+                  borderSide: BorderSide(color: context.colors.accentPrimary),
                 ),
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: AppTheme.spacingMd,
@@ -468,19 +469,19 @@ class _ConvertDialogState extends State<_ConvertDialog> {
           children: [
             Text(
               s.quality,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: AppTheme.foregroundPrimary,
+                color: context.colors.foregroundPrimary,
               ),
             ),
             const Spacer(),
             Text(
               '${_quality.round()}%',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: AppTheme.foregroundSecondary,
+                color: context.colors.foregroundSecondary,
               ),
             ),
           ],
@@ -488,10 +489,10 @@ class _ConvertDialogState extends State<_ConvertDialog> {
         const SizedBox(height: AppTheme.spacingSm),
         SliderTheme(
           data: SliderTheme.of(context).copyWith(
-            activeTrackColor: AppTheme.accentPrimary,
-            inactiveTrackColor: AppTheme.borderSubtle,
-            thumbColor: AppTheme.accentPrimary,
-            overlayColor: AppTheme.accentPrimary.withValues(alpha: 0.15),
+            activeTrackColor: context.colors.accentPrimary,
+            inactiveTrackColor: context.colors.borderSubtle,
+            thumbColor: context.colors.accentPrimary,
+            overlayColor: context.colors.accentPrimary.withValues(alpha: 0.15),
             trackHeight: 4,
           ),
           child: Slider(
@@ -506,16 +507,16 @@ class _ConvertDialogState extends State<_ConvertDialog> {
           children: [
             Text(
               s.qualityLow,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12,
-                color: AppTheme.foregroundMuted,
+                color: context.colors.foregroundMuted,
               ),
             ),
             Text(
               s.qualityHigh,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12,
-                color: AppTheme.foregroundMuted,
+                color: context.colors.foregroundMuted,
               ),
             ),
           ],
@@ -539,8 +540,8 @@ class _ConvertDialogState extends State<_ConvertDialog> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppTheme.roundedMd),
               ),
-              side: const BorderSide(color: AppTheme.borderSubtle),
-              foregroundColor: AppTheme.foregroundSecondary,
+              side: BorderSide(color: context.colors.borderSubtle),
+              foregroundColor: context.colors.foregroundSecondary,
             ),
             child: Text(s.cancel),
           ),
@@ -553,8 +554,8 @@ class _ConvertDialogState extends State<_ConvertDialog> {
               style: const TextStyle(fontWeight: FontWeight.w600),
             ),
             style: FilledButton.styleFrom(
-              backgroundColor: AppTheme.accentPrimary,
-              foregroundColor: AppTheme.surfacePrimary,
+              backgroundColor: context.colors.accentPrimary,
+              foregroundColor: context.colors.surfacePrimary,
               minimumSize: const Size(120, 40),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppTheme.roundedMd),

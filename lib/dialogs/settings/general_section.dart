@@ -37,16 +37,16 @@ class GeneralSection extends StatelessWidget {
       children: [
         Text(
           s.theme,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: AppTheme.foregroundPrimary,
+            color: context.colors.foregroundPrimary,
           ),
         ),
         const SizedBox(height: AppTheme.spacingXs),
         Text(
           s.themeDescription,
-          style: const TextStyle(fontSize: 11, color: AppTheme.foregroundMuted),
+          style: TextStyle(fontSize: 11, color: context.colors.foregroundMuted),
         ),
         const SizedBox(height: AppTheme.spacingMd),
         Row(
@@ -72,28 +72,9 @@ class GeneralSection extends StatelessWidget {
                 label: s.themeDark,
                 selected: settings.themeMode == AppThemeMode.dark,
                 onTap: () => settings.setThemeMode(AppThemeMode.dark),
-                disabled: true,
               ),
             ),
           ],
-        ),
-        const SizedBox(height: AppTheme.spacingSm),
-        Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppTheme.spacingSm,
-            vertical: 3,
-          ),
-          decoration: BoxDecoration(
-            color: AppTheme.surfaceTertiary,
-            borderRadius: BorderRadius.circular(AppTheme.roundedSm),
-          ),
-          child: Text(
-            s.darkModePhase4,
-            style: const TextStyle(
-              fontSize: 10,
-              color: AppTheme.foregroundMuted,
-            ),
-          ),
         ),
       ],
     );
@@ -109,39 +90,40 @@ class GeneralSection extends StatelessWidget {
       children: [
         Text(
           s.language,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: AppTheme.foregroundPrimary,
+            color: context.colors.foregroundPrimary,
           ),
         ),
         const SizedBox(height: AppTheme.spacingXs),
         Text(
           s.languageDescription,
-          style: const TextStyle(fontSize: 11, color: AppTheme.foregroundMuted),
+          style: TextStyle(fontSize: 11, color: context.colors.foregroundMuted),
         ),
         const SizedBox(height: AppTheme.spacingMd),
         Container(
           height: 36,
           padding: const EdgeInsets.symmetric(horizontal: 14),
           decoration: BoxDecoration(
-            color: AppTheme.surfacePrimary,
-            border: Border.all(color: AppTheme.borderSubtle),
+            color: context.colors.surfacePrimary,
+            border: Border.all(color: context.colors.borderSubtle),
             borderRadius: BorderRadius.circular(AppTheme.roundedMd),
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<AppLanguage>(
               value: settings.language,
               isExpanded: true,
-              icon: const Icon(
+              dropdownColor: context.colors.surfacePrimary,
+              icon: Icon(
                 LucideIcons.chevronDown,
                 size: 14,
-                color: AppTheme.foregroundMuted,
+                color: context.colors.foregroundMuted,
               ),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
-                color: AppTheme.foregroundPrimary,
+                color: context.colors.foregroundPrimary,
               ),
               items: const [
                 DropdownMenuItem(value: AppLanguage.ko, child: Text('한국어')),
@@ -163,32 +145,34 @@ class _ThemeOption extends StatelessWidget {
     required this.label,
     required this.selected,
     required this.onTap,
-    this.disabled = false,
   });
 
   final String label;
   final bool selected;
   final VoidCallback onTap;
-  final bool disabled;
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: disabled ? null : onTap,
+      onTap: onTap,
       borderRadius: BorderRadius.circular(AppTheme.roundedMd),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: selected ? AppTheme.surfaceSecondary : AppTheme.surfacePrimary,
+          color: selected
+              ? context.colors.surfaceSecondary
+              : context.colors.surfacePrimary,
           border: Border.all(
-            color: selected ? AppTheme.accentPrimary : AppTheme.borderSubtle,
+            color: selected
+                ? context.colors.accentPrimary
+                : context.colors.borderSubtle,
             width: selected ? 1.5 : 1,
           ),
           borderRadius: BorderRadius.circular(AppTheme.roundedMd),
         ),
         child: Row(
           children: [
-            _RadioDot(selected: selected, disabled: disabled),
+            _RadioDot(selected: selected),
             const SizedBox(width: AppTheme.spacingSm),
             Expanded(
               child: Text(
@@ -196,11 +180,9 @@ class _ThemeOption extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-                  color: disabled
-                      ? AppTheme.foregroundMuted
-                      : (selected
-                            ? AppTheme.foregroundPrimary
-                            : AppTheme.foregroundSecondary),
+                  color: selected
+                      ? context.colors.foregroundPrimary
+                      : context.colors.foregroundSecondary,
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
@@ -213,23 +195,21 @@ class _ThemeOption extends StatelessWidget {
 }
 
 class _RadioDot extends StatelessWidget {
-  const _RadioDot({required this.selected, required this.disabled});
+  const _RadioDot({required this.selected});
 
   final bool selected;
-  final bool disabled;
 
   @override
   Widget build(BuildContext context) {
-    final color = disabled
-        ? AppTheme.foregroundMuted
-        : (selected ? AppTheme.accentPrimary : AppTheme.borderSubtle);
+    final color =
+        selected ? context.colors.accentPrimary : context.colors.borderSubtle;
     return Container(
       width: 14,
       height: 14,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(color: color, width: selected ? 4 : 1.5),
-        color: AppTheme.surfacePrimary,
+        color: context.colors.surfacePrimary,
       ),
     );
   }

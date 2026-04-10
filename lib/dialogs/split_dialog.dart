@@ -105,9 +105,10 @@ class _SplitDialogState extends State<_SplitDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
+      backgroundColor: context.colors.surfacePrimary,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppTheme.roundedXl),
-        side: const BorderSide(color: AppTheme.borderSubtle),
+        side: BorderSide(color: context.colors.borderSubtle),
       ),
       child: SizedBox(
         width: 520,
@@ -115,7 +116,7 @@ class _SplitDialogState extends State<_SplitDialog> {
         child: Column(
           children: [
             _buildHeader(),
-            const Divider(height: 1, color: AppTheme.borderSubtle),
+            Divider(height: 1, color: context.colors.borderSubtle),
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(AppTheme.spacingXl),
@@ -131,7 +132,7 @@ class _SplitDialogState extends State<_SplitDialog> {
                 ),
               ),
             ),
-            const Divider(height: 1, color: AppTheme.borderSubtle),
+            Divider(height: 1, color: context.colors.borderSubtle),
             _buildFooter(),
           ],
         ),
@@ -148,17 +149,17 @@ class _SplitDialogState extends State<_SplitDialog> {
         children: [
           Text(
             s.splitTitle,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w700,
-              color: AppTheme.foregroundPrimary,
+              color: context.colors.foregroundPrimary,
             ),
           ),
           const Spacer(),
           IconButton(
             onPressed: () => Navigator.of(context).pop(),
             icon: const Icon(LucideIcons.x, size: 20),
-            color: AppTheme.foregroundSecondary,
+            color: context.colors.foregroundSecondary,
             tooltip: s.close,
           ),
         ],
@@ -177,18 +178,18 @@ class _SplitDialogState extends State<_SplitDialog> {
           children: [
             Text(
               s.pageSelection,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: AppTheme.foregroundPrimary,
+                color: context.colors.foregroundPrimary,
               ),
             ),
             const Spacer(),
             Text(
               s.totalPages(pdf.pageCount),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12,
-                color: AppTheme.foregroundMuted,
+                color: context.colors.foregroundMuted,
               ),
             ),
           ],
@@ -211,13 +212,13 @@ class _SplitDialogState extends State<_SplitDialog> {
                   ),
                   decoration: BoxDecoration(
                     color: selected
-                        ? AppTheme.accentPrimary
-                        : AppTheme.surfaceSecondary,
+                        ? context.colors.accentPrimary
+                        : context.colors.surfaceSecondary,
                     borderRadius: BorderRadius.circular(AppTheme.roundedMd),
                     border: Border.all(
                       color: selected
-                          ? AppTheme.accentPrimary
-                          : AppTheme.borderSubtle,
+                          ? context.colors.accentPrimary
+                          : context.colors.borderSubtle,
                     ),
                   ),
                   child: Text(
@@ -226,8 +227,8 @@ class _SplitDialogState extends State<_SplitDialog> {
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
                       color: selected
-                          ? AppTheme.surfacePrimary
-                          : AppTheme.foregroundSecondary,
+                          ? context.colors.surfacePrimary
+                          : context.colors.foregroundSecondary,
                     ),
                   ),
                 ),
@@ -241,27 +242,27 @@ class _SplitDialogState extends State<_SplitDialog> {
           enabled: _pageSelection == 2,
           decoration: InputDecoration(
             hintText: s.rangeHint,
-            hintStyle: const TextStyle(
-              color: AppTheme.foregroundMuted,
+            hintStyle: TextStyle(
+              color: context.colors.foregroundMuted,
               fontSize: 13,
             ),
             filled: true,
-            fillColor: AppTheme.surfaceSecondary,
+            fillColor: context.colors.surfaceSecondary,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppTheme.roundedMd),
-              borderSide: const BorderSide(color: AppTheme.borderSubtle),
+              borderSide: BorderSide(color: context.colors.borderSubtle),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppTheme.roundedMd),
-              borderSide: const BorderSide(color: AppTheme.borderSubtle),
+              borderSide: BorderSide(color: context.colors.borderSubtle),
             ),
             disabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppTheme.roundedMd),
-              borderSide: const BorderSide(color: AppTheme.borderSubtle),
+              borderSide: BorderSide(color: context.colors.borderSubtle),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppTheme.roundedMd),
-              borderSide: const BorderSide(color: AppTheme.accentPrimary),
+              borderSide: BorderSide(color: context.colors.accentPrimary),
             ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: AppTheme.spacingMd,
@@ -285,10 +286,10 @@ class _SplitDialogState extends State<_SplitDialog> {
         children: [
           Text(
             s.splitMethod,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: AppTheme.foregroundPrimary,
+              color: context.colors.foregroundPrimary,
             ),
           ),
           const SizedBox(height: AppTheme.spacingSm),
@@ -323,7 +324,7 @@ class _SplitDialogState extends State<_SplitDialog> {
           children: [
             Radio<int>(
               value: value,
-              activeColor: AppTheme.accentPrimary,
+              activeColor: context.colors.accentPrimary,
               visualDensity: VisualDensity.compact,
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
@@ -334,18 +335,18 @@ class _SplitDialogState extends State<_SplitDialog> {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
-                      color: AppTheme.foregroundPrimary,
+                      color: context.colors.foregroundPrimary,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     description,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
-                      color: AppTheme.foregroundMuted,
+                      color: context.colors.foregroundMuted,
                     ),
                   ),
                 ],
@@ -370,37 +371,37 @@ class _SplitDialogState extends State<_SplitDialog> {
       children: [
         Text(
           s.outputFile,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: AppTheme.foregroundPrimary,
+            color: context.colors.foregroundPrimary,
           ),
         ),
         const SizedBox(height: AppTheme.spacingSm),
         Container(
           padding: const EdgeInsets.all(AppTheme.spacingMd),
           decoration: BoxDecoration(
-            color: AppTheme.surfaceSecondary,
+            color: context.colors.surfaceSecondary,
             borderRadius: BorderRadius.circular(AppTheme.roundedMd),
-            border: Border.all(color: AppTheme.borderSubtle),
+            border: Border.all(color: context.colors.borderSubtle),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
-                  const Icon(
+                  Icon(
                     LucideIcons.fileText,
                     size: 18,
-                    color: AppTheme.foregroundSecondary,
+                    color: context.colors.foregroundSecondary,
                   ),
                   const SizedBox(width: AppTheme.spacingSm),
                   Text(
                     outputName,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
-                      color: AppTheme.foregroundPrimary,
+                      color: context.colors.foregroundPrimary,
                     ),
                   ),
                 ],
@@ -408,17 +409,17 @@ class _SplitDialogState extends State<_SplitDialog> {
               const SizedBox(height: AppTheme.spacingSm),
               Row(
                 children: [
-                  const Icon(
+                  Icon(
                     LucideIcons.info,
                     size: 14,
-                    color: AppTheme.foregroundMuted,
+                    color: context.colors.foregroundMuted,
                   ),
                   const SizedBox(width: AppTheme.spacingXs),
                   Text(
                     s.originalUnchanged,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
-                      color: AppTheme.foregroundMuted,
+                      color: context.colors.foregroundMuted,
                     ),
                   ),
                 ],
@@ -445,8 +446,8 @@ class _SplitDialogState extends State<_SplitDialog> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppTheme.roundedMd),
               ),
-              side: const BorderSide(color: AppTheme.borderSubtle),
-              foregroundColor: AppTheme.foregroundSecondary,
+              side: BorderSide(color: context.colors.borderSubtle),
+              foregroundColor: context.colors.foregroundSecondary,
             ),
             child: Text(s.cancel),
           ),
@@ -459,8 +460,8 @@ class _SplitDialogState extends State<_SplitDialog> {
               style: const TextStyle(fontWeight: FontWeight.w600),
             ),
             style: FilledButton.styleFrom(
-              backgroundColor: AppTheme.accentPrimary,
-              foregroundColor: AppTheme.surfacePrimary,
+              backgroundColor: context.colors.accentPrimary,
+              foregroundColor: context.colors.surfacePrimary,
               minimumSize: const Size(120, 40),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppTheme.roundedMd),

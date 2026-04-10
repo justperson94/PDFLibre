@@ -41,9 +41,10 @@ class _SettingsDialogState extends State<_SettingsDialog>
   @override
   Widget build(BuildContext context) {
     return Dialog(
+      backgroundColor: context.colors.surfacePrimary,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppTheme.roundedLg),
-        side: const BorderSide(color: AppTheme.borderSubtle),
+        side: BorderSide(color: context.colors.borderSubtle),
       ),
       child: SizedBox(
         width: 720,
@@ -51,9 +52,9 @@ class _SettingsDialogState extends State<_SettingsDialog>
         child: Column(
           children: [
             _buildHeader(),
-            const Divider(height: 1, color: AppTheme.borderSubtle),
+            Divider(height: 1, color: context.colors.borderSubtle),
             _buildTabBar(),
-            const Divider(height: 1, color: AppTheme.borderSubtle),
+            Divider(height: 1, color: context.colors.borderSubtle),
             Expanded(
               child: TabBarView(
                 controller: _tabs,
@@ -64,7 +65,7 @@ class _SettingsDialogState extends State<_SettingsDialog>
                 ],
               ),
             ),
-            const Divider(height: 1, color: AppTheme.borderSubtle),
+            Divider(height: 1, color: context.colors.borderSubtle),
             _buildFooter(),
           ],
         ),
@@ -82,10 +83,10 @@ class _SettingsDialogState extends State<_SettingsDialog>
           children: [
             Text(
               s.settingsTitle,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 17,
                 fontWeight: FontWeight.w600,
-                color: AppTheme.foregroundPrimary,
+                color: context.colors.foregroundPrimary,
               ),
             ),
             const Spacer(),
@@ -95,15 +96,15 @@ class _SettingsDialogState extends State<_SettingsDialog>
               child: Container(
                 width: 28,
                 height: 28,
-                decoration: const BoxDecoration(
-                  color: AppTheme.surfaceTertiary,
+                decoration: BoxDecoration(
+                  color: context.colors.surfaceTertiary,
                   shape: BoxShape.circle,
                 ),
                 alignment: Alignment.center,
-                child: const Icon(
+                child: Icon(
                   LucideIcons.x,
                   size: 12,
-                  color: AppTheme.foregroundSecondary,
+                  color: context.colors.foregroundSecondary,
                 ),
               ),
             ),
@@ -124,14 +125,14 @@ class _SettingsDialogState extends State<_SettingsDialog>
           horizontal: AppTheme.spacingSm,
         ),
         padding: const EdgeInsets.symmetric(horizontal: AppTheme.spacingXl),
-        labelColor: AppTheme.accentPrimary,
-        unselectedLabelColor: AppTheme.foregroundSecondary,
+        labelColor: context.colors.accentPrimary,
+        unselectedLabelColor: context.colors.foregroundSecondary,
         labelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
         unselectedLabelStyle: const TextStyle(
           fontSize: 13,
           fontWeight: FontWeight.w500,
         ),
-        indicatorColor: AppTheme.accentPrimary,
+        indicatorColor: context.colors.accentPrimary,
         indicatorWeight: 2,
         dividerColor: Colors.transparent,
         tabAlignment: TabAlignment.start,
@@ -156,8 +157,8 @@ class _SettingsDialogState extends State<_SettingsDialog>
             FilledButton(
               onPressed: () => Navigator.of(context).pop(),
               style: FilledButton.styleFrom(
-                backgroundColor: AppTheme.accentPrimary,
-                foregroundColor: AppTheme.surfacePrimary,
+                backgroundColor: context.colors.accentPrimary,
+                foregroundColor: context.colors.surfacePrimary,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 20,
                   vertical: 8,

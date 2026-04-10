@@ -103,15 +103,17 @@ class _PageThumbnailState extends State<PageThumbnail> {
     // Fixed size container (consistent row height regardless of rotation)
     const fixedSize = 64.0;
 
+    final colors = context.colors;
+
     Widget imageWidget = _thumbnail != null
         ? RawImage(image: _thumbnail, fit: BoxFit.contain)
-        : const Center(
+        : Center(
             child: SizedBox(
               width: 16,
               height: 16,
               child: CircularProgressIndicator(
                 strokeWidth: 1.5,
-                color: AppTheme.foregroundMuted,
+                color: colors.foregroundMuted,
               ),
             ),
           );
@@ -130,12 +132,12 @@ class _PageThumbnailState extends State<PageThumbnail> {
         height: fixedSize + AppTheme.spacingSm * 2,
         decoration: BoxDecoration(
           color: widget.selected
-              ? AppTheme.accentPrimary.withValues(alpha: 0.1)
+              ? colors.accentPrimary.withValues(alpha: 0.1)
               : Colors.transparent,
           border: Border(
             left: BorderSide(
               color: widget.selected
-                  ? AppTheme.accentPrimary
+                  ? colors.accentPrimary
                   : Colors.transparent,
               width: 2,
             ),
@@ -151,12 +153,12 @@ class _PageThumbnailState extends State<PageThumbnail> {
             if (widget.dragIndex != null)
               ReorderableDragStartListener(
                 index: widget.dragIndex!,
-                child: const Padding(
-                  padding: EdgeInsets.only(right: AppTheme.spacingXs),
+                child: Padding(
+                  padding: const EdgeInsets.only(right: AppTheme.spacingXs),
                   child: Icon(
                     LucideIcons.gripVertical,
                     size: 14,
-                    color: AppTheme.foregroundMuted,
+                    color: colors.foregroundMuted,
                   ),
                 ),
               ),
@@ -167,12 +169,12 @@ class _PageThumbnailState extends State<PageThumbnail> {
               child: Center(
                 child: Container(
                   decoration: BoxDecoration(
-                    color: AppTheme.surfacePrimary,
+                    color: colors.surfacePrimary,
                     borderRadius: BorderRadius.circular(AppTheme.roundedSm),
                     border: Border.all(
                       color: widget.selected
-                          ? AppTheme.accentPrimary
-                          : AppTheme.borderSubtle,
+                          ? colors.accentPrimary
+                          : colors.borderSubtle,
                       width: widget.selected ? 2 : 1,
                     ),
                   ),
@@ -188,8 +190,8 @@ class _PageThumbnailState extends State<PageThumbnail> {
                 style: TextStyle(
                   fontSize: 13,
                   color: widget.selected
-                      ? AppTheme.accentPrimary
-                      : AppTheme.foregroundSecondary,
+                      ? colors.accentPrimary
+                      : colors.foregroundSecondary,
                   fontWeight: widget.selected
                       ? FontWeight.w600
                       : FontWeight.w500,

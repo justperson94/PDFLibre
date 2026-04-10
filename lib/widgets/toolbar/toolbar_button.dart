@@ -8,14 +8,16 @@ class ToolbarButton extends StatefulWidget {
     required this.icon,
     required this.tooltip,
     this.label,
-    this.iconColor = AppTheme.foregroundSecondary,
+    this.iconColor,
     this.onTap,
   });
 
   final IconData icon;
   final String tooltip;
   final String? label;
-  final Color iconColor;
+
+  /// Icon colour override. Falls back to `context.colors.foregroundSecondary`.
+  final Color? iconColor;
   final VoidCallback? onTap;
 
   @override
@@ -27,10 +29,12 @@ class _ToolbarButtonState extends State<ToolbarButton> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final enabled = widget.onTap != null;
+    final resolvedIconColor = widget.iconColor ?? colors.foregroundSecondary;
     final color = enabled
-        ? widget.iconColor
-        : AppTheme.foregroundMuted.withValues(alpha: 0.65);
+        ? resolvedIconColor
+        : colors.foregroundMuted.withValues(alpha: 0.65);
 
     return Tooltip(
       message: widget.tooltip,
@@ -39,7 +43,7 @@ class _ToolbarButtonState extends State<ToolbarButton> {
         onExit: enabled ? (_) => setState(() => _hovered = false) : null,
         child: Material(
           color: _hovered && enabled
-              ? AppTheme.surfaceTertiary
+              ? colors.surfaceTertiary
               : Colors.transparent,
           borderRadius: BorderRadius.circular(AppTheme.roundedMd),
           child: InkWell(

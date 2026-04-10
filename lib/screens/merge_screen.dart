@@ -168,23 +168,23 @@ class _MergeScreenState extends State<MergeScreen> {
         if (pdfPaths.isNotEmpty) _loadPaths(pdfPaths);
       },
       child: Scaffold(
-        backgroundColor: AppTheme.surfacePrimary,
+        backgroundColor: context.colors.surfacePrimary,
         body: Stack(
           children: [
             Column(
               children: [
                 _buildToolbar(),
-                const Divider(height: 1, color: AppTheme.borderSubtle),
+                Divider(height: 1, color: context.colors.borderSubtle),
                 Expanded(
                   child: _files.isEmpty ? _buildEmptyState() : _buildContent(),
                 ),
-                const Divider(height: 1, color: AppTheme.borderSubtle),
+                Divider(height: 1, color: context.colors.borderSubtle),
                 _buildBottomBar(),
               ],
             ),
             if (_isDragging)
               Container(
-                color: AppTheme.accentPrimary.withValues(alpha: 0.1),
+                color: context.colors.accentPrimary.withValues(alpha: 0.1),
                 child: Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -192,7 +192,7 @@ class _MergeScreenState extends State<MergeScreen> {
                       Icon(
                         LucideIcons.filePlus,
                         size: 48,
-                        color: AppTheme.accentPrimary.withValues(alpha: 0.7),
+                        color: context.colors.accentPrimary.withValues(alpha: 0.7),
                       ),
                       const SizedBox(height: AppTheme.spacingMd),
                       Text(
@@ -200,7 +200,7 @@ class _MergeScreenState extends State<MergeScreen> {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: AppTheme.accentPrimary.withValues(alpha: 0.7),
+                          color: context.colors.accentPrimary.withValues(alpha: 0.7),
                         ),
                       ),
                     ],
@@ -219,26 +219,26 @@ class _MergeScreenState extends State<MergeScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(
+          Icon(
             LucideIcons.combine,
             size: 48,
-            color: AppTheme.foregroundMuted,
+            color: context.colors.foregroundMuted,
           ),
           const SizedBox(height: AppTheme.spacingLg),
           Text(
             s.addFilesPrompt,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: AppTheme.foregroundSecondary,
+              color: context.colors.foregroundSecondary,
             ),
           ),
           const SizedBox(height: AppTheme.spacingSm),
           Text(
             s.addFilesHint,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
-              color: AppTheme.foregroundMuted,
+              color: context.colors.foregroundMuted,
             ),
           ),
           const SizedBox(height: AppTheme.spacingXl),
@@ -247,8 +247,8 @@ class _MergeScreenState extends State<MergeScreen> {
             icon: const Icon(LucideIcons.plus, size: 16),
             label: Text(s.addFiles),
             style: FilledButton.styleFrom(
-              backgroundColor: AppTheme.accentPrimary,
-              foregroundColor: AppTheme.surfacePrimary,
+              backgroundColor: context.colors.accentPrimary,
+              foregroundColor: context.colors.surfacePrimary,
               minimumSize: const Size(120, 40),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppTheme.roundedMd),
@@ -264,7 +264,7 @@ class _MergeScreenState extends State<MergeScreen> {
     return Row(
       children: [
         _buildFileSidebar(),
-        Container(width: 1, color: AppTheme.borderSubtle),
+        Container(width: 1, color: context.colors.borderSubtle),
         Expanded(
           child: _activeFileIndex >= 0 && _activeFileIndex < _files.length
               ? _buildThumbnailGrid(_files[_activeFileIndex])
@@ -279,10 +279,10 @@ class _MergeScreenState extends State<MergeScreen> {
     return Container(
       height: 48,
       padding: const EdgeInsets.symmetric(horizontal: AppTheme.spacingLg),
-      decoration: const BoxDecoration(
-        color: AppTheme.toolbarBg,
+      decoration: BoxDecoration(
+        color: context.colors.toolbarBg,
         border: Border(
-          bottom: BorderSide(color: AppTheme.borderSubtle, width: 1),
+          bottom: BorderSide(color: context.colors.borderSubtle, width: 1),
         ),
       ),
       child: Row(
@@ -295,21 +295,21 @@ class _MergeScreenState extends State<MergeScreen> {
               style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
             ),
             style: TextButton.styleFrom(
-              foregroundColor: AppTheme.foregroundSecondary,
+              foregroundColor: context.colors.foregroundSecondary,
               padding: const EdgeInsets.symmetric(
                 horizontal: AppTheme.spacingSm,
               ),
             ),
           ),
           const SizedBox(width: AppTheme.spacingMd),
-          Container(width: 1, height: 24, color: AppTheme.borderSubtle),
+          Container(width: 1, height: 24, color: context.colors.borderSubtle),
           const SizedBox(width: AppTheme.spacingMd),
           Text(
             s.mergePdf,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w700,
-              color: AppTheme.foregroundPrimary,
+              color: context.colors.foregroundPrimary,
             ),
           ),
           const Spacer(),
@@ -321,8 +321,8 @@ class _MergeScreenState extends State<MergeScreen> {
               style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
             ),
             style: FilledButton.styleFrom(
-              backgroundColor: AppTheme.accentPrimary,
-              foregroundColor: AppTheme.surfacePrimary,
+              backgroundColor: context.colors.accentPrimary,
+              foregroundColor: context.colors.surfacePrimary,
               minimumSize: const Size(100, 36),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppTheme.roundedMd),
@@ -338,7 +338,7 @@ class _MergeScreenState extends State<MergeScreen> {
     final s = context.s;
     return Container(
       width: 280,
-      color: AppTheme.sidebarBg,
+      color: context.colors.sidebarBg,
       child: Column(
         children: [
           Container(
@@ -346,9 +346,9 @@ class _MergeScreenState extends State<MergeScreen> {
               horizontal: AppTheme.spacingLg,
               vertical: AppTheme.spacingMd,
             ),
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               border: Border(
-                bottom: BorderSide(color: AppTheme.borderSubtle, width: 1),
+                bottom: BorderSide(color: context.colors.borderSubtle, width: 1),
               ),
             ),
             child: Row(
@@ -356,17 +356,17 @@ class _MergeScreenState extends State<MergeScreen> {
               children: [
                 Text(
                   s.fileList,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: AppTheme.foregroundPrimary,
+                    color: context.colors.foregroundPrimary,
                   ),
                 ),
                 Text(
                   s.fileCount(_files.length),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
-                    color: AppTheme.foregroundMuted,
+                    color: context.colors.foregroundMuted,
                   ),
                 ),
               ],
@@ -407,13 +407,13 @@ class _MergeScreenState extends State<MergeScreen> {
                       ),
                       decoration: BoxDecoration(
                         color: active
-                            ? AppTheme.accentPrimary
+                            ? context.colors.accentPrimary
                             : Colors.transparent,
                         border: active
                             ? null
-                            : const Border(
+                            : Border(
                                 bottom: BorderSide(
-                                  color: AppTheme.borderSubtle,
+                                  color: context.colors.borderSubtle,
                                   width: 1,
                                 ),
                               ),
@@ -425,16 +425,16 @@ class _MergeScreenState extends State<MergeScreen> {
                             width: 36,
                             height: 48,
                             decoration: BoxDecoration(
-                              color: AppTheme.surfacePrimary,
+                              color: context.colors.surfacePrimary,
                               borderRadius: BorderRadius.circular(
                                 AppTheme.roundedSm,
                               ),
                               border: Border.all(
                                 color: active
-                                    ? AppTheme.surfacePrimary.withValues(
+                                    ? context.colors.surfacePrimary.withValues(
                                         alpha: 0.5,
                                       )
-                                    : AppTheme.borderSubtle,
+                                    : context.colors.borderSubtle,
                               ),
                             ),
                             clipBehavior: Clip.antiAlias,
@@ -453,8 +453,8 @@ class _MergeScreenState extends State<MergeScreen> {
                                     fontSize: 14,
                                     fontWeight: FontWeight.w500,
                                     color: active
-                                        ? AppTheme.surfacePrimary
-                                        : AppTheme.foregroundPrimary,
+                                        ? context.colors.surfacePrimary
+                                        : context.colors.foregroundPrimary,
                                   ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -467,10 +467,10 @@ class _MergeScreenState extends State<MergeScreen> {
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: active
-                                        ? AppTheme.surfacePrimary.withValues(
+                                        ? context.colors.surfacePrimary.withValues(
                                             alpha: 0.7,
                                           )
-                                        : AppTheme.foregroundMuted,
+                                        : context.colors.foregroundMuted,
                                   ),
                                 ),
                               ],
@@ -483,10 +483,10 @@ class _MergeScreenState extends State<MergeScreen> {
                               LucideIcons.x,
                               size: 16,
                               color: active
-                                  ? AppTheme.surfacePrimary.withValues(
+                                  ? context.colors.surfacePrimary.withValues(
                                       alpha: 0.7,
                                     )
-                                  : AppTheme.foregroundMuted,
+                                  : context.colors.foregroundMuted,
                             ),
                             iconSize: 16,
                             constraints: const BoxConstraints(
@@ -520,19 +520,19 @@ class _MergeScreenState extends State<MergeScreen> {
             horizontal: AppTheme.spacingXl,
             vertical: AppTheme.spacingMd,
           ),
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             border: Border(
-              bottom: BorderSide(color: AppTheme.borderSubtle, width: 1),
+              bottom: BorderSide(color: context.colors.borderSubtle, width: 1),
             ),
           ),
           child: Row(
             children: [
               Text(
                 s.filePageSelection(file.name),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: AppTheme.foregroundPrimary,
+                  color: context.colors.foregroundPrimary,
                 ),
               ),
               const Spacer(),
@@ -555,14 +555,14 @@ class _MergeScreenState extends State<MergeScreen> {
                     }
                   });
                 },
-                activeColor: AppTheme.accentPrimary,
+                activeColor: context.colors.accentPrimary,
                 visualDensity: VisualDensity.compact,
               ),
               Text(
                 s.selectAll,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13,
-                  color: AppTheme.foregroundSecondary,
+                  color: context.colors.foregroundSecondary,
                 ),
               ),
             ],
@@ -595,14 +595,14 @@ class _MergeScreenState extends State<MergeScreen> {
                     Expanded(
                       child: Container(
                         decoration: BoxDecoration(
-                          color: AppTheme.surfacePrimary,
+                          color: context.colors.surfacePrimary,
                           borderRadius: BorderRadius.circular(
                             AppTheme.roundedSm,
                           ),
                           border: Border.all(
                             color: selected
-                                ? AppTheme.accentPrimary
-                                : AppTheme.borderSubtle,
+                                ? context.colors.accentPrimary
+                                : context.colors.borderSubtle,
                             width: selected ? 2 : 1,
                           ),
                         ),
@@ -633,7 +633,7 @@ class _MergeScreenState extends State<MergeScreen> {
                                       }
                                     });
                                   },
-                                  activeColor: AppTheme.accentPrimary,
+                                  activeColor: context.colors.accentPrimary,
                                   visualDensity: VisualDensity.compact,
                                   materialTapTargetSize:
                                       MaterialTapTargetSize.shrinkWrap,
@@ -647,9 +647,9 @@ class _MergeScreenState extends State<MergeScreen> {
                     const SizedBox(height: AppTheme.spacingXs),
                     Text(
                       '${index + 1}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
-                        color: AppTheme.foregroundMuted,
+                        color: context.colors.foregroundMuted,
                       ),
                     ),
                   ],
@@ -671,34 +671,34 @@ class _MergeScreenState extends State<MergeScreen> {
     return Container(
       height: 56,
       padding: const EdgeInsets.symmetric(horizontal: AppTheme.spacingXl),
-      decoration: const BoxDecoration(
-        color: AppTheme.toolbarBg,
-        border: Border(top: BorderSide(color: AppTheme.borderSubtle, width: 1)),
+      decoration: BoxDecoration(
+        color: context.colors.toolbarBg,
+        border: Border(top: BorderSide(color: context.colors.borderSubtle, width: 1)),
       ),
       child: Row(
         children: [
           Text(
             s.selectedPages(_totalSelectedPages, totalPages),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: AppTheme.foregroundSecondary,
+              color: context.colors.foregroundSecondary,
             ),
           ),
           const SizedBox(width: AppTheme.spacingXl),
           Row(
             children: [
-              const Icon(
+              Icon(
                 LucideIcons.info,
                 size: 14,
-                color: AppTheme.foregroundMuted,
+                color: context.colors.foregroundMuted,
               ),
               const SizedBox(width: AppTheme.spacingXs),
               Text(
                 s.originalUnchanged,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
-                  color: AppTheme.foregroundMuted,
+                  color: context.colors.foregroundMuted,
                 ),
               ),
             ],
@@ -712,8 +712,8 @@ class _MergeScreenState extends State<MergeScreen> {
               style: const TextStyle(fontWeight: FontWeight.w600),
             ),
             style: FilledButton.styleFrom(
-              backgroundColor: AppTheme.accentPrimary,
-              foregroundColor: AppTheme.surfacePrimary,
+              backgroundColor: context.colors.accentPrimary,
+              foregroundColor: context.colors.surfacePrimary,
               minimumSize: const Size(120, 40),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppTheme.roundedMd),
@@ -798,13 +798,13 @@ class _PageGridThumbnailState extends State<_PageGridThumbnail> {
     if (_image != null) {
       return RawImage(image: _image, fit: BoxFit.contain);
     }
-    return const Center(
+    return Center(
       child: SizedBox(
         width: 16,
         height: 16,
         child: CircularProgressIndicator(
           strokeWidth: 1.5,
-          color: AppTheme.foregroundMuted,
+          color: context.colors.foregroundMuted,
         ),
       ),
     );

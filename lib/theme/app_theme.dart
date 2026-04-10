@@ -1,36 +1,143 @@
 import 'package:flutter/material.dart';
 
+/// Semantic color tokens that adapt to light / dark mode.
+///
+/// Registered as a [ThemeExtension] on both light and dark [ThemeData].
+/// Access via `context.colors` (see [AppColorsExt]).
+class AppColors extends ThemeExtension<AppColors> {
+  const AppColors({
+    required this.brandBlue,
+    required this.accentPrimary,
+    required this.accentHover,
+    required this.surfacePrimary,
+    required this.surfaceSecondary,
+    required this.surfaceTertiary,
+    required this.foregroundPrimary,
+    required this.foregroundSecondary,
+    required this.foregroundMuted,
+    required this.borderSubtle,
+    required this.toolbarBg,
+    required this.sidebarBg,
+    required this.danger,
+  });
+
+  final Color brandBlue;
+  final Color accentPrimary;
+  final Color accentHover;
+  final Color surfacePrimary;
+  final Color surfaceSecondary;
+  final Color surfaceTertiary;
+  final Color foregroundPrimary;
+  final Color foregroundSecondary;
+  final Color foregroundMuted;
+  final Color borderSubtle;
+  final Color toolbarBg;
+  final Color sidebarBg;
+  final Color danger;
+
+  // ── Light palette ──────────────────────────────────────────────
+  static const light = AppColors(
+    brandBlue: Color(0xFF5A7EB5),
+    accentPrimary: Color(0xFFEE6B5B),
+    accentHover: Color(0xFFD95A4A),
+    surfacePrimary: Color(0xFFFFFFFF),
+    surfaceSecondary: Color(0xFFFAF9F8),
+    surfaceTertiary: Color(0xFFF0EDEB),
+    foregroundPrimary: Color(0xFF2D2D2D),
+    foregroundSecondary: Color(0xFF5A5A5A),
+    foregroundMuted: Color(0xFF8A8A8A),
+    borderSubtle: Color(0xFFE5E2DF),
+    toolbarBg: Color(0xFFFCFBFA),
+    sidebarBg: Color(0xFFF5F3F1),
+    danger: Color(0xFFD94040),
+  );
+
+  // ── Dark palette ───────────────────────────────────────────────
+  static const dark = AppColors(
+    brandBlue: Color(0xFF7BA3D4),
+    accentPrimary: Color(0xFFEE6B5B),
+    accentHover: Color(0xFFF07D6F),
+    surfacePrimary: Color(0xFF1A1A1A),
+    surfaceSecondary: Color(0xFF222222),
+    surfaceTertiary: Color(0xFF2E2E2E),
+    foregroundPrimary: Color(0xFFE8E8E8),
+    foregroundSecondary: Color(0xFFA0A0A0),
+    foregroundMuted: Color(0xFF6A6A6A),
+    borderSubtle: Color(0xFF3A3A3A),
+    toolbarBg: Color(0xFF1E1E1E),
+    sidebarBg: Color(0xFF242424),
+    danger: Color(0xFFE05050),
+  );
+
+  @override
+  AppColors copyWith({
+    Color? brandBlue,
+    Color? accentPrimary,
+    Color? accentHover,
+    Color? surfacePrimary,
+    Color? surfaceSecondary,
+    Color? surfaceTertiary,
+    Color? foregroundPrimary,
+    Color? foregroundSecondary,
+    Color? foregroundMuted,
+    Color? borderSubtle,
+    Color? toolbarBg,
+    Color? sidebarBg,
+    Color? danger,
+  }) {
+    return AppColors(
+      brandBlue: brandBlue ?? this.brandBlue,
+      accentPrimary: accentPrimary ?? this.accentPrimary,
+      accentHover: accentHover ?? this.accentHover,
+      surfacePrimary: surfacePrimary ?? this.surfacePrimary,
+      surfaceSecondary: surfaceSecondary ?? this.surfaceSecondary,
+      surfaceTertiary: surfaceTertiary ?? this.surfaceTertiary,
+      foregroundPrimary: foregroundPrimary ?? this.foregroundPrimary,
+      foregroundSecondary: foregroundSecondary ?? this.foregroundSecondary,
+      foregroundMuted: foregroundMuted ?? this.foregroundMuted,
+      borderSubtle: borderSubtle ?? this.borderSubtle,
+      toolbarBg: toolbarBg ?? this.toolbarBg,
+      sidebarBg: sidebarBg ?? this.sidebarBg,
+      danger: danger ?? this.danger,
+    );
+  }
+
+  @override
+  AppColors lerp(AppColors? other, double t) {
+    if (other is! AppColors) return this;
+    return AppColors(
+      brandBlue: Color.lerp(brandBlue, other.brandBlue, t)!,
+      accentPrimary: Color.lerp(accentPrimary, other.accentPrimary, t)!,
+      accentHover: Color.lerp(accentHover, other.accentHover, t)!,
+      surfacePrimary: Color.lerp(surfacePrimary, other.surfacePrimary, t)!,
+      surfaceSecondary:
+          Color.lerp(surfaceSecondary, other.surfaceSecondary, t)!,
+      surfaceTertiary: Color.lerp(surfaceTertiary, other.surfaceTertiary, t)!,
+      foregroundPrimary:
+          Color.lerp(foregroundPrimary, other.foregroundPrimary, t)!,
+      foregroundSecondary:
+          Color.lerp(foregroundSecondary, other.foregroundSecondary, t)!,
+      foregroundMuted: Color.lerp(foregroundMuted, other.foregroundMuted, t)!,
+      borderSubtle: Color.lerp(borderSubtle, other.borderSubtle, t)!,
+      toolbarBg: Color.lerp(toolbarBg, other.toolbarBg, t)!,
+      sidebarBg: Color.lerp(sidebarBg, other.sidebarBg, t)!,
+      danger: Color.lerp(danger, other.danger, t)!,
+    );
+  }
+}
+
+/// Convenience accessor: `context.colors.accentPrimary` etc.
+extension AppColorsExt on BuildContext {
+  AppColors get colors => Theme.of(this).extension<AppColors>()!;
+}
+
+/// Non-color design tokens (spacing, rounding) — theme-independent.
 class AppTheme {
-  // === Brand ===
-  static const brandBlue = Color(0xFF5A7EB5); // Logo "PDF" text color
-
-  // === Accent ===
-  static const accentPrimary = Color(0xFFEE6B5B); // Coral - CTA, active state
-  static const accentHover = Color(0xFFD95A4A); // Hover/press state
-
-  // === Surface ===
-  static const surfacePrimary = Color(0xFFFFFFFF); // Main background
-  static const surfaceSecondary = Color(
-    0xFFFAF9F8,
-  ); // Secondary background (input fields, etc.)
-  static const surfaceTertiary = Color(0xFFF0EDEB); // Disabled elements
-
-  // === Foreground (text) ===
-  static const foregroundPrimary = Color(0xFF2D2D2D); // Title, body
-  static const foregroundSecondary = Color(0xFF5A5A5A); // Secondary text
-  static const foregroundMuted = Color(0xFF8A8A8A); // Hint, disabled
-
-  // === Functional ===
-  static const borderSubtle = Color(0xFFE5E2DF); // Border
-  static const toolbarBg = Color(0xFFFCFBFA); // Toolbar background
-  static const sidebarBg = Color(0xFFF5F3F1); // Sidebar background
-  static const danger = Color(0xFFD94040); // Error, danger
-
   // === Rounding ===
-  static const roundedSm = 4.0; // Checkbox, tag
-  static const roundedMd = 6.0; // Button, input field
-  static const roundedLg = 8.0; // Card
-  static const roundedXl = 12.0; // Dialog
+  static const roundedSm = 4.0;
+  static const roundedMd = 6.0;
+  static const roundedLg = 8.0;
+  static const roundedXl = 12.0;
 
   // === Spacing ===
   static const spacingXs = 4.0;

@@ -60,16 +60,16 @@ class _DefaultsSectionState extends State<DefaultsSection> {
       children: [
         Text(
           s.saveLocation,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: AppTheme.foregroundPrimary,
+            color: context.colors.foregroundPrimary,
           ),
         ),
         const SizedBox(height: AppTheme.spacingXs),
         Text(
           s.saveLocationDesc,
-          style: const TextStyle(fontSize: 11, color: AppTheme.foregroundMuted),
+          style: TextStyle(fontSize: 11, color: context.colors.foregroundMuted),
         ),
         const SizedBox(height: AppTheme.spacingSm),
         _SaveModeOption(
@@ -105,16 +105,16 @@ class _DefaultsSectionState extends State<DefaultsSection> {
       children: [
         Text(
           s.filenameRules,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: AppTheme.foregroundPrimary,
+            color: context.colors.foregroundPrimary,
           ),
         ),
         const SizedBox(height: AppTheme.spacingXs),
         Text(
           s.filenameRulesDesc,
-          style: const TextStyle(fontSize: 11, color: AppTheme.foregroundMuted),
+          style: TextStyle(fontSize: 11, color: context.colors.foregroundMuted),
         ),
         const SizedBox(height: AppTheme.spacingSm),
         _FilenameRuleRow(
@@ -164,9 +164,13 @@ class _SaveModeOption extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: selected ? AppTheme.surfaceSecondary : AppTheme.surfacePrimary,
+          color: selected
+              ? context.colors.surfaceSecondary
+              : context.colors.surfacePrimary,
           border: Border.all(
-            color: selected ? AppTheme.accentPrimary : AppTheme.borderSubtle,
+            color: selected
+                ? context.colors.accentPrimary
+                : context.colors.borderSubtle,
             width: selected ? 1.5 : 1,
           ),
           borderRadius: BorderRadius.circular(AppTheme.roundedMd),
@@ -180,11 +184,11 @@ class _SaveModeOption extends StatelessWidget {
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: selected
-                      ? AppTheme.accentPrimary
-                      : AppTheme.borderSubtle,
+                      ? context.colors.accentPrimary
+                      : context.colors.borderSubtle,
                   width: selected ? 4 : 1.5,
                 ),
-                color: AppTheme.surfacePrimary,
+                color: context.colors.surfacePrimary,
               ),
             ),
             const SizedBox(width: AppTheme.spacingSm),
@@ -195,8 +199,8 @@ class _SaveModeOption extends StatelessWidget {
                   fontSize: 13,
                   fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
                   color: selected
-                      ? AppTheme.foregroundPrimary
-                      : AppTheme.foregroundSecondary,
+                      ? context.colors.foregroundPrimary
+                      : context.colors.foregroundSecondary,
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
@@ -232,16 +236,16 @@ class _FolderPickButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: AppTheme.surfaceTertiary,
+          color: context.colors.surfaceTertiary,
           borderRadius: BorderRadius.circular(AppTheme.roundedSm),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
+            Icon(
               LucideIcons.folder,
               size: 12,
-              color: AppTheme.foregroundMuted,
+              color: context.colors.foregroundMuted,
             ),
             const SizedBox(width: 6),
             ConstrainedBox(
@@ -250,10 +254,10 @@ class _FolderPickButton extends StatelessWidget {
                 message: hasFolder ? folderPath : pickFolderLabel,
                 child: Text(
                   displayName,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w500,
-                    color: AppTheme.foregroundSecondary,
+                    color: context.colors.foregroundSecondary,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -319,10 +323,10 @@ class _FilenameRuleRowState extends State<_FilenameRuleRow> {
       children: [
         Text(
           widget.label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w500,
-            color: AppTheme.foregroundSecondary,
+            color: context.colors.foregroundSecondary,
           ),
         ),
         const SizedBox(height: AppTheme.spacingXs),
@@ -333,15 +337,15 @@ class _FilenameRuleRowState extends State<_FilenameRuleRow> {
                 height: 28,
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 decoration: BoxDecoration(
-                  color: AppTheme.surfacePrimary,
-                  border: Border.all(color: AppTheme.borderSubtle),
+                  color: context.colors.surfacePrimary,
+                  border: Border.all(color: context.colors.borderSubtle),
                   borderRadius: BorderRadius.circular(AppTheme.roundedSm),
                 ),
                 child: TextField(
                   controller: widget.controller,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
-                    color: AppTheme.foregroundPrimary,
+                    color: context.colors.foregroundPrimary,
                   ),
                   decoration: const InputDecoration(
                     border: InputBorder.none,
@@ -356,10 +360,10 @@ class _FilenameRuleRowState extends State<_FilenameRuleRow> {
               width: 160,
               child: Text(
                 _preview(),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 11,
                   fontStyle: FontStyle.italic,
-                  color: AppTheme.foregroundMuted,
+                  color: context.colors.foregroundMuted,
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
