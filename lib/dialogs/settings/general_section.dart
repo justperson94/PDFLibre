@@ -157,7 +157,8 @@ class _ThemeOption extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppTheme.roundedMd),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        height: 36,
+        padding: const EdgeInsets.symmetric(horizontal: 14),
         decoration: BoxDecoration(
           color: selected
               ? context.colors.surfaceSecondary

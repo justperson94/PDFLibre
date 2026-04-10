@@ -162,7 +162,8 @@ class _SaveModeOption extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppTheme.roundedMd),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        height: 36,
+        padding: const EdgeInsets.symmetric(horizontal: 14),
         decoration: BoxDecoration(
           color: selected
               ? context.colors.surfaceSecondary
@@ -334,7 +335,8 @@ class _FilenameRuleRowState extends State<_FilenameRuleRow> {
           children: [
             Expanded(
               child: Container(
-                height: 28,
+                height: 32,
+                alignment: Alignment.center,
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 decoration: BoxDecoration(
                   color: context.colors.surfacePrimary,
@@ -347,10 +349,11 @@ class _FilenameRuleRowState extends State<_FilenameRuleRow> {
                     fontSize: 12,
                     color: context.colors.foregroundPrimary,
                   ),
+                  textAlignVertical: TextAlignVertical.center,
                   decoration: const InputDecoration(
                     border: InputBorder.none,
                     isDense: true,
-                    contentPadding: EdgeInsets.zero,
+                    contentPadding: EdgeInsets.symmetric(vertical: 8),
                   ),
                 ),
               ),
