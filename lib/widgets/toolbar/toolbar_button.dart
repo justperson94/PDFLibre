@@ -28,7 +28,9 @@ class _ToolbarButtonState extends State<ToolbarButton> {
   @override
   Widget build(BuildContext context) {
     final enabled = widget.onTap != null;
-    final color = enabled ? widget.iconColor : AppTheme.foregroundMuted.withValues(alpha: 0.65);
+    final color = enabled
+        ? widget.iconColor
+        : AppTheme.foregroundMuted.withValues(alpha: 0.65);
 
     return Tooltip(
       message: widget.tooltip,
@@ -36,7 +38,9 @@ class _ToolbarButtonState extends State<ToolbarButton> {
         onEnter: enabled ? (_) => setState(() => _hovered = true) : null,
         onExit: enabled ? (_) => setState(() => _hovered = false) : null,
         child: Material(
-          color: _hovered && enabled ? AppTheme.surfaceTertiary : Colors.transparent,
+          color: _hovered && enabled
+              ? AppTheme.surfaceTertiary
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(AppTheme.roundedMd),
           child: InkWell(
             borderRadius: BorderRadius.circular(AppTheme.roundedMd),

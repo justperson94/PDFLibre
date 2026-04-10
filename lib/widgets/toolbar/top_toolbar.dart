@@ -25,6 +25,7 @@ class TopToolbar extends StatelessWidget {
     this.onSplit,
     this.onMerge,
     this.onConvert,
+    this.onSettings,
   });
 
   final VoidCallback? onOpenFile;
@@ -39,6 +40,7 @@ class TopToolbar extends StatelessWidget {
   final VoidCallback? onSplit;
   final VoidCallback? onMerge;
   final VoidCallback? onConvert;
+  final VoidCallback? onSettings;
 
   @override
   Widget build(BuildContext context) {
@@ -76,11 +78,7 @@ class TopToolbar extends StatelessWidget {
             onTap: onSave,
           ),
           const SizedBox(width: AppTheme.spacingXs),
-          ToolbarButton(
-            icon: LucideIcons.x,
-            tooltip: '문서 닫기',
-            onTap: onClose,
-          ),
+          ToolbarButton(icon: LucideIcons.x, tooltip: '문서 닫기', onTap: onClose),
 
           const Spacer(),
 
@@ -135,6 +133,13 @@ class TopToolbar extends StatelessWidget {
           ),
 
           const Spacer(),
+
+          // Right: Settings gear
+          ToolbarButton(
+            icon: LucideIcons.settings,
+            tooltip: '설정 (${_shortcutPrefix()}+,)',
+            onTap: onSettings,
+          ),
         ],
       ),
     );

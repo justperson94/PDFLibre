@@ -9,10 +9,12 @@ import 'package:provider/provider.dart';
 import '../dialogs/convert_dialog.dart';
 import '../dialogs/error_dialog.dart';
 import '../dialogs/progress_dialog.dart';
+import '../dialogs/settings_dialog.dart';
 import '../dialogs/split_dialog.dart';
 import '../models/edit_command.dart';
 import '../providers/history_provider.dart';
 import '../providers/pdf_provider.dart';
+import '../providers/settings_provider.dart';
 import '../services/file_service.dart';
 import '../services/pdf_service.dart';
 import '../services/recent_files_service.dart';
@@ -77,10 +79,19 @@ class _MainScreenState extends State<MainScreen> {
     final pdf = context.read<PdfProvider>();
     if (pdf.pdfBytes == null) return;
 
+    final settings = context.read<SettingsProvider>();
     final baseName = _stripPdfExtension(pdf.fileName);
+    final defaultName = SettingsProvider.applyFilenameRule(
+      settings.filenameRuleSave,
+      originalBase: baseName,
+    );
     final path = await FileService.pickSaveFile(
-      defaultName: '${baseName}_편집.pdf',
+      defaultName: '$defaultName.pdf',
       extension: 'pdf',
+      initialDirectoryOverride:
+          settings.saveMode == SaveLocationMode.fixedFolder
+          ? settings.saveFolder
+          : null,
     );
     if (path == null || !mounted) return;
 
@@ -88,16 +99,16 @@ class _MainScreenState extends State<MainScreen> {
       await File(path).writeAsBytes(pdf.pdfBytes!);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('저장 실패: 파일을 쓸 수 없습니다 ($e)')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('저장 실패: 파일을 쓸 수 없습니다 ($e)')));
       return;
     }
 
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('PDF 저장이 완료되었습니다')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('PDF 저장이 완료되었습니다')));
   }
 
   void _rotateCurrentPage({required bool clockwise}) {
@@ -125,9 +136,7 @@ class _MainScreenState extends State<MainScreen> {
             ),
             FilledButton(
               onPressed: () => Navigator.pop(ctx, true),
-              style: FilledButton.styleFrom(
-                backgroundColor: AppTheme.danger,
-              ),
+              style: FilledButton.styleFrom(backgroundColor: AppTheme.danger),
               child: const Text('닫기'),
             ),
           ],
@@ -154,6 +163,10 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
+  void _openSettings() {
+    showSettingsDialog(context);
+  }
+
   Future<void> _onConvert() async {
     final result = await showConvertDialog(context);
     if (result == null || !mounted) return;
@@ -161,6 +174,8 @@ class _MainScreenState extends State<MainScreen> {
     final pdf = context.read<PdfProvider>();
     if (pdf.document == null) return;
 
+    final settings = context.read<SettingsProvider>();
+    final baseName = _stripPdfExtension(pdf.fileName);
     final success = await runWithProgressDialog(
       context: context,
       title: '이미지로 변환 중...',
@@ -172,6 +187,11 @@ class _MainScreenState extends State<MainScreen> {
         format: result.format,
         dpi: result.dpi.toDouble(),
         quality: result.quality,
+        fileNameBuilder: (pageNumber) => SettingsProvider.applyFilenameRule(
+          settings.filenameRuleConvert,
+          originalBase: baseName,
+          pageNumber: pageNumber,
+        ),
         onProgress: onProgress,
         cancelToken: cancelToken,
       ),
@@ -181,8 +201,7 @@ class _MainScreenState extends State<MainScreen> {
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-              '${result.pageIndices.length}개 페이지를 이미지로 변환했습니다'),
+          content: Text('${result.pageIndices.length}개 페이지를 이미지로 변환했습니다'),
         ),
       );
     }
@@ -195,7 +214,11 @@ class _MainScreenState extends State<MainScreen> {
     final pdf = context.read<PdfProvider>();
     if (pdf.document == null) return;
 
+    final settings = context.read<SettingsProvider>();
     final baseName = _stripPdfExtension(pdf.fileName);
+    final fixedDir = settings.saveMode == SaveLocationMode.fixedFolder
+        ? settings.saveFolder
+        : null;
 
     if (result.splitIndividual) {
       final dir = await FileService.pickSaveDirectory();
@@ -208,11 +231,17 @@ class _MainScreenState extends State<MainScreen> {
           for (var i = 0; i < result.pageIndices.length; i++) {
             if (cancelToken.isCancelled) return;
             onProgress(i + 1, result.pageIndices.length);
+            final pageNum = result.pageIndices[i] + 1;
+            final fileName = SettingsProvider.applyFilenameRule(
+              settings.filenameRuleSplit,
+              originalBase: baseName,
+              pageNumber: pageNum,
+            );
             await PdfService.splitToFile(
               source: pdf.document!,
               pageIndices: [result.pageIndices[i]],
               rotations: pdf.rotations,
-              outputPath: '$dir/${baseName}_${result.pageIndices[i] + 1}.pdf',
+              outputPath: '$dir/$fileName.pdf',
             );
           }
         },
@@ -221,16 +250,22 @@ class _MainScreenState extends State<MainScreen> {
       if (!mounted) return;
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-                '${result.pageIndices.length}개 PDF로 분할했습니다'),
-          ),
+          SnackBar(content: Text('${result.pageIndices.length}개 PDF로 분할했습니다')),
         );
       }
     } else {
+      // Single combined PDF: rule uses first selected page number.
+      final firstPage =
+          (result.pageIndices.isNotEmpty ? result.pageIndices.first : 0) + 1;
+      final defaultName = SettingsProvider.applyFilenameRule(
+        settings.filenameRuleSplit,
+        originalBase: baseName,
+        pageNumber: firstPage,
+      );
       final path = await FileService.pickSaveFile(
-        defaultName: '${baseName}_분할.pdf',
+        defaultName: '$defaultName.pdf',
         extension: 'pdf',
+        initialDirectoryOverride: fixedDir,
       );
       if (path == null || !mounted) return;
 
@@ -251,9 +286,9 @@ class _MainScreenState extends State<MainScreen> {
 
       if (!mounted) return;
       if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('PDF 분할이 완료되었습니다')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('PDF 분할이 완료되었습니다')));
       }
     }
   }
@@ -270,8 +305,9 @@ class _MainScreenState extends State<MainScreen> {
   void _fitWidth() {
     if (!_viewerController.isReady) return;
     final page = _viewerController.pageNumber ?? 1;
-    final matrix =
-        _viewerController.calcMatrixFitWidthForPage(pageNumber: page);
+    final matrix = _viewerController.calcMatrixFitWidthForPage(
+      pageNumber: page,
+    );
     if (matrix != null) {
       _viewerController.goTo(matrix);
     }
@@ -279,18 +315,16 @@ class _MainScreenState extends State<MainScreen> {
 
   void _actualSize() {
     if (_viewerController.isReady) {
-      _viewerController.setZoom(
-        _viewerController.centerPosition,
-        1.0,
-      );
+      _viewerController.setZoom(_viewerController.centerPosition, 1.0);
     }
   }
 
   void _fitHeight() {
     if (!_viewerController.isReady) return;
     final page = _viewerController.pageNumber ?? 1;
-    final matrix =
-        _viewerController.calcMatrixFitHeightForPage(pageNumber: page);
+    final matrix = _viewerController.calcMatrixFitHeightForPage(
+      pageNumber: page,
+    );
     if (matrix != null) {
       _viewerController.goTo(matrix);
     }
@@ -320,153 +354,180 @@ class _MainScreenState extends State<MainScreen> {
             const _CloseIntent(),
         SingleActivator(LogicalKeyboardKey.keyW, control: true):
             const _CloseIntent(),
+        SingleActivator(LogicalKeyboardKey.comma, meta: true):
+            const _SettingsIntent(),
+        SingleActivator(LogicalKeyboardKey.comma, control: true):
+            const _SettingsIntent(),
       },
       child: Actions(
         actions: {
-          _UndoIntent: CallbackAction<_UndoIntent>(onInvoke: (_) {
-            _undo();
-            return null;
-          }),
-          _RedoIntent: CallbackAction<_RedoIntent>(onInvoke: (_) {
-            _redo();
-            return null;
-          }),
-          _OpenIntent: CallbackAction<_OpenIntent>(onInvoke: (_) {
-            _openFile();
-            return null;
-          }),
-          _SaveIntent: CallbackAction<_SaveIntent>(onInvoke: (_) {
-            _onSave();
-            return null;
-          }),
-          _CloseIntent: CallbackAction<_CloseIntent>(onInvoke: (_) {
-            _confirmClose();
-            return null;
-          }),
+          _UndoIntent: CallbackAction<_UndoIntent>(
+            onInvoke: (_) {
+              _undo();
+              return null;
+            },
+          ),
+          _RedoIntent: CallbackAction<_RedoIntent>(
+            onInvoke: (_) {
+              _redo();
+              return null;
+            },
+          ),
+          _OpenIntent: CallbackAction<_OpenIntent>(
+            onInvoke: (_) {
+              _openFile();
+              return null;
+            },
+          ),
+          _SaveIntent: CallbackAction<_SaveIntent>(
+            onInvoke: (_) {
+              _onSave();
+              return null;
+            },
+          ),
+          _CloseIntent: CallbackAction<_CloseIntent>(
+            onInvoke: (_) {
+              _confirmClose();
+              return null;
+            },
+          ),
+          _SettingsIntent: CallbackAction<_SettingsIntent>(
+            onInvoke: (_) {
+              _openSettings();
+              return null;
+            },
+          ),
         },
         child: Focus(
           autofocus: true,
           child: Consumer<PdfProvider>(
-      builder: (context, pdf, _) {
-        return Scaffold(
-          backgroundColor: AppTheme.surfacePrimary,
-          body: Column(
-            children: [
-              // Top toolbar (48px)
-              TopToolbar(
-                onOpenFile: _openFile,
-                onClose: _confirmClose,
-                onSave: _onSave,
-                onRotateCcw: () => _rotateCurrentPage(clockwise: false),
-                onRotateCw: () => _rotateCurrentPage(clockwise: true),
-                onUndo: _undo,
-                onRedo: _redo,
-                canUndo: context.watch<HistoryProvider>().canUndo,
-                canRedo: context.watch<HistoryProvider>().canRedo,
-                onSplit: _onSplit,
-                onMerge: () {
-                  final currentPath = context.read<PdfProvider>().originalFilePath;
-                  Navigator.of(context).push(MaterialPageRoute(
-                    builder: (_) => MergeScreen(
-                      initialPaths: currentPath.isNotEmpty ? [currentPath] : null,
-                    ),
-                  ));
-                },
-                onConvert: _onConvert,
-              ),
-
-              // Main content: sidebar + viewer
-              Expanded(
-                child: Row(
+            builder: (context, pdf, _) {
+              return Scaffold(
+                backgroundColor: AppTheme.surfacePrimary,
+                body: Column(
                   children: [
-                    // Sidebar (240px)
-                    Sidebar(
-                      pageCount: pdf.pageCount,
-                      selectedPage: pdf.currentPage,
-                      onPageSelected: pdf.setPage,
+                    // Top toolbar (48px)
+                    TopToolbar(
+                      onOpenFile: _openFile,
+                      onClose: _confirmClose,
+                      onSave: _onSave,
+                      onRotateCcw: () => _rotateCurrentPage(clockwise: false),
+                      onRotateCw: () => _rotateCurrentPage(clockwise: true),
+                      onUndo: _undo,
+                      onRedo: _redo,
+                      canUndo: context.watch<HistoryProvider>().canUndo,
+                      canRedo: context.watch<HistoryProvider>().canRedo,
+                      onSplit: _onSplit,
+                      onMerge: () {
+                        final currentPath = context
+                            .read<PdfProvider>()
+                            .originalFilePath;
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => MergeScreen(
+                              initialPaths: currentPath.isNotEmpty
+                                  ? [currentPath]
+                                  : null,
+                            ),
+                          ),
+                        );
+                      },
+                      onConvert: _onConvert,
+                      onSettings: _openSettings,
                     ),
 
-                    // Viewer area
+                    // Main content: sidebar + viewer
                     Expanded(
-                      child: Column(
+                      child: Row(
                         children: [
-                          // Viewer sub-toolbar (36px)
-                          ViewerToolbar(
-                            currentPage: pdf.currentPage,
-                            totalPages: pdf.pageCount,
-                            onFitWidth: _fitWidth,
-                            onActualSize: _actualSize,
-                            onFitHeight: _fitHeight,
-                            onPrev: pdf.prevPage,
-                            onNext: pdf.nextPage,
+                          // Sidebar (240px)
+                          Sidebar(
+                            pageCount: pdf.pageCount,
+                            selectedPage: pdf.currentPage,
+                            onPageSelected: pdf.setPage,
                           ),
 
-                          // PDF viewer
+                          // Viewer area
                           Expanded(
-                            child: pdf.pdfBytes != null
-                                ? PdfViewerWidget(
-                                    pdfBytes: pdf.pdfBytes!,
-                                    sourceName:
-                                        '${pdf.fileName}_v${pdf.viewerVersion}',
-                                    controller: _viewerController,
-                                    currentPage: pdf.currentPage,
-                                    onPageChanged: pdf.setPage,
-                                  )
-                                : const SizedBox.shrink(),
+                            child: Column(
+                              children: [
+                                // Viewer sub-toolbar (36px)
+                                ViewerToolbar(
+                                  currentPage: pdf.currentPage,
+                                  totalPages: pdf.pageCount,
+                                  onFitWidth: _fitWidth,
+                                  onActualSize: _actualSize,
+                                  onFitHeight: _fitHeight,
+                                  onPrev: pdf.prevPage,
+                                  onNext: pdf.nextPage,
+                                ),
+
+                                // PDF viewer
+                                Expanded(
+                                  child: pdf.pdfBytes != null
+                                      ? PdfViewerWidget(
+                                          pdfBytes: pdf.pdfBytes!,
+                                          sourceName:
+                                              '${pdf.fileName}_v${pdf.viewerVersion}',
+                                          controller: _viewerController,
+                                          currentPage: pdf.currentPage,
+                                          onPageChanged: pdf.setPage,
+                                        )
+                                      : const SizedBox.shrink(),
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
                     ),
-                  ],
-                ),
-              ),
 
-              // Bottom status bar (32px)
-              StatusBar(
-                leftWidget: Row(
-                  children: [
-                    const Icon(
-                      LucideIcons.fileText,
-                      size: 14,
-                      color: AppTheme.foregroundMuted,
-                    ),
-                    const SizedBox(width: AppTheme.spacingXs),
-                    Flexible(
-                      child: Tooltip(
-                        message: pdf.fileName,
-                        child: Text(
-                          pdf.fileName,
-                          style: const TextStyle(
-                            fontSize: 12,
+                    // Bottom status bar (32px)
+                    StatusBar(
+                      leftWidget: Row(
+                        children: [
+                          const Icon(
+                            LucideIcons.fileText,
+                            size: 14,
                             color: AppTheme.foregroundMuted,
-                            fontWeight: FontWeight.w500,
                           ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                          const SizedBox(width: AppTheme.spacingXs),
+                          Flexible(
+                            child: Tooltip(
+                              message: pdf.fileName,
+                              child: Text(
+                                pdf.fileName,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: AppTheme.foregroundMuted,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: AppTheme.spacingSm),
+                          Text(
+                            '|  ${pdf.fileSize}  |  ${pdf.pageCount} 페이지',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppTheme.foregroundMuted,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                    const SizedBox(width: AppTheme.spacingSm),
-                    Text(
-                      '|  ${pdf.fileSize}  |  ${pdf.pageCount} 페이지',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: AppTheme.foregroundMuted,
-                        fontWeight: FontWeight.w500,
+                      centerText: '',
+                      rightWidget: ZoomControls(
+                        zoom: _displayZoom,
+                        onChanged: _setZoom,
                       ),
                     ),
                   ],
                 ),
-                centerText: '',
-                rightWidget: ZoomControls(
-                  zoom: _displayZoom,
-                  onChanged: _setZoom,
-                ),
-              ),
-            ],
+              );
+            },
           ),
-        );
-      },
-    ),
         ),
       ),
     );
@@ -499,4 +560,8 @@ class _SaveIntent extends Intent {
 
 class _CloseIntent extends Intent {
   const _CloseIntent();
+}
+
+class _SettingsIntent extends Intent {
+  const _SettingsIntent();
 }

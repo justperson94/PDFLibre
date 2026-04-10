@@ -5,6 +5,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 import '../dialogs/error_dialog.dart';
+import '../dialogs/settings_dialog.dart';
 import '../providers/pdf_provider.dart';
 import '../services/file_service.dart';
 import '../services/recent_files_service.dart';
@@ -97,8 +98,9 @@ class _EmptyStateScreenState extends State<EmptyStateScreen> {
                           ),
                           decoration: BoxDecoration(
                             color: AppTheme.surfacePrimary,
-                            borderRadius:
-                                BorderRadius.circular(AppTheme.roundedXl),
+                            borderRadius: BorderRadius.circular(
+                              AppTheme.roundedXl,
+                            ),
                             border: Border.all(
                               color: AppTheme.borderSubtle,
                               width: 1.5,
@@ -134,8 +136,10 @@ class _EmptyStateScreenState extends State<EmptyStateScreen> {
                               const SizedBox(height: AppTheme.spacingXl),
                               FilledButton.icon(
                                 onPressed: _openFile,
-                                icon:
-                                    const Icon(LucideIcons.folderOpen, size: 16),
+                                icon: const Icon(
+                                  LucideIcons.folderOpen,
+                                  size: 16,
+                                ),
                                 label: const Text(
                                   'PDF 파일 열기',
                                   style: TextStyle(
@@ -149,7 +153,8 @@ class _EmptyStateScreenState extends State<EmptyStateScreen> {
                                   minimumSize: const Size(180, 44),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(
-                                        AppTheme.roundedMd),
+                                      AppTheme.roundedMd,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -160,13 +165,21 @@ class _EmptyStateScreenState extends State<EmptyStateScreen> {
                                 alignment: WrapAlignment.center,
                                 children: [
                                   _FeatureChip(
-                                      icon: LucideIcons.rotateCw, label: '회전'),
+                                    icon: LucideIcons.rotateCw,
+                                    label: '회전',
+                                  ),
                                   _FeatureChip(
-                                      icon: LucideIcons.scissors, label: '분할'),
+                                    icon: LucideIcons.scissors,
+                                    label: '분할',
+                                  ),
                                   _FeatureChip(
-                                      icon: LucideIcons.merge, label: '병합'),
+                                    icon: LucideIcons.merge,
+                                    label: '병합',
+                                  ),
                                   _FeatureChip(
-                                      icon: LucideIcons.image, label: '변환'),
+                                    icon: LucideIcons.image,
+                                    label: '변환',
+                                  ),
                                 ],
                               ),
                               const SizedBox(height: AppTheme.spacingMd),
@@ -246,9 +259,20 @@ class _EmptyStateScreenState extends State<EmptyStateScreen> {
         right: AppTheme.spacingLg,
       ),
       color: AppTheme.toolbarBg,
-      child: const Row(
+      child: Row(
         children: [
-          AppLogo(),
+          const AppLogo(),
+          const Spacer(),
+          IconButton(
+            onPressed: () => showSettingsDialog(context),
+            icon: const Icon(
+              LucideIcons.settings,
+              size: 18,
+              color: AppTheme.foregroundSecondary,
+            ),
+            tooltip: '설정',
+            splashRadius: 16,
+          ),
         ],
       ),
     );
