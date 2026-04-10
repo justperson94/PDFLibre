@@ -56,20 +56,41 @@ class FileService {
     return dir;
   }
 
-  /// Pick save file path
+  /// Pick save file path.
+  ///
+  /// [initialDirectoryOverride] is used when the user has configured a fixed
+  /// save folder in settings. If that folder does not exist on disk, this
+  /// gracefully falls back to the last-used directory (RF2 from the settings
+  /// design review).
   static Future<String?> pickSaveFile({
     required String defaultName,
     String? extension,
+    String? initialDirectoryOverride,
   }) async {
+    final initial = _resolveInitialDirectory(initialDirectoryOverride);
     final result = await FilePicker.platform.saveFile(
       dialogTitle: '저장',
       fileName: defaultName,
       type: extension != null ? FileType.custom : FileType.any,
       allowedExtensions: extension != null ? [extension] : null,
-      initialDirectory: _lastDirectory,
+      initialDirectory: initial,
     );
     _updateLastDirectory(result);
     return result;
+  }
+
+  /// Return [override] if it is a valid existing directory, otherwise fall
+  /// back to the in-memory last-used directory. Returns null when neither
+  /// is available so the OS picks its own default.
+  static String? _resolveInitialDirectory(String? override) {
+    if (override != null && override.isNotEmpty) {
+      try {
+        if (Directory(override).existsSync()) return override;
+      } catch (_) {
+        // Fall through to last-used directory.
+      }
+    }
+    return _lastDirectory;
   }
 
   /// Format file size as a human-readable string

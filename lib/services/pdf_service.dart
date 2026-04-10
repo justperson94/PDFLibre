@@ -32,17 +32,25 @@ class PdfService {
     pdfImage.dispose();
 
     // Run image encoding (+rotation) in a separate isolate to prevent UI jank
-    return compute(_encodeImageIsolate, _EncodeRequest(
-      pixels: image.toUint8List(),
-      width: image.width,
-      height: image.height,
-      format: format,
-      quality: quality,
-      rotation: rotation,
-    ));
+    return compute(
+      _encodeImageIsolate,
+      _EncodeRequest(
+        pixels: image.toUint8List(),
+        width: image.width,
+        height: image.height,
+        format: format,
+        quality: quality,
+        rotation: rotation,
+      ),
+    );
   }
 
-  /// Save PDF pages as image files
+  /// Save PDF pages as image files.
+  ///
+  /// [fileNameBuilder] lets the caller supply per-page basenames (e.g., from
+  /// a user-configured filename rule). It receives the 1-based page number and
+  /// returns the filename without extension. If null, a default `page_{N}`
+  /// basename is used.
   static Future<void> convertPagesToImages({
     required PdfDocument document,
     required List<int> pageIndices,
@@ -51,6 +59,7 @@ class PdfService {
     required String format,
     double dpi = 300,
     int quality = 85,
+    String Function(int pageNumber)? fileNameBuilder,
     void Function(int current, int total)? onProgress,
     CancelToken? cancelToken,
   }) async {
@@ -77,7 +86,11 @@ class PdfService {
 
       if (cancelToken?.isCancelled ?? false) return;
 
-      final fileName = 'page_${pageIndices[i] + 1}.$ext';
+      final pageNumber = pageIdx + 1;
+      final baseName = fileNameBuilder != null
+          ? fileNameBuilder(pageNumber)
+          : 'page_$pageNumber';
+      final fileName = '$baseName.$ext';
       await File('$outputDir/$fileName').writeAsBytes(bytes);
     }
   }
@@ -180,7 +193,6 @@ class PdfService {
     final sorted = indices.toList()..sort();
     return sorted;
   }
-
 }
 
 /// Encoding request data for passing between isolates
