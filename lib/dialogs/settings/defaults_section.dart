@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
+import '../../l10n/strings.dart';
 import '../../providers/settings_provider.dart';
 import '../../services/file_service.dart';
 import '../../theme/app_theme.dart';
@@ -52,41 +53,43 @@ class _DefaultsSectionState extends State<DefaultsSection> {
     );
   }
 
-  Widget _buildSaveLocationSection(SettingsProvider s) {
+  Widget _buildSaveLocationSection(SettingsProvider sp) {
+    final s = context.s;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          '저장 위치',
-          style: TextStyle(
+        Text(
+          s.saveLocation,
+          style: const TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
             color: AppTheme.foregroundPrimary,
           ),
         ),
         const SizedBox(height: AppTheme.spacingXs),
-        const Text(
-          '저장 다이얼로그에서 처음 열리는 폴더를 지정합니다',
-          style: TextStyle(fontSize: 11, color: AppTheme.foregroundMuted),
+        Text(
+          s.saveLocationDesc,
+          style: const TextStyle(fontSize: 11, color: AppTheme.foregroundMuted),
         ),
         const SizedBox(height: AppTheme.spacingSm),
         _SaveModeOption(
-          label: '매번 묻기 (현재 동작)',
-          selected: s.saveMode == SaveLocationMode.askEveryTime,
-          onTap: () => s.setSaveMode(SaveLocationMode.askEveryTime),
+          label: s.askEveryTime,
+          selected: sp.saveMode == SaveLocationMode.askEveryTime,
+          onTap: () => sp.setSaveMode(SaveLocationMode.askEveryTime),
         ),
         const SizedBox(height: AppTheme.spacingXs),
         _SaveModeOption(
-          label: '지정한 폴더 사용',
-          selected: s.saveMode == SaveLocationMode.fixedFolder,
-          onTap: () => s.setSaveMode(SaveLocationMode.fixedFolder),
+          label: s.useFixedFolder,
+          selected: sp.saveMode == SaveLocationMode.fixedFolder,
+          onTap: () => sp.setSaveMode(SaveLocationMode.fixedFolder),
           trailing: _FolderPickButton(
-            folderPath: s.saveFolder,
+            folderPath: sp.saveFolder,
+            pickFolderLabel: s.pickFolder,
             onPick: () async {
               final dir = await FileService.pickSaveDirectory();
               if (dir != null) {
-                await s.setSaveFolder(dir);
-                await s.setSaveMode(SaveLocationMode.fixedFolder);
+                await sp.setSaveFolder(dir);
+                await sp.setSaveMode(SaveLocationMode.fixedFolder);
               }
             },
           ),
@@ -95,44 +98,45 @@ class _DefaultsSectionState extends State<DefaultsSection> {
     );
   }
 
-  Widget _buildFilenameRulesSection(SettingsProvider s) {
+  Widget _buildFilenameRulesSection(SettingsProvider sp) {
+    final s = context.s;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          '파일명 규칙',
-          style: TextStyle(
+        Text(
+          s.filenameRules,
+          style: const TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
             color: AppTheme.foregroundPrimary,
           ),
         ),
         const SizedBox(height: AppTheme.spacingXs),
-        const Text(
-          '각 작업에서 생성되는 기본 파일명 규칙. 토큰: {원본} {페이지} {날짜}',
-          style: TextStyle(fontSize: 11, color: AppTheme.foregroundMuted),
+        Text(
+          s.filenameRulesDesc,
+          style: const TextStyle(fontSize: 11, color: AppTheme.foregroundMuted),
         ),
         const SizedBox(height: AppTheme.spacingSm),
         _FilenameRuleRow(
-          label: '저장',
+          label: s.ruleSave,
           controller: _ruleSaveCtl,
           previewPage: null,
-          onChanged: s.setFilenameRuleSave,
+          onChanged: sp.setFilenameRuleSave,
         ),
         const SizedBox(height: AppTheme.spacingSm),
         _FilenameRuleRow(
-          label: '분할',
+          label: s.ruleSplit,
           controller: _ruleSplitCtl,
           previewPage: 3,
-          onChanged: s.setFilenameRuleSplit,
+          onChanged: sp.setFilenameRuleSplit,
         ),
         const SizedBox(height: AppTheme.spacingSm),
         _FilenameRuleRow(
-          label: '이미지 변환',
+          label: s.ruleConvert,
           controller: _ruleConvertCtl,
           previewPage: 3,
           previewSuffix: '.jpg',
-          onChanged: s.setFilenameRuleConvert,
+          onChanged: sp.setFilenameRuleConvert,
         ),
       ],
     );
@@ -206,9 +210,14 @@ class _SaveModeOption extends StatelessWidget {
 }
 
 class _FolderPickButton extends StatelessWidget {
-  const _FolderPickButton({required this.folderPath, required this.onPick});
+  const _FolderPickButton({
+    required this.folderPath,
+    required this.pickFolderLabel,
+    required this.onPick,
+  });
 
   final String folderPath;
+  final String pickFolderLabel;
   final VoidCallback onPick;
 
   @override
@@ -216,7 +225,7 @@ class _FolderPickButton extends StatelessWidget {
     final hasFolder = folderPath.isNotEmpty;
     final displayName = hasFolder
         ? folderPath.split('/').where((e) => e.isNotEmpty).last
-        : '폴더 선택';
+        : pickFolderLabel;
     return InkWell(
       onTap: onPick,
       borderRadius: BorderRadius.circular(AppTheme.roundedSm),
@@ -238,7 +247,7 @@ class _FolderPickButton extends StatelessWidget {
             ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 180),
               child: Tooltip(
-                message: hasFolder ? folderPath : '폴더 선택',
+                message: hasFolder ? folderPath : pickFolderLabel,
                 child: Text(
                   displayName,
                   style: const TextStyle(

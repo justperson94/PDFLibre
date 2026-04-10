@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/strings.dart';
 import '../theme/app_theme.dart';
 
 /// Cancel token -- checked periodically by the task to abort
@@ -80,6 +81,7 @@ class _ProgressDialogState extends State<_ProgressDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final s = context.s;
     final progress = _total > 0 ? _current / _total : 0.0;
     final percent = (progress * 100).round();
 
@@ -139,7 +141,9 @@ class _ProgressDialogState extends State<_ProgressDialog> {
                     ),
                     const SizedBox(height: AppTheme.spacingSm),
                     Text(
-                      _cancelling ? '취소 중...' : '$_current / $_total 페이지 처리 중',
+                      _cancelling
+                          ? s.cancelling
+                          : s.progressText(_current, _total),
                       style: const TextStyle(
                         fontSize: 13,
                         color: AppTheme.foregroundMuted,
@@ -165,7 +169,7 @@ class _ProgressDialogState extends State<_ProgressDialog> {
                   ),
                   onPressed: _cancelling ? null : _onCancel,
                   child: Text(
-                    _cancelling ? '취소 중...' : '취소',
+                    _cancelling ? s.cancelling : s.cancel,
                     style: const TextStyle(color: AppTheme.foregroundSecondary),
                   ),
                 ),

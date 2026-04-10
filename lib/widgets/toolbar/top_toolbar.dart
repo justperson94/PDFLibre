@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
+import '../../l10n/strings.dart';
 import '../../theme/app_theme.dart';
 import '../common/app_logo.dart';
 import 'toolbar_button.dart';
@@ -44,6 +45,7 @@ class TopToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = context.s;
     final macOsLeftPad = Platform.isMacOS ? 54.0 : 0.0;
     return Container(
       height: 48,
@@ -66,32 +68,36 @@ class TopToolbar extends StatelessWidget {
           const SizedBox(width: AppTheme.spacingMd),
           ToolbarButton(
             icon: LucideIcons.folderOpen,
-            tooltip: '다른 파일 열기 (${_shortcutPrefix()}+O)',
-            label: '열기',
+            tooltip: s.openFileTooltip(_shortcutPrefix()),
+            label: s.openLabel,
             iconColor: AppTheme.accentPrimary,
             onTap: onOpenFile,
           ),
           const SizedBox(width: AppTheme.spacingXs),
           ToolbarButton(
             icon: LucideIcons.save,
-            tooltip: '다른 이름으로 저장',
+            tooltip: s.saveAsTooltip,
             onTap: onSave,
           ),
           const SizedBox(width: AppTheme.spacingXs),
-          ToolbarButton(icon: LucideIcons.x, tooltip: '문서 닫기', onTap: onClose),
+          ToolbarButton(
+            icon: LucideIcons.x,
+            tooltip: s.closeDocTooltip,
+            onTap: onClose,
+          ),
 
           const Spacer(),
 
           // Center: Undo/Redo + tool buttons
           ToolbarButton(
             icon: LucideIcons.undo2,
-            tooltip: '실행 취소 (${_shortcutPrefix()}+Z)',
+            tooltip: s.undoTooltip(_shortcutPrefix()),
             onTap: canUndo ? onUndo : null,
           ),
           const SizedBox(width: AppTheme.spacingXs),
           ToolbarButton(
             icon: LucideIcons.redo2,
-            tooltip: '다시 실행 (${_shortcutPrefix()}+Shift+Z)',
+            tooltip: s.redoTooltip(_shortcutPrefix()),
             onTap: canRedo ? onRedo : null,
           ),
           const SizedBox(width: AppTheme.spacingSm),
@@ -99,13 +105,13 @@ class TopToolbar extends StatelessWidget {
           const SizedBox(width: AppTheme.spacingSm),
           ToolbarButton(
             icon: LucideIcons.rotateCcw,
-            tooltip: '왼쪽으로 회전',
+            tooltip: s.rotateLeft,
             onTap: onRotateCcw,
           ),
           const SizedBox(width: AppTheme.spacingXs),
           ToolbarButton(
             icon: LucideIcons.rotateCw,
-            tooltip: '오른쪽으로 회전',
+            tooltip: s.rotateRight,
             onTap: onRotateCw,
           ),
           const SizedBox(width: AppTheme.spacingSm),
@@ -113,22 +119,22 @@ class TopToolbar extends StatelessWidget {
           const SizedBox(width: AppTheme.spacingSm),
           ToolbarButton(
             icon: LucideIcons.scissors,
-            tooltip: '분할',
-            label: '분할',
+            tooltip: s.splitLabel,
+            label: s.splitLabel,
             onTap: onSplit,
           ),
           const SizedBox(width: AppTheme.spacingXs),
           ToolbarButton(
             icon: LucideIcons.merge,
-            tooltip: '병합',
-            label: '병합',
+            tooltip: s.mergeLabel,
+            label: s.mergeLabel,
             onTap: onMerge,
           ),
           const SizedBox(width: AppTheme.spacingXs),
           ToolbarButton(
             icon: LucideIcons.image,
-            tooltip: '이미지로 변환',
-            label: '변환',
+            tooltip: s.convertToImage,
+            label: s.convertLabel,
             onTap: onConvert,
           ),
 
@@ -137,7 +143,7 @@ class TopToolbar extends StatelessWidget {
           // Right: Settings gear
           ToolbarButton(
             icon: LucideIcons.settings,
-            tooltip: '설정 (${_shortcutPrefix()}+,)',
+            tooltip: s.settingsTooltip(_shortcutPrefix()),
             onTap: onSettings,
           ),
         ],

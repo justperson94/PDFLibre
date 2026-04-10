@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
+import '../../l10n/strings.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/constants.dart';
-import '../../widgets/common/app_logo.dart';
 
 /// 정보 section — app metadata, GitHub link, open-source licenses.
 class AboutSection extends StatelessWidget {
@@ -17,13 +17,14 @@ class AboutSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = context.s;
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppTheme.spacingXl),
       child: Column(
         children: [
-          _buildBrand(),
+          _buildBrand(s),
           const SizedBox(height: AppTheme.spacingLg),
-          _buildInfoCard(context),
+          _buildInfoCard(context, s),
           const SizedBox(height: AppTheme.spacingMd),
           const Text(
             '© 2026 justperson94 · MIT License',
@@ -34,7 +35,7 @@ class AboutSection extends StatelessWidget {
     );
   }
 
-  Widget _buildBrand() {
+  Widget _buildBrand(S s) {
     return Column(
       children: [
         ClipRRect(
@@ -69,15 +70,15 @@ class AboutSection extends StatelessWidget {
           ],
         ),
         const SizedBox(height: AppTheme.spacingXs),
-        const Text(
-          '빠르고 가벼운 데스크톱 PDF 도구',
-          style: TextStyle(fontSize: 12, color: AppTheme.foregroundMuted),
+        Text(
+          s.appTagline,
+          style: const TextStyle(fontSize: 12, color: AppTheme.foregroundMuted),
         ),
       ],
     );
   }
 
-  Widget _buildInfoCard(BuildContext context) {
+  Widget _buildInfoCard(BuildContext context, S s) {
     return Container(
       width: 440,
       decoration: BoxDecoration(
@@ -88,11 +89,11 @@ class AboutSection extends StatelessWidget {
       child: Column(
         children: [
           _InfoRow(
-            label: '버전',
+            label: s.version,
             value: '${AppConstants.appVersion} (build $_buildNumber)',
           ),
           const Divider(height: 1, color: AppTheme.borderSubtle),
-          _InfoRow(label: '플랫폼', value: _platformLabel()),
+          _InfoRow(label: s.platform, value: _platformLabel()),
           const Divider(height: 1, color: AppTheme.borderSubtle),
           _InfoRow(
             label: 'GitHub',
@@ -101,9 +102,9 @@ class AboutSection extends StatelessWidget {
                 await Clipboard.setData(const ClipboardData(text: _githubUrl));
                 if (!context.mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('GitHub 주소를 클립보드에 복사했습니다'),
-                    duration: Duration(seconds: 2),
+                  SnackBar(
+                    content: Text(s.githubCopied),
+                    duration: const Duration(seconds: 2),
                   ),
                 );
               },
@@ -127,7 +128,7 @@ class AboutSection extends StatelessWidget {
           ),
           const Divider(height: 1, color: AppTheme.borderSubtle),
           _InfoRow(
-            label: '오픈소스 라이선스',
+            label: s.openSourceLicenses,
             valueWidget: InkWell(
               onTap: () => showLicensePage(
                 context: context,
@@ -146,9 +147,9 @@ class AboutSection extends StatelessWidget {
                   border: Border.all(color: AppTheme.borderSubtle),
                   borderRadius: BorderRadius.circular(AppTheme.roundedSm),
                 ),
-                child: const Text(
-                  '라이선스 보기',
-                  style: TextStyle(
+                child: Text(
+                  s.viewLicenses,
+                  style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w500,
                     color: AppTheme.foregroundPrimary,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pdfrx/pdfrx.dart';
 import 'package:provider/provider.dart';
 
+import '../../l10n/strings.dart';
 import '../../models/edit_command.dart';
 import '../../providers/history_provider.dart';
 import '../../providers/pdf_provider.dart';
@@ -22,6 +23,7 @@ class Sidebar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = context.s;
     final pdf = context.watch<PdfProvider>();
     final document = pdf.document;
 
@@ -46,9 +48,9 @@ class Sidebar extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  '페이지',
-                  style: TextStyle(
+                Text(
+                  s.page,
+                  style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                     color: AppTheme.foregroundPrimary,

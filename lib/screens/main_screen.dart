@@ -11,6 +11,7 @@ import '../dialogs/error_dialog.dart';
 import '../dialogs/progress_dialog.dart';
 import '../dialogs/settings_dialog.dart';
 import '../dialogs/split_dialog.dart';
+import '../l10n/strings.dart';
 import '../models/edit_command.dart';
 import '../providers/history_provider.dart';
 import '../providers/pdf_provider.dart';
@@ -60,7 +61,8 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Future<void> _openFile() async {
-    final path = await FileService.pickPdfFile();
+    final s = S.of(context);
+    final path = await FileService.pickPdfFile(dialogTitle: s.pickPdfFile);
     if (path == null || !mounted) return;
 
     final provider = context.read<PdfProvider>();
@@ -76,6 +78,7 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Future<void> _onSave() async {
+    final s = S.of(context);
     final pdf = context.read<PdfProvider>();
     if (pdf.pdfBytes == null) return;
 
@@ -101,14 +104,14 @@ class _MainScreenState extends State<MainScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('저장 실패: 파일을 쓸 수 없습니다 ($e)')));
+      ).showSnackBar(SnackBar(content: Text(s.saveFailed(e.toString()))));
       return;
     }
 
     if (!mounted) return;
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(const SnackBar(content: Text('PDF 저장이 완료되었습니다')));
+    ).showSnackBar(SnackBar(content: Text(s.saveComplete)));
   }
 
   void _rotateCurrentPage({required bool clockwise}) {
@@ -122,22 +125,23 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Future<void> _confirmClose() async {
+    final s = S.of(context);
     final hasChanges = context.read<HistoryProvider>().canUndo;
     if (hasChanges) {
       final result = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: const Text('문서 닫기'),
-          content: const Text('저장하지 않은 변경사항이 있습니다.\n그래도 닫으시겠습니까?'),
+          title: Text(s.closeDocTitle),
+          content: Text(s.unsavedChanges),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('취소'),
+              child: Text(s.cancel),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(ctx, true),
               style: FilledButton.styleFrom(backgroundColor: AppTheme.danger),
-              child: const Text('닫기'),
+              child: Text(s.close),
             ),
           ],
         ),
@@ -168,6 +172,7 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Future<void> _onConvert() async {
+    final s = S.of(context);
     final result = await showConvertDialog(context);
     if (result == null || !mounted) return;
 
@@ -178,7 +183,7 @@ class _MainScreenState extends State<MainScreen> {
     final baseName = _stripPdfExtension(pdf.fileName);
     final success = await runWithProgressDialog(
       context: context,
-      title: '이미지로 변환 중...',
+      title: s.convertingImages,
       task: (onProgress, cancelToken) => PdfService.convertPagesToImages(
         document: pdf.document!,
         pageIndices: result.pageIndices,
@@ -200,14 +205,13 @@ class _MainScreenState extends State<MainScreen> {
     if (!mounted) return;
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${result.pageIndices.length}개 페이지를 이미지로 변환했습니다'),
-        ),
+        SnackBar(content: Text(s.convertedPages(result.pageIndices.length))),
       );
     }
   }
 
   Future<void> _onSplit() async {
+    final s = S.of(context);
     final result = await showSplitDialog(context);
     if (result == null || !mounted) return;
 
@@ -226,7 +230,7 @@ class _MainScreenState extends State<MainScreen> {
 
       final success = await runWithProgressDialog(
         context: context,
-        title: 'PDF 분할 중...',
+        title: s.splittingPdf,
         task: (onProgress, cancelToken) async {
           for (var i = 0; i < result.pageIndices.length; i++) {
             if (cancelToken.isCancelled) return;
@@ -250,7 +254,7 @@ class _MainScreenState extends State<MainScreen> {
       if (!mounted) return;
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${result.pageIndices.length}개 PDF로 분할했습니다')),
+          SnackBar(content: Text(s.splitComplete(result.pageIndices.length))),
         );
       }
     } else {
@@ -271,7 +275,7 @@ class _MainScreenState extends State<MainScreen> {
 
       final success = await runWithProgressDialog(
         context: context,
-        title: 'PDF 분할 중...',
+        title: s.splittingPdf,
         task: (onProgress, cancelToken) async {
           onProgress(0, 1);
           await PdfService.splitToFile(
@@ -288,7 +292,7 @@ class _MainScreenState extends State<MainScreen> {
       if (success) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('PDF 분할이 완료되었습니다')));
+        ).showSnackBar(SnackBar(content: Text(s.splitSingleComplete)));
       }
     }
   }
@@ -402,6 +406,7 @@ class _MainScreenState extends State<MainScreen> {
           autofocus: true,
           child: Consumer<PdfProvider>(
             builder: (context, pdf, _) {
+              final s = context.s;
               return Scaffold(
                 backgroundColor: AppTheme.surfacePrimary,
                 body: Column(
@@ -508,7 +513,7 @@ class _MainScreenState extends State<MainScreen> {
                           ),
                           const SizedBox(width: AppTheme.spacingSm),
                           Text(
-                            '|  ${pdf.fileSize}  |  ${pdf.pageCount} 페이지',
+                            s.statusInfo(pdf.fileSize, pdf.pageCount),
                             style: const TextStyle(
                               fontSize: 12,
                               color: AppTheme.foregroundMuted,

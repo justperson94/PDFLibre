@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
+import '../l10n/strings.dart';
 import '../providers/pdf_provider.dart';
 import '../services/pdf_service.dart';
 import '../theme/app_theme.dart';
@@ -86,7 +87,7 @@ class _SplitDialogState extends State<_SplitDialog> {
     }
 
     if (indices.isEmpty) {
-      _showError('분할할 페이지를 선택해주세요');
+      _showError(S.of(context).selectPagesForSplit);
       return;
     }
 
@@ -139,14 +140,15 @@ class _SplitDialogState extends State<_SplitDialog> {
   }
 
   Widget _buildHeader() {
+    final s = context.s;
     return Container(
       height: 60,
       padding: const EdgeInsets.symmetric(horizontal: AppTheme.spacingXl),
       child: Row(
         children: [
-          const Text(
-            'PDF 분할',
-            style: TextStyle(
+          Text(
+            s.splitTitle,
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w700,
               color: AppTheme.foregroundPrimary,
@@ -157,7 +159,7 @@ class _SplitDialogState extends State<_SplitDialog> {
             onPressed: () => Navigator.of(context).pop(),
             icon: const Icon(LucideIcons.x, size: 20),
             color: AppTheme.foregroundSecondary,
-            tooltip: '닫기',
+            tooltip: s.close,
           ),
         ],
       ),
@@ -166,15 +168,16 @@ class _SplitDialogState extends State<_SplitDialog> {
 
   Widget _buildPageSelection() {
     final pdf = context.read<PdfProvider>();
-    const labels = ['전체 페이지', '현재 페이지', '범위 지정'];
+    final s = context.s;
+    final labels = [s.allPages, s.currentPage, s.pageRange];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            const Text(
-              '페이지 선택',
-              style: TextStyle(
+            Text(
+              s.pageSelection,
+              style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
                 color: AppTheme.foregroundPrimary,
@@ -182,7 +185,7 @@ class _SplitDialogState extends State<_SplitDialog> {
             ),
             const Spacer(),
             Text(
-              '총 ${pdf.pageCount} 페이지',
+              s.totalPages(pdf.pageCount),
               style: const TextStyle(
                 fontSize: 12,
                 color: AppTheme.foregroundMuted,
@@ -237,7 +240,7 @@ class _SplitDialogState extends State<_SplitDialog> {
           controller: _rangeController,
           enabled: _pageSelection == 2,
           decoration: InputDecoration(
-            hintText: '예: 1-3, 5, 7-10',
+            hintText: s.rangeHint,
             hintStyle: const TextStyle(
               color: AppTheme.foregroundMuted,
               fontSize: 13,
@@ -271,6 +274,7 @@ class _SplitDialogState extends State<_SplitDialog> {
   }
 
   Widget _buildSplitMethod() {
+    final s = context.s;
     return RadioGroup<int>(
       groupValue: _splitMethod,
       onChanged: (v) {
@@ -279,9 +283,9 @@ class _SplitDialogState extends State<_SplitDialog> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            '분할 방식',
-            style: TextStyle(
+          Text(
+            s.splitMethod,
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
               color: AppTheme.foregroundPrimary,
@@ -290,14 +294,14 @@ class _SplitDialogState extends State<_SplitDialog> {
           const SizedBox(height: AppTheme.spacingSm),
           _buildRadioOption(
             value: 0,
-            title: '범위를 하나의 PDF로 추출',
-            description: '선택한 페이지들을 하나의 새 PDF 파일로 만듭니다',
+            title: s.splitSinglePdf,
+            description: s.splitSinglePdfDesc,
           ),
           const SizedBox(height: AppTheme.spacingSm),
           _buildRadioOption(
             value: 1,
-            title: '페이지별로 개별 PDF 생성',
-            description: '각 페이지를 별도의 PDF 파일로 분리합니다',
+            title: s.splitPerPage,
+            description: s.splitPerPageDesc,
           ),
         ],
       ),
@@ -355,17 +359,18 @@ class _SplitDialogState extends State<_SplitDialog> {
 
   Widget _buildOutputFile() {
     final pdf = context.read<PdfProvider>();
+    final s = context.s;
     final baseName = pdf.fileName.replaceAll('.pdf', '').replaceAll('.PDF', '');
     final outputName = _splitMethod == 0
-        ? '${baseName}_분할.pdf'
-        : '${baseName}_페이지별.pdf';
+        ? s.splitDefaultName(baseName)
+        : s.splitPerPageName(baseName);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          '출력 파일',
-          style: TextStyle(
+        Text(
+          s.outputFile,
+          style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
             color: AppTheme.foregroundPrimary,
@@ -402,16 +407,16 @@ class _SplitDialogState extends State<_SplitDialog> {
               ),
               const SizedBox(height: AppTheme.spacingSm),
               Row(
-                children: const [
-                  Icon(
+                children: [
+                  const Icon(
                     LucideIcons.info,
                     size: 14,
                     color: AppTheme.foregroundMuted,
                   ),
-                  SizedBox(width: AppTheme.spacingXs),
+                  const SizedBox(width: AppTheme.spacingXs),
                   Text(
-                    '원본 파일은 변경되지 않습니다',
-                    style: TextStyle(
+                    s.originalUnchanged,
+                    style: const TextStyle(
                       fontSize: 12,
                       color: AppTheme.foregroundMuted,
                     ),
@@ -426,6 +431,7 @@ class _SplitDialogState extends State<_SplitDialog> {
   }
 
   Widget _buildFooter() {
+    final s = context.s;
     return Container(
       height: 59,
       padding: const EdgeInsets.symmetric(horizontal: AppTheme.spacingXl),
@@ -442,15 +448,15 @@ class _SplitDialogState extends State<_SplitDialog> {
               side: const BorderSide(color: AppTheme.borderSubtle),
               foregroundColor: AppTheme.foregroundSecondary,
             ),
-            child: const Text('취소'),
+            child: Text(s.cancel),
           ),
           const SizedBox(width: AppTheme.spacingSm),
           FilledButton.icon(
             onPressed: _onSplit,
             icon: const Icon(LucideIcons.scissors, size: 16),
-            label: const Text(
-              '분할하기',
-              style: TextStyle(fontWeight: FontWeight.w600),
+            label: Text(
+              s.splitAction,
+              style: const TextStyle(fontWeight: FontWeight.w600),
             ),
             style: FilledButton.styleFrom(
               backgroundColor: AppTheme.accentPrimary,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
+import '../../l10n/strings.dart';
 import '../../theme/app_theme.dart';
 
 class ViewerToolbar extends StatelessWidget {
@@ -25,6 +26,7 @@ class ViewerToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = context.s;
     return Container(
       height: 36,
       padding: const EdgeInsets.symmetric(horizontal: AppTheme.spacingLg),
@@ -44,10 +46,10 @@ class ViewerToolbar extends StatelessWidget {
             visualDensity: VisualDensity.compact,
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
-            tooltip: '이전 페이지',
+            tooltip: s.prevPage,
           ),
           Text(
-            '페이지 $currentPage / $totalPages',
+            s.pageOf(currentPage, totalPages),
             style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
@@ -61,7 +63,7 @@ class ViewerToolbar extends StatelessWidget {
             visualDensity: VisualDensity.compact,
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
-            tooltip: '다음 페이지',
+            tooltip: s.nextPage,
           ),
 
           const Spacer(),
@@ -74,7 +76,7 @@ class ViewerToolbar extends StatelessWidget {
             visualDensity: VisualDensity.compact,
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
-            tooltip: '가로 맞춤',
+            tooltip: s.fitWidth,
           ),
           IconButton(
             onPressed: onActualSize,
@@ -83,7 +85,7 @@ class ViewerToolbar extends StatelessWidget {
             visualDensity: VisualDensity.compact,
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
-            tooltip: '원본 크기 (100%)',
+            tooltip: s.actualSize,
           ),
           IconButton(
             onPressed: onFitHeight,
@@ -92,7 +94,7 @@ class ViewerToolbar extends StatelessWidget {
             visualDensity: VisualDensity.compact,
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
-            tooltip: '세로 맞춤',
+            tooltip: s.fitHeight,
           ),
         ],
       ),

@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import '../dialogs/error_dialog.dart';
 import '../dialogs/settings_dialog.dart';
+import '../l10n/strings.dart';
 import '../providers/pdf_provider.dart';
 import '../services/file_service.dart';
 import '../services/recent_files_service.dart';
@@ -37,12 +38,14 @@ class _EmptyStateScreenState extends State<EmptyStateScreen> {
   }
 
   Future<void> _openFile() async {
-    final path = await FileService.pickPdfFile();
+    final s = S.of(context);
+    final path = await FileService.pickPdfFile(dialogTitle: s.pickPdfFile);
     if (path == null || !mounted) return;
     _loadPdf(path);
   }
 
   Future<void> _loadPdf(String path, {bool fromRecent = false}) async {
+    final s = S.of(context);
     final provider = context.read<PdfProvider>();
     final success = await provider.loadPdf(path);
 
@@ -60,9 +63,7 @@ class _EmptyStateScreenState extends State<EmptyStateScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          fromRecent
-              ? '파일을 열 수 없어 최근 목록에서 제거했습니다. 다시 선택해주세요.'
-              : '파일을 열 수 없습니다.',
+          fromRecent ? s.recentFileRemoved : s.cannotOpenFilePeriod,
         ),
       ),
     );
@@ -71,12 +72,13 @@ class _EmptyStateScreenState extends State<EmptyStateScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final s = context.s;
     return Scaffold(
       backgroundColor: AppTheme.surfacePrimary,
       body: Column(
         children: [
           // Top toolbar (48px) — logo only
-          _buildToolbar(),
+          _buildToolbar(s),
           const Divider(height: 1, color: AppTheme.borderSubtle),
 
           // Center content with drop zone
@@ -115,19 +117,19 @@ class _EmptyStateScreenState extends State<EmptyStateScreen> {
                                 color: AppTheme.foregroundMuted,
                               ),
                               const SizedBox(height: AppTheme.spacingXl),
-                              const Text(
-                                'PDF 파일을 열어보세요',
-                                style: TextStyle(
+                              Text(
+                                s.openPdfPrompt,
+                                style: const TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.w700,
                                   color: AppTheme.foregroundPrimary,
                                 ),
                               ),
                               const SizedBox(height: AppTheme.spacingSm),
-                              const Text(
-                                'PDF 파일을 드래그하여 놓거나, 아래 버튼으로 열 수 있습니다',
+                              Text(
+                                s.openPdfHint,
                                 textAlign: TextAlign.center,
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontSize: 14,
                                   color: AppTheme.foregroundSecondary,
                                   height: 1.5,
@@ -140,9 +142,9 @@ class _EmptyStateScreenState extends State<EmptyStateScreen> {
                                   LucideIcons.folderOpen,
                                   size: 16,
                                 ),
-                                label: const Text(
-                                  'PDF 파일 열기',
-                                  style: TextStyle(
+                                label: Text(
+                                  s.openPdfButton,
+                                  style: const TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -159,33 +161,33 @@ class _EmptyStateScreenState extends State<EmptyStateScreen> {
                                 ),
                               ),
                               const SizedBox(height: AppTheme.spacingLg),
-                              const Wrap(
+                              Wrap(
                                 spacing: AppTheme.spacingSm,
                                 runSpacing: AppTheme.spacingSm,
                                 alignment: WrapAlignment.center,
                                 children: [
                                   _FeatureChip(
                                     icon: LucideIcons.rotateCw,
-                                    label: '회전',
+                                    label: s.rotate,
                                   ),
                                   _FeatureChip(
                                     icon: LucideIcons.scissors,
-                                    label: '분할',
+                                    label: s.split,
                                   ),
                                   _FeatureChip(
                                     icon: LucideIcons.merge,
-                                    label: '병합',
+                                    label: s.merge,
                                   ),
                                   _FeatureChip(
                                     icon: LucideIcons.image,
-                                    label: '변환',
+                                    label: s.convert,
                                   ),
                                 ],
                               ),
                               const SizedBox(height: AppTheme.spacingMd),
-                              const Text(
-                                '여러 파일을 드래그하면 병합 화면으로 이동합니다',
-                                style: TextStyle(
+                              Text(
+                                s.multiFileMergeHint,
+                                style: const TextStyle(
                                   fontSize: 12,
                                   color: AppTheme.foregroundMuted,
                                 ),
@@ -197,7 +199,7 @@ class _EmptyStateScreenState extends State<EmptyStateScreen> {
                         // Recent files section
                         if (_recentFiles.isNotEmpty) ...[
                           const SizedBox(height: AppTheme.spacingXl),
-                          _buildRecentFiles(),
+                          _buildRecentFiles(s),
                         ],
                       ],
                     ),
@@ -208,8 +210,8 @@ class _EmptyStateScreenState extends State<EmptyStateScreen> {
           ),
 
           // Bottom status bar (32px)
-          const StatusBar(
-            leftText: '파일을 선택해주세요',
+          StatusBar(
+            leftText: s.selectFilePrompt,
             rightText: '${AppConstants.appName} ${AppConstants.appVersion}',
           ),
         ],
@@ -217,7 +219,7 @@ class _EmptyStateScreenState extends State<EmptyStateScreen> {
     );
   }
 
-  Widget _buildRecentFiles() {
+  Widget _buildRecentFiles(S s) {
     return Container(
       width: 400,
       padding: const EdgeInsets.all(AppTheme.spacingLg),
@@ -229,9 +231,9 @@ class _EmptyStateScreenState extends State<EmptyStateScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            '최근 파일',
-            style: TextStyle(
+          Text(
+            s.recentFiles,
+            style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
               color: AppTheme.foregroundPrimary,
@@ -250,7 +252,7 @@ class _EmptyStateScreenState extends State<EmptyStateScreen> {
     );
   }
 
-  Widget _buildToolbar() {
+  Widget _buildToolbar(S s) {
     final macOsLeftPad = Platform.isMacOS ? 54.0 : 0.0;
     return Container(
       height: 48,
@@ -270,7 +272,7 @@ class _EmptyStateScreenState extends State<EmptyStateScreen> {
               size: 18,
               color: AppTheme.foregroundSecondary,
             ),
-            tooltip: '설정',
+            tooltip: s.settings,
             splashRadius: 16,
           ),
         ],

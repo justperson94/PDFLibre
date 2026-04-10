@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
+import '../l10n/strings.dart';
 import '../providers/pdf_provider.dart';
 import '../services/file_service.dart';
 import '../services/pdf_service.dart';
@@ -91,14 +92,14 @@ class _ConvertDialogState extends State<_ConvertDialog> {
     }
 
     if (indices.isEmpty) {
-      _showError('변환할 페이지를 선택해주세요');
+      _showError(S.of(context).selectPagesForConvert);
       return;
     }
 
     // Validate DPI
     final dpi = _getDpi();
     if (dpi < 1 || dpi > 2400) {
-      _showError('DPI는 1~2400 사이의 값을 입력해주세요');
+      _showError(S.of(context).dpiRangeError);
       return;
     }
 
@@ -168,14 +169,15 @@ class _ConvertDialogState extends State<_ConvertDialog> {
   }
 
   Widget _buildHeader() {
+    final s = context.s;
     return Container(
       height: 60,
       padding: const EdgeInsets.symmetric(horizontal: AppTheme.spacingXl),
       child: Row(
         children: [
-          const Text(
-            '이미지로 변환',
-            style: TextStyle(
+          Text(
+            s.convertTitle,
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w700,
               color: AppTheme.foregroundPrimary,
@@ -186,7 +188,7 @@ class _ConvertDialogState extends State<_ConvertDialog> {
             onPressed: () => Navigator.of(context).pop(),
             icon: const Icon(LucideIcons.x, size: 20),
             color: AppTheme.foregroundSecondary,
-            tooltip: '닫기',
+            tooltip: s.close,
           ),
         ],
       ),
@@ -195,15 +197,16 @@ class _ConvertDialogState extends State<_ConvertDialog> {
 
   Widget _buildPageSelection() {
     final pdf = context.read<PdfProvider>();
-    const labels = ['전체 페이지', '현재 페이지', '범위 지정'];
+    final s = context.s;
+    final labels = [s.allPages, s.currentPage, s.pageRange];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            const Text(
-              '페이지 선택',
-              style: TextStyle(
+            Text(
+              s.pageSelection,
+              style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
                 color: AppTheme.foregroundPrimary,
@@ -211,7 +214,7 @@ class _ConvertDialogState extends State<_ConvertDialog> {
             ),
             const Spacer(),
             Text(
-              '총 ${pdf.pageCount} 페이지',
+              s.totalPages(pdf.pageCount),
               style: const TextStyle(
                 fontSize: 12,
                 color: AppTheme.foregroundMuted,
@@ -263,7 +266,7 @@ class _ConvertDialogState extends State<_ConvertDialog> {
           TextField(
             controller: _rangeController,
             decoration: InputDecoration(
-              hintText: '예: 1-3, 5, 7-10',
+              hintText: s.rangeHint,
               hintStyle: const TextStyle(
                 color: AppTheme.foregroundMuted,
                 fontSize: 13,
@@ -294,12 +297,13 @@ class _ConvertDialogState extends State<_ConvertDialog> {
   }
 
   Widget _buildFormatSelection() {
+    final s = context.s;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          '출력 포맷',
-          style: TextStyle(
+        Text(
+          s.outputFormat,
+          style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
             color: AppTheme.foregroundPrimary,
@@ -350,15 +354,16 @@ class _ConvertDialogState extends State<_ConvertDialog> {
   }
 
   Widget _buildDpiSelection() {
-    final labels = [..._dpiPresets.map((d) => '$d'), '직접 입력'];
+    final s = context.s;
+    final labels = [..._dpiPresets.map((d) => '$d'), s.customInput];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            const Text(
-              '해상도 (DPI)',
-              style: TextStyle(
+            Text(
+              s.resolutionDpi,
+              style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
                 color: AppTheme.foregroundPrimary,
@@ -423,7 +428,7 @@ class _ConvertDialogState extends State<_ConvertDialog> {
               controller: _customDpiController,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
-                hintText: 'DPI 값',
+                hintText: s.dpiValue,
                 hintStyle: const TextStyle(
                   color: AppTheme.foregroundMuted,
                   fontSize: 13,
@@ -455,14 +460,15 @@ class _ConvertDialogState extends State<_ConvertDialog> {
   }
 
   Widget _buildQualitySlider() {
+    final s = context.s;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            const Text(
-              '품질',
-              style: TextStyle(
+            Text(
+              s.quality,
+              style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
                 color: AppTheme.foregroundPrimary,
@@ -497,14 +503,20 @@ class _ConvertDialogState extends State<_ConvertDialog> {
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: const [
+          children: [
             Text(
-              '낮음',
-              style: TextStyle(fontSize: 12, color: AppTheme.foregroundMuted),
+              s.qualityLow,
+              style: const TextStyle(
+                fontSize: 12,
+                color: AppTheme.foregroundMuted,
+              ),
             ),
             Text(
-              '높음',
-              style: TextStyle(fontSize: 12, color: AppTheme.foregroundMuted),
+              s.qualityHigh,
+              style: const TextStyle(
+                fontSize: 12,
+                color: AppTheme.foregroundMuted,
+              ),
             ),
           ],
         ),
@@ -513,6 +525,7 @@ class _ConvertDialogState extends State<_ConvertDialog> {
   }
 
   Widget _buildFooter() {
+    final s = context.s;
     return Container(
       height: 59,
       padding: const EdgeInsets.symmetric(horizontal: AppTheme.spacingXl),
@@ -529,15 +542,15 @@ class _ConvertDialogState extends State<_ConvertDialog> {
               side: const BorderSide(color: AppTheme.borderSubtle),
               foregroundColor: AppTheme.foregroundSecondary,
             ),
-            child: const Text('취소'),
+            child: Text(s.cancel),
           ),
           const SizedBox(width: AppTheme.spacingSm),
           FilledButton.icon(
             onPressed: _onConvert,
             icon: const Icon(LucideIcons.image, size: 16),
-            label: const Text(
-              '변환하기',
-              style: TextStyle(fontWeight: FontWeight.w600),
+            label: Text(
+              s.convertAction,
+              style: const TextStyle(fontWeight: FontWeight.w600),
             ),
             style: FilledButton.styleFrom(
               backgroundColor: AppTheme.accentPrimary,

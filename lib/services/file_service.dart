@@ -16,11 +16,11 @@ class FileService {
   }
 
   /// PDF file picker dialog
-  static Future<String?> pickPdfFile() async {
+  static Future<String?> pickPdfFile({String? dialogTitle}) async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['pdf'],
-      dialogTitle: 'PDF 파일 선택',
+      dialogTitle: dialogTitle ?? 'PDF 파일 선택',
       initialDirectory: _lastDirectory,
     );
     final path = result?.files.single.path;
@@ -29,12 +29,14 @@ class FileService {
   }
 
   /// Multiple PDF file picker dialog
-  static Future<List<String>> pickMultiplePdfFiles() async {
+  static Future<List<String>> pickMultiplePdfFiles({
+    String? dialogTitle,
+  }) async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['pdf'],
       allowMultiple: true,
-      dialogTitle: 'PDF 파일 선택',
+      dialogTitle: dialogTitle ?? 'PDF 파일 선택',
       initialDirectory: _lastDirectory,
     );
     if (result == null) return [];
@@ -47,9 +49,9 @@ class FileService {
   }
 
   /// Pick save directory
-  static Future<String?> pickSaveDirectory() async {
+  static Future<String?> pickSaveDirectory({String? dialogTitle}) async {
     final dir = await FilePicker.platform.getDirectoryPath(
-      dialogTitle: '저장 위치 선택',
+      dialogTitle: dialogTitle ?? '저장 위치 선택',
       initialDirectory: _lastDirectory,
     );
     if (dir != null) _lastDirectory = dir;
@@ -66,10 +68,11 @@ class FileService {
     required String defaultName,
     String? extension,
     String? initialDirectoryOverride,
+    String? dialogTitle,
   }) async {
     final initial = _resolveInitialDirectory(initialDirectoryOverride);
     final result = await FilePicker.platform.saveFile(
-      dialogTitle: '저장',
+      dialogTitle: dialogTitle ?? '저장',
       fileName: defaultName,
       type: extension != null ? FileType.custom : FileType.any,
       allowedExtensions: extension != null ? [extension] : null,

@@ -7,6 +7,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:pdfrx/pdfrx.dart';
 
 import '../dialogs/progress_dialog.dart';
+import '../l10n/strings.dart';
 import '../services/file_service.dart';
 import '../services/pdf_service.dart';
 import '../theme/app_theme.dart';
@@ -52,6 +53,7 @@ class _MergeScreenState extends State<MergeScreen> {
 
   /// Load PDFs from a list of file paths (shared helper)
   Future<void> _loadPaths(List<String> paths) async {
+    final s = S.of(context);
     for (final path in paths) {
       try {
         final bytes = await File(path).readAsBytes();
@@ -73,7 +75,7 @@ class _MergeScreenState extends State<MergeScreen> {
         if (mounted) {
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(SnackBar(content: Text('파일을 열 수 없습니다: $path')));
+          ).showSnackBar(SnackBar(content: Text(s.cannotOpenFilePath(path))));
         }
       }
     }
@@ -85,7 +87,10 @@ class _MergeScreenState extends State<MergeScreen> {
   }
 
   Future<void> _addFiles() async {
-    final paths = await FileService.pickMultiplePdfFiles();
+    final s = S.of(context);
+    final paths = await FileService.pickMultiplePdfFiles(
+      dialogTitle: s.addFiles,
+    );
     if (paths.isEmpty || !mounted) return;
     await _loadPaths(paths);
   }
@@ -114,22 +119,25 @@ class _MergeScreenState extends State<MergeScreen> {
       }
     }
 
+    final s = S.of(context);
+
     if (pages.isEmpty) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('병합할 페이지를 선택해주세요')));
+      ).showSnackBar(SnackBar(content: Text(s.selectPagesForMerge)));
       return;
     }
 
     final path = await FileService.pickSaveFile(
-      defaultName: '병합.pdf',
+      defaultName: '${s.merge}.pdf',
       extension: 'pdf',
+      dialogTitle: s.saveDialogTitle,
     );
     if (path == null || !mounted) return;
 
     final success = await runWithProgressDialog(
       context: context,
-      title: 'PDF 병합 중...',
+      title: s.mergingPdf,
       task: (onProgress, cancelToken) async {
         onProgress(0, 1);
         await PdfService.mergeToFile(pages: pages, outputPath: path);
@@ -140,15 +148,14 @@ class _MergeScreenState extends State<MergeScreen> {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(
-          success ? '${pages.length}개 페이지를 병합했습니다' : '병합 중 오류가 발생했습니다',
-        ),
+        content: Text(success ? s.mergedPages(pages.length) : s.mergeError),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final s = context.s;
     return DropTarget(
       onDragEntered: (_) => setState(() => _isDragging = true),
       onDragExited: (_) => setState(() => _isDragging = false),
@@ -189,7 +196,7 @@ class _MergeScreenState extends State<MergeScreen> {
                       ),
                       const SizedBox(height: AppTheme.spacingMd),
                       Text(
-                        'PDF 파일을 여기에 놓으세요',
+                        s.dropFilesHere,
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
@@ -207,6 +214,7 @@ class _MergeScreenState extends State<MergeScreen> {
   }
 
   Widget _buildEmptyState() {
+    final s = context.s;
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -217,24 +225,27 @@ class _MergeScreenState extends State<MergeScreen> {
             color: AppTheme.foregroundMuted,
           ),
           const SizedBox(height: AppTheme.spacingLg),
-          const Text(
-            '병합할 PDF 파일을 추가해주세요',
-            style: TextStyle(
+          Text(
+            s.addFilesPrompt,
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: AppTheme.foregroundSecondary,
             ),
           ),
           const SizedBox(height: AppTheme.spacingSm),
-          const Text(
-            '상단의 "파일 추가" 버튼으로 여러 PDF를 선택할 수 있습니다',
-            style: TextStyle(fontSize: 13, color: AppTheme.foregroundMuted),
+          Text(
+            s.addFilesHint,
+            style: const TextStyle(
+              fontSize: 13,
+              color: AppTheme.foregroundMuted,
+            ),
           ),
           const SizedBox(height: AppTheme.spacingXl),
           FilledButton.icon(
             onPressed: _addFiles,
             icon: const Icon(LucideIcons.plus, size: 16),
-            label: const Text('파일 추가'),
+            label: Text(s.addFiles),
             style: FilledButton.styleFrom(
               backgroundColor: AppTheme.accentPrimary,
               foregroundColor: AppTheme.surfacePrimary,
@@ -264,6 +275,7 @@ class _MergeScreenState extends State<MergeScreen> {
   }
 
   Widget _buildToolbar() {
+    final s = context.s;
     return Container(
       height: 48,
       padding: const EdgeInsets.symmetric(horizontal: AppTheme.spacingLg),
@@ -278,9 +290,9 @@ class _MergeScreenState extends State<MergeScreen> {
           TextButton.icon(
             onPressed: () => Navigator.of(context).pop(),
             icon: const Icon(LucideIcons.arrowLeft, size: 16),
-            label: const Text(
-              '돌아가기',
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+            label: Text(
+              s.goBack,
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
             ),
             style: TextButton.styleFrom(
               foregroundColor: AppTheme.foregroundSecondary,
@@ -292,9 +304,9 @@ class _MergeScreenState extends State<MergeScreen> {
           const SizedBox(width: AppTheme.spacingMd),
           Container(width: 1, height: 24, color: AppTheme.borderSubtle),
           const SizedBox(width: AppTheme.spacingMd),
-          const Text(
-            'PDF 병합',
-            style: TextStyle(
+          Text(
+            s.mergePdf,
+            style: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w700,
               color: AppTheme.foregroundPrimary,
@@ -304,9 +316,9 @@ class _MergeScreenState extends State<MergeScreen> {
           FilledButton.icon(
             onPressed: _addFiles,
             icon: const Icon(LucideIcons.plus, size: 16),
-            label: const Text(
-              '파일 추가',
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+            label: Text(
+              s.addFiles,
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
             ),
             style: FilledButton.styleFrom(
               backgroundColor: AppTheme.accentPrimary,
@@ -323,6 +335,7 @@ class _MergeScreenState extends State<MergeScreen> {
   }
 
   Widget _buildFileSidebar() {
+    final s = context.s;
     return Container(
       width: 280,
       color: AppTheme.sidebarBg,
@@ -341,16 +354,16 @@ class _MergeScreenState extends State<MergeScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  '파일 목록',
-                  style: TextStyle(
+                Text(
+                  s.fileList,
+                  style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: AppTheme.foregroundPrimary,
                   ),
                 ),
                 Text(
-                  '${_files.length}개 파일',
+                  s.fileCount(_files.length),
                   style: const TextStyle(
                     fontSize: 12,
                     color: AppTheme.foregroundMuted,
@@ -447,7 +460,10 @@ class _MergeScreenState extends State<MergeScreen> {
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
-                                  '${file.document.pages.length} 페이지 · ${file.size}',
+                                  s.filePageInfo(
+                                    file.document.pages.length,
+                                    file.size,
+                                  ),
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: active
@@ -478,7 +494,7 @@ class _MergeScreenState extends State<MergeScreen> {
                               minHeight: 28,
                             ),
                             padding: EdgeInsets.zero,
-                            tooltip: '파일 제거',
+                            tooltip: s.removeFile,
                           ),
                         ],
                       ),
@@ -494,6 +510,7 @@ class _MergeScreenState extends State<MergeScreen> {
   }
 
   Widget _buildThumbnailGrid(_MergeFile file) {
+    final s = context.s;
     final pageCount = file.document.pages.length;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -511,7 +528,7 @@ class _MergeScreenState extends State<MergeScreen> {
           child: Row(
             children: [
               Text(
-                '${file.name} — 페이지 선택',
+                s.filePageSelection(file.name),
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
@@ -541,9 +558,9 @@ class _MergeScreenState extends State<MergeScreen> {
                 activeColor: AppTheme.accentPrimary,
                 visualDensity: VisualDensity.compact,
               ),
-              const Text(
-                '전체 선택',
-                style: TextStyle(
+              Text(
+                s.selectAll,
+                style: const TextStyle(
                   fontSize: 13,
                   color: AppTheme.foregroundSecondary,
                 ),
@@ -646,6 +663,7 @@ class _MergeScreenState extends State<MergeScreen> {
   }
 
   Widget _buildBottomBar() {
+    final s = context.s;
     final totalPages = _files.fold(
       0,
       (sum, f) => sum + f.document.pages.length,
@@ -660,7 +678,7 @@ class _MergeScreenState extends State<MergeScreen> {
       child: Row(
         children: [
           Text(
-            '선택된 페이지: $_totalSelectedPages / $totalPages',
+            s.selectedPages(_totalSelectedPages, totalPages),
             style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
@@ -669,12 +687,19 @@ class _MergeScreenState extends State<MergeScreen> {
           ),
           const SizedBox(width: AppTheme.spacingXl),
           Row(
-            children: const [
-              Icon(LucideIcons.info, size: 14, color: AppTheme.foregroundMuted),
-              SizedBox(width: AppTheme.spacingXs),
+            children: [
+              const Icon(
+                LucideIcons.info,
+                size: 14,
+                color: AppTheme.foregroundMuted,
+              ),
+              const SizedBox(width: AppTheme.spacingXs),
               Text(
-                '원본 파일은 변경되지 않습니다',
-                style: TextStyle(fontSize: 12, color: AppTheme.foregroundMuted),
+                s.originalUnchanged,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppTheme.foregroundMuted,
+                ),
               ),
             ],
           ),
@@ -682,9 +707,9 @@ class _MergeScreenState extends State<MergeScreen> {
           FilledButton.icon(
             onPressed: _files.isEmpty ? null : _merge,
             icon: const Icon(LucideIcons.combine, size: 16),
-            label: const Text(
-              '병합하기',
-              style: TextStyle(fontWeight: FontWeight.w600),
+            label: Text(
+              s.mergeAction,
+              style: const TextStyle(fontWeight: FontWeight.w600),
             ),
             style: FilledButton.styleFrom(
               backgroundColor: AppTheme.accentPrimary,

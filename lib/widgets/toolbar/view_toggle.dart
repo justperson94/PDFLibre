@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
+import '../../l10n/strings.dart';
 import '../../theme/app_theme.dart';
 
 class ViewToggle extends StatelessWidget {
@@ -11,18 +12,19 @@ class ViewToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = context.s;
     return Row(
       children: [
         _ToggleIconButton(
           icon: LucideIcons.grid,
-          tooltip: '그리드 보기',
+          tooltip: s.gridView,
           selected: isGrid,
           onTap: () => onChanged(true),
         ),
         const SizedBox(width: AppTheme.spacingXs),
         _ToggleIconButton(
           icon: LucideIcons.rows,
-          tooltip: '리스트 보기',
+          tooltip: s.listView,
           selected: !isGrid,
           onTap: () => onChanged(false),
         ),

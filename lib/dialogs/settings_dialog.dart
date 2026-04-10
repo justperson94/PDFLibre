@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
+import '../l10n/strings.dart';
 import '../theme/app_theme.dart';
 import 'settings/about_section.dart';
 import 'settings/defaults_section.dart';
@@ -72,15 +73,16 @@ class _SettingsDialogState extends State<_SettingsDialog>
   }
 
   Widget _buildHeader() {
+    final s = context.s;
     return SizedBox(
       height: 60,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: AppTheme.spacingXl),
         child: Row(
           children: [
-            const Text(
-              '설정',
-              style: TextStyle(
+            Text(
+              s.settingsTitle,
+              style: const TextStyle(
                 fontSize: 17,
                 fontWeight: FontWeight.w600,
                 color: AppTheme.foregroundPrimary,
@@ -112,6 +114,7 @@ class _SettingsDialogState extends State<_SettingsDialog>
   }
 
   Widget _buildTabBar() {
+    final s = context.s;
     return SizedBox(
       height: 44,
       child: TabBar(
@@ -132,16 +135,17 @@ class _SettingsDialogState extends State<_SettingsDialog>
         indicatorWeight: 2,
         dividerColor: Colors.transparent,
         tabAlignment: TabAlignment.start,
-        tabs: const [
-          Tab(text: '일반'),
-          Tab(text: '파일 기본값'),
-          Tab(text: '정보'),
+        tabs: [
+          Tab(text: s.tabGeneral),
+          Tab(text: s.tabDefaults),
+          Tab(text: s.tabAbout),
         ],
       ),
     );
   }
 
   Widget _buildFooter() {
+    final s = context.s;
     return SizedBox(
       height: 60,
       child: Padding(
@@ -162,9 +166,12 @@ class _SettingsDialogState extends State<_SettingsDialog>
                   borderRadius: BorderRadius.circular(AppTheme.roundedMd),
                 ),
               ),
-              child: const Text(
-                '닫기',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+              child: Text(
+                s.close,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
           ],

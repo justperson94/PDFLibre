@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
+import '../l10n/strings.dart';
 import '../theme/app_theme.dart';
 
 Future<void> showErrorDialog(BuildContext context, {VoidCallback? onPickFile}) {
   return showDialog<void>(
     context: context,
     builder: (context) {
+      final s = context.s;
       return Dialog(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppTheme.roundedXl),
@@ -38,19 +40,19 @@ Future<void> showErrorDialog(BuildContext context, {VoidCallback? onPickFile}) {
                       ),
                     ),
                     const SizedBox(height: AppTheme.spacingLg),
-                    const Text(
-                      '파일을 열 수 없습니다',
-                      style: TextStyle(
+                    Text(
+                      s.errorDialogTitle,
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
                         color: AppTheme.foregroundPrimary,
                       ),
                     ),
                     const SizedBox(height: AppTheme.spacingMd),
-                    const Text(
-                      'PDF 파일이 손상되었거나 지원하지 않는 형식입니다.\n다른 파일을 선택해 주세요.',
+                    Text(
+                      s.errorDialogBody,
                       textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 14,
                         color: AppTheme.foregroundSecondary,
                         height: 1.5,
@@ -83,7 +85,7 @@ Future<void> showErrorDialog(BuildContext context, {VoidCallback? onPickFile}) {
                         side: const BorderSide(color: AppTheme.borderSubtle),
                         foregroundColor: AppTheme.foregroundSecondary,
                       ),
-                      child: const Text('다른 파일 선택'),
+                      child: Text(s.pickAnotherFile),
                     ),
                     const SizedBox(width: AppTheme.spacingSm),
                     FilledButton(
@@ -98,9 +100,9 @@ Future<void> showErrorDialog(BuildContext context, {VoidCallback? onPickFile}) {
                         ),
                       ),
                       onPressed: () => Navigator.of(context).pop(),
-                      child: const Text(
-                        '확인',
-                        style: TextStyle(fontWeight: FontWeight.w600),
+                      child: Text(
+                        s.confirm,
+                        style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
                     ),
                   ],

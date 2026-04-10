@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:pdfrx/pdfrx.dart';
 
+import '../../l10n/strings.dart';
 import '../../theme/app_theme.dart';
 
 /// Sidebar page thumbnail (actual PDF rendering + rotation metadata)
@@ -96,6 +97,7 @@ class _PageThumbnailState extends State<PageThumbnail> {
 
   @override
   Widget build(BuildContext context) {
+    final s = context.s;
     final rotation = widget.rotation % 360;
 
     // Fixed size container (consistent row height regardless of rotation)
@@ -182,7 +184,7 @@ class _PageThumbnailState extends State<PageThumbnail> {
             const SizedBox(width: AppTheme.spacingSm),
             Expanded(
               child: Text(
-                '${widget.pageNumber} 페이지',
+                s.pageLabel(widget.pageNumber),
                 style: TextStyle(
                   fontSize: 13,
                   color: widget.selected

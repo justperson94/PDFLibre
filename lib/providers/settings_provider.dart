@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../l10n/strings.dart';
+
 /// Theme mode preference.
 enum AppThemeMode { system, light, dark }
 
@@ -50,6 +52,9 @@ class SettingsProvider extends ChangeNotifier {
   String get filenameRuleSplit => _filenameRuleSplit;
   String get filenameRuleConvert => _filenameRuleConvert;
   bool get isLoaded => _loaded;
+
+  /// Localized strings for the current language.
+  S get s => S(_language);
 
   /// Load persisted settings from disk. Call once at app startup.
   Future<void> load() async {

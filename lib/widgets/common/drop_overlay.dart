@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
+import '../../l10n/strings.dart';
 import '../../theme/app_theme.dart';
 
 class DropOverlay extends StatelessWidget {
@@ -11,6 +12,7 @@ class DropOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = context.s;
     return Center(
       child: Container(
         margin: const EdgeInsets.all(AppTheme.spacingXl * 2),
@@ -40,18 +42,18 @@ class DropOverlay extends StatelessWidget {
               ),
             ),
             const SizedBox(height: AppTheme.spacingXl),
-            const Text(
-              'PDF 파일을 여기에 놓으세요',
-              style: TextStyle(
+            Text(
+              s.dropHere,
+              style: const TextStyle(
                 color: AppTheme.foregroundPrimary,
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
               ),
             ),
             const SizedBox(height: AppTheme.spacingSm),
-            const Text(
-              'PDF 파일을 드래그하여 열거나 병합할 수 있습니다',
-              style: TextStyle(
+            Text(
+              s.dropDescription,
+              style: const TextStyle(
                 color: AppTheme.foregroundSecondary,
                 fontSize: 14,
               ),
@@ -59,16 +61,16 @@ class DropOverlay extends StatelessWidget {
             const SizedBox(height: AppTheme.spacingXl),
             Row(
               mainAxisSize: MainAxisSize.min,
-              children: const [
-                Icon(
+              children: [
+                const Icon(
                   LucideIcons.fileText,
                   size: 16,
                   color: AppTheme.foregroundMuted,
                 ),
-                SizedBox(width: AppTheme.spacingSm),
+                const SizedBox(width: AppTheme.spacingSm),
                 Text(
-                  '지원 형식: .pdf',
-                  style: TextStyle(
+                  s.supportedFormat,
+                  style: const TextStyle(
                     color: AppTheme.foregroundMuted,
                     fontSize: 13,
                   ),

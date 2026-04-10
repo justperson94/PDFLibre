@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
+import '../../l10n/strings.dart';
 import '../../providers/settings_provider.dart';
 import '../../theme/app_theme.dart';
 
@@ -30,28 +31,29 @@ class GeneralSection extends StatelessWidget {
   }
 
   Widget _buildThemeSection(BuildContext context, SettingsProvider settings) {
+    final s = context.s;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          '테마',
-          style: TextStyle(
+        Text(
+          s.theme,
+          style: const TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
             color: AppTheme.foregroundPrimary,
           ),
         ),
         const SizedBox(height: AppTheme.spacingXs),
-        const Text(
-          '앱의 전반적인 색상 모드를 선택하세요',
-          style: TextStyle(fontSize: 11, color: AppTheme.foregroundMuted),
+        Text(
+          s.themeDescription,
+          style: const TextStyle(fontSize: 11, color: AppTheme.foregroundMuted),
         ),
         const SizedBox(height: AppTheme.spacingMd),
         Row(
           children: [
             Expanded(
               child: _ThemeOption(
-                label: '시스템 설정 따르기',
+                label: s.themeSystem,
                 selected: settings.themeMode == AppThemeMode.system,
                 onTap: () => settings.setThemeMode(AppThemeMode.system),
               ),
@@ -59,7 +61,7 @@ class GeneralSection extends StatelessWidget {
             const SizedBox(width: AppTheme.spacingMd),
             Expanded(
               child: _ThemeOption(
-                label: '라이트',
+                label: s.themeLight,
                 selected: settings.themeMode == AppThemeMode.light,
                 onTap: () => settings.setThemeMode(AppThemeMode.light),
               ),
@@ -67,7 +69,7 @@ class GeneralSection extends StatelessWidget {
             const SizedBox(width: AppTheme.spacingMd),
             Expanded(
               child: _ThemeOption(
-                label: '다크',
+                label: s.themeDark,
                 selected: settings.themeMode == AppThemeMode.dark,
                 onTap: () => settings.setThemeMode(AppThemeMode.dark),
                 disabled: true,
@@ -85,9 +87,12 @@ class GeneralSection extends StatelessWidget {
             color: AppTheme.surfaceTertiary,
             borderRadius: BorderRadius.circular(AppTheme.roundedSm),
           ),
-          child: const Text(
-            '다크 모드는 Phase 4에서 제공됩니다',
-            style: TextStyle(fontSize: 10, color: AppTheme.foregroundMuted),
+          child: Text(
+            s.darkModePhase4,
+            style: const TextStyle(
+              fontSize: 10,
+              color: AppTheme.foregroundMuted,
+            ),
           ),
         ),
       ],
@@ -98,21 +103,22 @@ class GeneralSection extends StatelessWidget {
     BuildContext context,
     SettingsProvider settings,
   ) {
+    final s = context.s;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          '언어',
-          style: TextStyle(
+        Text(
+          s.language,
+          style: const TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
             color: AppTheme.foregroundPrimary,
           ),
         ),
         const SizedBox(height: AppTheme.spacingXs),
-        const Text(
-          '앱에서 사용할 언어를 선택하세요',
-          style: TextStyle(fontSize: 11, color: AppTheme.foregroundMuted),
+        Text(
+          s.languageDescription,
+          style: const TextStyle(fontSize: 11, color: AppTheme.foregroundMuted),
         ),
         const SizedBox(height: AppTheme.spacingMd),
         Container(
@@ -139,10 +145,7 @@ class GeneralSection extends StatelessWidget {
               ),
               items: const [
                 DropdownMenuItem(value: AppLanguage.ko, child: Text('한국어')),
-                DropdownMenuItem(
-                  value: AppLanguage.en,
-                  child: Text('English (Phase 4)'),
-                ),
+                DropdownMenuItem(value: AppLanguage.en, child: Text('English')),
               ],
               onChanged: (v) {
                 if (v != null) settings.setLanguage(v);

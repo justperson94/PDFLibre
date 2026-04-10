@@ -1,0 +1,294 @@
+import 'package:flutter/widgets.dart';
+import 'package:provider/provider.dart';
+
+import '../providers/settings_provider.dart';
+
+/// Lightweight i18n — two-language runtime switch (ko / en).
+///
+/// Access via `context.s` extension or `S.of(context)`.
+class S {
+  S(this._lang);
+
+  final AppLanguage _lang;
+
+  bool get _ko => _lang == AppLanguage.ko;
+
+  // ── static helpers ──────────────────────────────────────────
+
+  static S of(BuildContext context) => context.read<SettingsProvider>().s;
+
+  // ── App-wide ────────────────────────────────────────────────
+
+  String get appTagline =>
+      _ko ? '빠르고 가벼운 데스크톱 PDF 도구' : 'Fast & lightweight desktop PDF tool';
+
+  // ── Common ──────────────────────────────────────────────────
+
+  String get cancel => _ko ? '취소' : 'Cancel';
+  String get close => _ko ? '닫기' : 'Close';
+  String get confirm => _ko ? '확인' : 'OK';
+  String get save => _ko ? '저장' : 'Save';
+  String get delete => _ko ? '삭제' : 'Delete';
+
+  // ── File operations ─────────────────────────────────────────
+
+  String get pickPdfFile => _ko ? 'PDF 파일 선택' : 'Select PDF file';
+  String get pickSaveDirectory => _ko ? '저장 위치 선택' : 'Select save location';
+  String get saveDialogTitle => _ko ? '저장' : 'Save';
+  String get cannotOpenFile => _ko ? '파일을 열 수 없습니다' : 'Cannot open file';
+  String get cannotOpenFilePeriod =>
+      _ko ? '파일을 열 수 없습니다.' : 'Cannot open file.';
+  String get onlyPdfAllowed =>
+      _ko ? 'PDF 파일만 열 수 있습니다' : 'Only PDF files can be opened';
+  String get fileNotFound => _ko ? '파일을 찾을 수 없습니다' : 'File not found';
+  String get recentFileRemoved => _ko
+      ? '파일을 열 수 없어 최근 목록에서 제거했습니다. 다시 선택해주세요.'
+      : 'Could not open file. Removed from recent list. Please select again.';
+
+  String saveFailed(String error) => _ko
+      ? '저장 실패: 파일을 쓸 수 없습니다 ($error)'
+      : 'Save failed: cannot write file ($error)';
+  String get saveComplete => _ko ? 'PDF 저장이 완료되었습니다' : 'PDF saved successfully';
+
+  // ── Empty state ─────────────────────────────────────────────
+
+  String get openPdfPrompt => _ko ? 'PDF 파일을 열어보세요' : 'Open a PDF file';
+  String get openPdfHint => _ko
+      ? 'PDF 파일을 드래그하여 놓거나, 아래 버튼으로 열 수 있습니다'
+      : 'Drag & drop a PDF file, or use the button below';
+  String get openPdfButton => _ko ? 'PDF 파일 열기' : 'Open PDF file';
+  String get multiFileMergeHint => _ko
+      ? '여러 파일을 드래그하면 병합 화면으로 이동합니다'
+      : 'Drop multiple files to open the merge screen';
+  String get selectFilePrompt => _ko ? '파일을 선택해주세요' : 'Please select a file';
+  String get recentFiles => _ko ? '최근 파일' : 'Recent files';
+
+  // ── Feature chips ───────────────────────────────────────────
+
+  String get rotate => _ko ? '회전' : 'Rotate';
+  String get split => _ko ? '분할' : 'Split';
+  String get merge => _ko ? '병합' : 'Merge';
+  String get convert => _ko ? '변환' : 'Convert';
+
+  // ── Drop overlay ────────────────────────────────────────────
+
+  String get dropHere => _ko ? 'PDF 파일을 여기에 놓으세요' : 'Drop PDF files here';
+  String get dropDescription =>
+      _ko ? 'PDF 파일을 드래그하여 열거나 병합할 수 있습니다' : 'Drag PDF files to open or merge';
+  String get supportedFormat => _ko ? '지원 형식: .pdf' : 'Supported format: .pdf';
+
+  // ── Toolbar ─────────────────────────────────────────────────
+
+  String openFileTooltip(String prefix) =>
+      _ko ? '다른 파일 열기 ($prefix+O)' : 'Open file ($prefix+O)';
+  String get openLabel => _ko ? '열기' : 'Open';
+  String get saveAsTooltip => _ko ? '다른 이름으로 저장' : 'Save as';
+  String get closeDocTooltip => _ko ? '문서 닫기' : 'Close document';
+  String undoTooltip(String prefix) =>
+      _ko ? '실행 취소 ($prefix+Z)' : 'Undo ($prefix+Z)';
+  String redoTooltip(String prefix) =>
+      _ko ? '다시 실행 ($prefix+Shift+Z)' : 'Redo ($prefix+Shift+Z)';
+  String get rotateLeft => _ko ? '왼쪽으로 회전' : 'Rotate left';
+  String get rotateRight => _ko ? '오른쪽으로 회전' : 'Rotate right';
+  String get splitLabel => _ko ? '분할' : 'Split';
+  String get mergeLabel => _ko ? '병합' : 'Merge';
+  String get convertToImage => _ko ? '이미지로 변환' : 'Convert to image';
+  String get convertLabel => _ko ? '변환' : 'Convert';
+  String settingsTooltip(String prefix) =>
+      _ko ? '설정 ($prefix+,)' : 'Settings ($prefix+,)';
+  String get settings => _ko ? '설정' : 'Settings';
+
+  // ── Viewer toolbar ──────────────────────────────────────────
+
+  String get prevPage => _ko ? '이전 페이지' : 'Previous page';
+  String get nextPage => _ko ? '다음 페이지' : 'Next page';
+  String pageOf(int current, int total) =>
+      _ko ? '페이지 $current / $total' : 'Page $current / $total';
+  String get fitWidth => _ko ? '가로 맞춤' : 'Fit width';
+  String get actualSize => _ko ? '원본 크기 (100%)' : 'Actual size (100%)';
+  String get fitHeight => _ko ? '세로 맞춤' : 'Fit height';
+
+  // ── View toggle ─────────────────────────────────────────────
+
+  String get gridView => _ko ? '그리드 보기' : 'Grid view';
+  String get listView => _ko ? '리스트 보기' : 'List view';
+
+  // ── Sidebar ─────────────────────────────────────────────────
+
+  String get page => _ko ? '페이지' : 'Page';
+  String pageLabel(int n) => _ko ? '$n 페이지' : 'Page $n';
+
+  // ── Status bar ──────────────────────────────────────────────
+
+  String statusInfo(String fileSize, int pageCount) => _ko
+      ? '|  $fileSize  |  $pageCount 페이지'
+      : '|  $fileSize  |  $pageCount pages';
+
+  // ── Error dialog ────────────────────────────────────────────
+
+  String get errorDialogTitle => _ko ? '파일을 열 수 없습니다' : 'Cannot open file';
+  String get errorDialogBody => _ko
+      ? 'PDF 파일이 손상되었거나 지원하지 않는 형식입니다.\n다른 파일을 선택해 주세요.'
+      : 'The PDF file is corrupted or in an unsupported format.\nPlease select another file.';
+  String get pickAnotherFile => _ko ? '다른 파일 선택' : 'Select another file';
+
+  // ── Close confirmation ──────────────────────────────────────
+
+  String get closeDocTitle => _ko ? '문서 닫기' : 'Close document';
+  String get unsavedChanges => _ko
+      ? '저장하지 않은 변경사항이 있습니다.\n그래도 닫으시겠습니까?'
+      : 'You have unsaved changes.\nClose anyway?';
+
+  // ── Progress dialog ─────────────────────────────────────────
+
+  String get cancelling => _ko ? '취소 중...' : 'Cancelling...';
+  String progressText(int current, int total) =>
+      _ko ? '$current / $total 페이지 처리 중' : 'Processing page $current / $total';
+
+  // ── Convert dialog ──────────────────────────────────────────
+
+  String get convertTitle => _ko ? '이미지로 변환' : 'Convert to images';
+  String get selectPagesForConvert =>
+      _ko ? '변환할 페이지를 선택해주세요' : 'Please select pages to convert';
+  String get dpiRangeError =>
+      _ko ? 'DPI는 1~2400 사이의 값을 입력해주세요' : 'DPI must be between 1 and 2400';
+  String get allPages => _ko ? '전체 페이지' : 'All pages';
+  String get currentPage => _ko ? '현재 페이지' : 'Current page';
+  String get pageRange => _ko ? '범위 지정' : 'Page range';
+  String get pageSelection => _ko ? '페이지 선택' : 'Page selection';
+  String totalPages(int count) => _ko ? '총 $count 페이지' : '$count pages total';
+  String get rangeHint => _ko ? '예: 1-3, 5, 7-10' : 'e.g. 1-3, 5, 7-10';
+  String get outputFormat => _ko ? '출력 포맷' : 'Output format';
+  String get customInput => _ko ? '직접 입력' : 'Custom';
+  String get resolutionDpi => _ko ? '해상도 (DPI)' : 'Resolution (DPI)';
+  String get dpiValue => _ko ? 'DPI 값' : 'DPI value';
+  String get quality => _ko ? '품질' : 'Quality';
+  String get qualityLow => _ko ? '낮음' : 'Low';
+  String get qualityHigh => _ko ? '높음' : 'High';
+  String get convertAction => _ko ? '변환하기' : 'Convert';
+  String get convertingImages =>
+      _ko ? '이미지로 변환 중...' : 'Converting to images...';
+  String convertedPages(int count) =>
+      _ko ? '$count개 페이지를 이미지로 변환했습니다' : 'Converted $count pages to images';
+
+  // ── Split dialog ────────────────────────────────────────────
+
+  String get splitTitle => _ko ? 'PDF 분할' : 'Split PDF';
+  String get selectPagesForSplit =>
+      _ko ? '분할할 페이지를 선택해주세요' : 'Please select pages to split';
+  String get splitMethod => _ko ? '분할 방식' : 'Split method';
+  String get splitSinglePdf =>
+      _ko ? '범위를 하나의 PDF로 추출' : 'Extract range as one PDF';
+  String get splitSinglePdfDesc => _ko
+      ? '선택한 페이지들을 하나의 새 PDF 파일로 만듭니다'
+      : 'Creates a single new PDF with the selected pages';
+  String get splitPerPage =>
+      _ko ? '페이지별로 개별 PDF 생성' : 'Create individual PDFs per page';
+  String get splitPerPageDesc => _ko
+      ? '각 페이지를 별도의 PDF 파일로 분리합니다'
+      : 'Separates each page into its own PDF file';
+  String splitDefaultName(String baseName) =>
+      _ko ? '${baseName}_분할.pdf' : '${baseName}_split.pdf';
+  String splitPerPageName(String baseName) =>
+      _ko ? '${baseName}_페이지별.pdf' : '${baseName}_pages.pdf';
+  String get outputFile => _ko ? '출력 파일' : 'Output file';
+  String get originalUnchanged =>
+      _ko ? '원본 파일은 변경되지 않습니다' : 'Original file will not be modified';
+  String get splitAction => _ko ? '분할하기' : 'Split';
+  String get splittingPdf => _ko ? 'PDF 분할 중...' : 'Splitting PDF...';
+  String splitComplete(int count) =>
+      _ko ? '$count개 PDF로 분할했습니다' : 'Split into $count PDFs';
+  String get splitSingleComplete =>
+      _ko ? 'PDF 분할이 완료되었습니다' : 'PDF split complete';
+
+  // ── Merge screen ────────────────────────────────────────────
+
+  String cannotOpenFilePath(String path) =>
+      _ko ? '파일을 열 수 없습니다: $path' : 'Cannot open file: $path';
+  String get selectPagesForMerge =>
+      _ko ? '병합할 페이지를 선택해주세요' : 'Please select pages to merge';
+  String get mergePdf => _ko ? 'PDF 병합' : 'Merge PDFs';
+  String get mergingPdf => _ko ? 'PDF 병합 중...' : 'Merging PDFs...';
+  String mergedPages(int count) =>
+      _ko ? '$count개 페이지를 병합했습니다' : 'Merged $count pages';
+  String get mergeError =>
+      _ko ? '병합 중 오류가 발생했습니다' : 'An error occurred during merge';
+  String get dropFilesHere => _ko ? 'PDF 파일을 여기에 놓으세요' : 'Drop PDF files here';
+  String get addFilesPrompt =>
+      _ko ? '병합할 PDF 파일을 추가해주세요' : 'Add PDF files to merge';
+  String get addFilesHint => _ko
+      ? '상단의 "파일 추가" 버튼으로 여러 PDF를 선택할 수 있습니다'
+      : 'Use the "Add files" button above to select multiple PDFs';
+  String get addFiles => _ko ? '파일 추가' : 'Add files';
+  String get goBack => _ko ? '돌아가기' : 'Go back';
+  String get fileList => _ko ? '파일 목록' : 'File list';
+  String fileCount(int count) => _ko ? '$count개 파일' : '$count files';
+  String filePageInfo(int pageCount, String size) =>
+      _ko ? '$pageCount 페이지 · $size' : '$pageCount pages · $size';
+  String get removeFile => _ko ? '파일 제거' : 'Remove file';
+  String filePageSelection(String name) =>
+      _ko ? '$name — 페이지 선택' : '$name — select pages';
+  String get selectAll => _ko ? '전체 선택' : 'Select all';
+  String selectedPages(int selected, int total) => _ko
+      ? '선택된 페이지: $selected / $total'
+      : 'Selected pages: $selected / $total';
+  String get mergeAction => _ko ? '병합하기' : 'Merge';
+
+  // ── Edit commands ───────────────────────────────────────────
+
+  String rotateCommand(int page, bool clockwise) => _ko
+      ? '$page페이지 ${clockwise ? "시계방향" : "반시계방향"} 회전'
+      : 'Rotate page $page ${clockwise ? "clockwise" : "counterclockwise"}';
+  String reorderCommand(int from, int to) =>
+      _ko ? '$from페이지 → $to번째로 이동' : 'Move page $from → position $to';
+
+  // ── Settings dialog ─────────────────────────────────────────
+
+  String get settingsTitle => _ko ? '설정' : 'Settings';
+  String get tabGeneral => _ko ? '일반' : 'General';
+  String get tabDefaults => _ko ? '파일 기본값' : 'File defaults';
+  String get tabAbout => _ko ? '정보' : 'About';
+
+  // Settings > General
+  String get theme => _ko ? '테마' : 'Theme';
+  String get themeDescription =>
+      _ko ? '앱의 전반적인 색상 모드를 선택하세요' : 'Choose the color mode for the app';
+  String get themeSystem => _ko ? '시스템 설정 따르기' : 'Follow system';
+  String get themeLight => _ko ? '라이트' : 'Light';
+  String get themeDark => _ko ? '다크' : 'Dark';
+  String get darkModePhase4 =>
+      _ko ? '다크 모드는 Phase 4에서 제공됩니다' : 'Dark mode coming in Phase 4';
+  String get language => _ko ? '언어' : 'Language';
+  String get languageDescription =>
+      _ko ? '앱에서 사용할 언어를 선택하세요' : 'Choose the app language';
+
+  // Settings > Defaults
+  String get saveLocation => _ko ? '저장 위치' : 'Save location';
+  String get saveLocationDesc => _ko
+      ? '저장 다이얼로그에서 처음 열리는 폴더를 지정합니다'
+      : 'Set the default folder for the save dialog';
+  String get askEveryTime => _ko ? '매번 묻기 (현재 동작)' : 'Ask every time (current)';
+  String get useFixedFolder => _ko ? '지정한 폴더 사용' : 'Use fixed folder';
+  String get pickFolder => _ko ? '폴더 선택' : 'Select folder';
+  String get filenameRules => _ko ? '파일명 규칙' : 'Filename rules';
+  String get filenameRulesDesc => _ko
+      ? '각 작업에서 생성되는 기본 파일명 규칙. 토큰: {원본} {페이지} {날짜}'
+      : 'Default filename rules per operation. Tokens: {원본} {페이지} {날짜}';
+  String get ruleSave => _ko ? '저장' : 'Save';
+  String get ruleSplit => _ko ? '분할' : 'Split';
+  String get ruleConvert => _ko ? '이미지 변환' : 'Image convert';
+
+  // Settings > About
+  String get version => _ko ? '버전' : 'Version';
+  String get platform => _ko ? '플랫폼' : 'Platform';
+  String get githubCopied =>
+      _ko ? 'GitHub 주소를 클립보드에 복사했습니다' : 'GitHub URL copied to clipboard';
+  String get openSourceLicenses => _ko ? '오픈소스 라이선스' : 'Open-source licenses';
+  String get viewLicenses => _ko ? '라이선스 보기' : 'View licenses';
+}
+
+/// Shortcut extension for widget trees.
+extension StringsContext on BuildContext {
+  S get s => watch<SettingsProvider>().s;
+  S get sRead => read<SettingsProvider>().s;
+}
