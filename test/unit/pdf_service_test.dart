@@ -16,10 +16,16 @@ void main() {
     });
 
     test('parse mixed range', () {
-      expect(
-        PdfService.parsePageRange('1-3, 5, 7-10', 10),
-        [0, 1, 2, 4, 6, 7, 8, 9],
-      );
+      expect(PdfService.parsePageRange('1-3, 5, 7-10', 10), [
+        0,
+        1,
+        2,
+        4,
+        6,
+        7,
+        8,
+        9,
+      ]);
     });
 
     test('deduplicate and sort', () {

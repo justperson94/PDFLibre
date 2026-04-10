@@ -10,7 +10,9 @@ class AppTheme {
 
   // === Surface ===
   static const surfacePrimary = Color(0xFFFFFFFF); // Main background
-  static const surfaceSecondary = Color(0xFFFAF9F8); // Secondary background (input fields, etc.)
+  static const surfaceSecondary = Color(
+    0xFFFAF9F8,
+  ); // Secondary background (input fields, etc.)
   static const surfaceTertiary = Color(0xFFF0EDEB); // Disabled elements
 
   // === Foreground (text) ===

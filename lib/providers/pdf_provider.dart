@@ -116,7 +116,9 @@ class PdfProvider extends ChangeNotifier {
     }
 
     _version++;
-    debugPrint('[PDFLibre] Rotate page ${originalPageIndex + 1} ${clockwise ? 'CW' : 'CCW'} 90° → ${newRotation}°');
+    debugPrint(
+      '[PDFLibre] Rotate page ${originalPageIndex + 1} ${clockwise ? 'CW' : 'CCW'} 90° → ${newRotation}°',
+    );
     notifyListeners();
     _scheduleRebuild();
   }
@@ -137,7 +139,9 @@ class PdfProvider extends ChangeNotifier {
     }
 
     _version++;
-    debugPrint('[PDFLibre] Reorder page ${oldDisplayIndex + 1} → ${newDisplayIndex + 1}');
+    debugPrint(
+      '[PDFLibre] Reorder page ${oldDisplayIndex + 1} → ${newDisplayIndex + 1}',
+    );
     notifyListeners();
     _scheduleRebuild();
   }
@@ -145,7 +149,10 @@ class PdfProvider extends ChangeNotifier {
   /// Schedule debounced viewer bytes rebuild
   void _scheduleRebuild() {
     _encodeTimer?.cancel();
-    _encodeTimer = Timer(const Duration(milliseconds: 300), _rebuildViewerBytes);
+    _encodeTimer = Timer(
+      const Duration(milliseconds: 300),
+      _rebuildViewerBytes,
+    );
   }
 
   /// Check if page order is the default order

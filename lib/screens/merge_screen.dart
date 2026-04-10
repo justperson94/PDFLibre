@@ -71,8 +71,9 @@ class _MergeScreenState extends State<MergeScreen> {
         _files.add(file);
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text('파일을 열 수 없습니다: $path')));
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('파일을 열 수 없습니다: $path')));
         }
       }
     }
@@ -168,8 +169,7 @@ class _MergeScreenState extends State<MergeScreen> {
                 _buildToolbar(),
                 const Divider(height: 1, color: AppTheme.borderSubtle),
                 Expanded(
-                  child:
-                      _files.isEmpty ? _buildEmptyState() : _buildContent(),
+                  child: _files.isEmpty ? _buildEmptyState() : _buildContent(),
                 ),
                 const Divider(height: 1, color: AppTheme.borderSubtle),
                 _buildBottomBar(),
@@ -193,8 +193,7 @@ class _MergeScreenState extends State<MergeScreen> {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color:
-                              AppTheme.accentPrimary.withValues(alpha: 0.7),
+                          color: AppTheme.accentPrimary.withValues(alpha: 0.7),
                         ),
                       ),
                     ],
@@ -419,8 +418,9 @@ class _MergeScreenState extends State<MergeScreen> {
                               ),
                               border: Border.all(
                                 color: active
-                                    ? AppTheme.surfacePrimary
-                                        .withValues(alpha: 0.5)
+                                    ? AppTheme.surfacePrimary.withValues(
+                                        alpha: 0.5,
+                                      )
                                     : AppTheme.borderSubtle,
                               ),
                             ),

@@ -36,7 +36,8 @@ class _ProgressDialog extends StatefulWidget {
   final Future<void> Function(
     void Function(int current, int total) onProgress,
     CancelToken cancelToken,
-  ) task;
+  )
+  task;
 
   @override
   State<_ProgressDialog> createState() => _ProgressDialogState();
@@ -138,9 +139,7 @@ class _ProgressDialogState extends State<_ProgressDialog> {
                     ),
                     const SizedBox(height: AppTheme.spacingSm),
                     Text(
-                      _cancelling
-                          ? '취소 중...'
-                          : '$_current / $_total 페이지 처리 중',
+                      _cancelling ? '취소 중...' : '$_current / $_total 페이지 처리 중',
                       style: const TextStyle(
                         fontSize: 13,
                         color: AppTheme.foregroundMuted,

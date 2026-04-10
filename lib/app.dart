@@ -67,9 +67,9 @@ class _DropWrapperState extends State<_DropWrapper> {
 
         if (pdfPaths.isEmpty) {
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('PDF 파일만 열 수 있습니다')),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('PDF 파일만 열 수 있습니다')));
           }
           return;
         }
@@ -93,9 +93,7 @@ class _DropWrapperState extends State<_DropWrapper> {
         final messenger = ScaffoldMessenger.of(context);
         final success = await provider.loadPdf(pdfPaths.first);
         if (!success && mounted) {
-          messenger.showSnackBar(
-            const SnackBar(content: Text('파일을 열 수 없습니다')),
-          );
+          messenger.showSnackBar(const SnackBar(content: Text('파일을 열 수 없습니다')));
         }
       },
       child: Stack(

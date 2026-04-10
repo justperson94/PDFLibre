@@ -75,7 +75,10 @@ class Sidebar extends StatelessWidget {
   }
 
   Widget _buildPageList(
-      BuildContext context, PdfDocument document, PdfProvider pdf) {
+    BuildContext context,
+    PdfDocument document,
+    PdfProvider pdf,
+  ) {
     return ReorderableListView.builder(
       buildDefaultDragHandles: false,
       itemCount: pageCount,
@@ -84,16 +87,12 @@ class Sidebar extends StatelessWidget {
         if (newIndex > oldIndex) newIndex--;
         if (oldIndex == newIndex) return;
         context.read<HistoryProvider>().execute(
-              ReorderPageCommand(oldIndex: oldIndex, newIndex: newIndex),
-              context.read<PdfProvider>(),
-            );
+          ReorderPageCommand(oldIndex: oldIndex, newIndex: newIndex),
+          context.read<PdfProvider>(),
+        );
       },
       proxyDecorator: (child, index, animation) {
-        return Material(
-          elevation: 4,
-          color: AppTheme.sidebarBg,
-          child: child,
-        );
+        return Material(elevation: 4, color: AppTheme.sidebarBg, child: child);
       },
       itemBuilder: (context, index) {
         final displayPage = index + 1;

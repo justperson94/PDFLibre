@@ -188,7 +188,9 @@ class _PageThumbnailState extends State<PageThumbnail> {
                   color: widget.selected
                       ? AppTheme.accentPrimary
                       : AppTheme.foregroundSecondary,
-                  fontWeight: widget.selected ? FontWeight.w600 : FontWeight.w500,
+                  fontWeight: widget.selected
+                      ? FontWeight.w600
+                      : FontWeight.w500,
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
