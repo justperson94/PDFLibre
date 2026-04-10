@@ -129,6 +129,22 @@ class SettingsProvider extends ChangeNotifier {
     await prefs.setString(_kFnRuleConvert, rule);
   }
 
+  /// Reset output settings (save mode, folder, filename rules) to defaults.
+  Future<void> resetOutputDefaults() async {
+    _saveMode = SaveLocationMode.askEveryTime;
+    _saveFolder = '';
+    _filenameRuleSave = defaultFilenameRuleSave;
+    _filenameRuleSplit = defaultFilenameRuleSplit;
+    _filenameRuleConvert = defaultFilenameRuleConvert;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_kSaveMode);
+    await prefs.remove(_kSaveFolder);
+    await prefs.remove(_kFnRuleSave);
+    await prefs.remove(_kFnRuleSplit);
+    await prefs.remove(_kFnRuleConvert);
+  }
+
   /// Apply a filename rule template with available tokens.
   ///
   /// Supported tokens:

@@ -48,6 +48,8 @@ class _DefaultsSectionState extends State<DefaultsSection> {
           _buildSaveLocationSection(settings),
           const SizedBox(height: AppTheme.spacingMd),
           _buildFilenameRulesSection(settings),
+          const SizedBox(height: AppTheme.spacingXl),
+          _buildResetButton(context, settings),
         ],
       ),
     );
@@ -139,6 +141,45 @@ class _DefaultsSectionState extends State<DefaultsSection> {
           onChanged: sp.setFilenameRuleConvert,
         ),
       ],
+    );
+  }
+
+  Widget _buildResetButton(BuildContext context, SettingsProvider sp) {
+    final s = context.s;
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: OutlinedButton.icon(
+        onPressed: () async {
+          await sp.resetOutputDefaults();
+          _ruleSaveCtl.text = SettingsProvider.defaultFilenameRuleSave;
+          _ruleSplitCtl.text = SettingsProvider.defaultFilenameRuleSplit;
+          _ruleConvertCtl.text = SettingsProvider.defaultFilenameRuleConvert;
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(s.resetDefaultsDone)),
+            );
+          }
+        },
+        icon: Icon(
+          LucideIcons.rotateCcw,
+          size: 13,
+          color: context.colors.foregroundMuted,
+        ),
+        label: Text(
+          s.resetDefaults,
+          style: TextStyle(
+            fontSize: 12,
+            color: context.colors.foregroundSecondary,
+          ),
+        ),
+        style: OutlinedButton.styleFrom(
+          side: BorderSide(color: context.colors.borderSubtle),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppTheme.roundedMd),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        ),
+      ),
     );
   }
 }

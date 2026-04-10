@@ -246,7 +246,7 @@ class S {
 
   String get settingsTitle => _ko ? '설정' : 'Settings';
   String get tabGeneral => _ko ? '일반' : 'General';
-  String get tabDefaults => _ko ? '파일 기본값' : 'File defaults';
+  String get tabDefaults => _ko ? '출력 설정' : 'Output';
   String get tabAbout => _ko ? '정보' : 'About';
 
   // Settings > General
@@ -277,6 +277,8 @@ class S {
   String get ruleSave => _ko ? '저장' : 'Save';
   String get ruleSplit => _ko ? '분할' : 'Split';
   String get ruleConvert => _ko ? '이미지 변환' : 'Image convert';
+  String get resetDefaults => _ko ? '기본값으로 초기화' : 'Reset to defaults';
+  String get resetDefaultsDone => _ko ? '출력 설정이 초기화되었습니다' : 'Output settings reset';
 
   // Settings > About
   String get version => _ko ? '버전' : 'Version';
