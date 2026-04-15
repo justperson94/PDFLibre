@@ -9,6 +9,7 @@ import 'providers/settings_provider.dart';
 import 'screens/empty_state_screen.dart';
 import 'screens/main_screen.dart';
 import 'screens/merge_screen.dart';
+import 'services/window_chrome_service.dart';
 import 'theme/app_theme.dart';
 import 'utils/constants.dart';
 import 'widgets/common/drop_overlay.dart';
@@ -60,8 +61,36 @@ class PDFLibreApp extends StatelessWidget {
         ),
         extensions: const [AppColors.dark],
       ),
-      home: const _DropWrapper(),
+      home: const _WindowChromeSync(child: _DropWrapper()),
     );
+  }
+}
+
+/// MaterialApp의 effective brightness를 네이티브 macOS 창에 전파한다.
+/// 시스템 모드에서 OS 밝기가 바뀌면 MediaQuery.platformBrightness → Theme가
+/// 재빌드되므로 이 위젯도 자동으로 갱신 신호를 보낸다.
+class _WindowChromeSync extends StatefulWidget {
+  const _WindowChromeSync({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_WindowChromeSync> createState() => _WindowChromeSyncState();
+}
+
+class _WindowChromeSyncState extends State<_WindowChromeSync> {
+  Brightness? _lastApplied;
+
+  @override
+  Widget build(BuildContext context) {
+    final brightness = Theme.of(context).brightness;
+    if (brightness != _lastApplied) {
+      _lastApplied = brightness;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        WindowChromeService.applyBrightness(brightness);
+      });
+    }
+    return widget.child;
   }
 }
 
