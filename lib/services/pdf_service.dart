@@ -5,6 +5,7 @@ import 'package:image/image.dart' as img;
 import 'package:pdfrx/pdfrx.dart';
 
 import '../dialogs/progress_dialog.dart';
+import '../models/page_mix.dart';
 
 /// PDF processing service (rendering, conversion, splitting, merging)
 class PdfService {
@@ -156,6 +157,64 @@ class PdfService {
     required String outputPath,
   }) async {
     final bytes = await mergePages(pages: pages);
+    await File(outputPath).writeAsBytes(bytes);
+  }
+
+  /// Merge from a list of [PageRef]s against already-open [sourceDocuments].
+  ///
+  /// Resolves each ref's source page from [sourceDocuments] (keyed by
+  /// [PageRef.sourceId]), applies per-instance rotation via [PdfPage.rotatedCW90],
+  /// and assembles a new PDF in the given output order. The caller retains
+  /// ownership of the source [PdfDocument]s — this function does not dispose them.
+  ///
+  /// Throws [StateError] if a ref points to a source not present in
+  /// [sourceDocuments] or a page index out of bounds.
+  static Future<Uint8List> mergeFromPageRefs({
+    required List<PageRef> refs,
+    required Map<String, PdfDocument> sourceDocuments,
+  }) async {
+    final newDoc = await PdfDocument.createNew(sourceName: 'merged.pdf');
+    try {
+      final pages = <PdfPage>[];
+      var hasRotation = false;
+      for (final ref in refs) {
+        final source = sourceDocuments[ref.sourceId];
+        if (source == null) {
+          throw StateError('Source not loaded: ${ref.sourceId}');
+        }
+        if (ref.pageIndex < 0 || ref.pageIndex >= source.pages.length) {
+          throw StateError(
+            'Page index ${ref.pageIndex} out of range for ${ref.sourceId}',
+          );
+        }
+        var page = source.pages[ref.pageIndex];
+        final turns = ref.rotationTurns % 4;
+        if (turns != 0) hasRotation = true;
+        for (var t = 0; t < turns; t++) {
+          page = page.rotatedCW90();
+        }
+        pages.add(page);
+      }
+      newDoc.pages = pages;
+      if (hasRotation) {
+        await newDoc.assemble();
+      }
+      return await newDoc.encodePdf();
+    } finally {
+      newDoc.dispose();
+    }
+  }
+
+  /// Merge from [PageRef]s and write to a file.
+  static Future<void> mergeFromPageRefsToFile({
+    required List<PageRef> refs,
+    required Map<String, PdfDocument> sourceDocuments,
+    required String outputPath,
+  }) async {
+    final bytes = await mergeFromPageRefs(
+      refs: refs,
+      sourceDocuments: sourceDocuments,
+    );
     await File(outputPath).writeAsBytes(bytes);
   }
 
