@@ -273,6 +273,10 @@ class S {
   String pageLabelRotated(String name, int page, int degrees) => _ko
       ? '$name · p.$page · $degrees°'
       : '$name · p.$page · $degrees°';
+  String get rotateCounterClockwise =>
+      _ko ? '반시계방향 회전' : 'Rotate counterclockwise';
+  String get rotateClockwise => _ko ? '시계방향 회전' : 'Rotate clockwise';
+  String get removeOutputPage => _ko ? '출력에서 제거' : 'Remove from output';
 
   // ── Edit commands ───────────────────────────────────────────
 

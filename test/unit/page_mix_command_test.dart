@@ -108,6 +108,60 @@ void main() {
     });
   });
 
+  group('RotateOutputCommand', () {
+    test('clockwise rotation sets 90°, undo returns to 0°', () {
+      final ref = provider.addPageToOutput('a', 0);
+      expect(ref.rotationTurns, 0);
+
+      final cmd =
+          RotateOutputCommand(instanceId: ref.instanceId, clockwise: true);
+      history.execute(cmd, provider);
+      expect(provider.output.single.rotationTurns, 1);
+
+      history.undo(provider);
+      expect(provider.output.single.rotationTurns, 0);
+    });
+
+    test('counterclockwise rotation sets 270°, undo returns to 0°', () {
+      final ref = provider.addPageToOutput('a', 0);
+
+      final cmd =
+          RotateOutputCommand(instanceId: ref.instanceId, clockwise: false);
+      history.execute(cmd, provider);
+      expect(provider.output.single.rotationTurns, 3);
+
+      history.undo(provider);
+      expect(provider.output.single.rotationTurns, 0);
+    });
+
+    test('four clockwise rotations wrap back to 0°', () {
+      final ref = provider.addPageToOutput('a', 0);
+      for (var i = 0; i < 4; i++) {
+        history.execute(
+          RotateOutputCommand(instanceId: ref.instanceId, clockwise: true),
+          provider,
+        );
+      }
+      expect(provider.output.single.rotationTurns, 0);
+    });
+
+    test('only affects the targeted instance', () {
+      final r0 = provider.addPageToOutput('a', 0);
+      final r1 = provider.addPageToOutput('a', 1);
+
+      history.execute(
+        RotateOutputCommand(instanceId: r0.instanceId, clockwise: true),
+        provider,
+      );
+      expect(provider.output.first.rotationTurns, 1);
+      expect(
+        provider.output.firstWhere((r) => r.instanceId == r1.instanceId)
+            .rotationTurns,
+        0,
+      );
+    });
+  });
+
   group('PageMixHistoryProvider', () {
     test('canUndo / canRedo reflect stack state', () {
       expect(history.canUndo, false);

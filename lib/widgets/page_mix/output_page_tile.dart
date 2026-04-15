@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:pdfrx/pdfrx.dart';
 
+import '../../l10n/strings.dart';
 import '../../theme/app_theme.dart';
 
 /// Output canvas tile for the 페이지 혼합 mode.
@@ -167,11 +168,16 @@ class _OutputPageTileState extends State<OutputPageTile> {
             },
           ),
         },
-        child: MouseRegion(
+        child: Focus(
+          child: MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
-      child: InkWell(
-        onTap: widget.onTap,
+      child: Builder(
+        builder: (context) => InkWell(
+        onTap: () {
+          Focus.of(context).requestFocus();
+          widget.onTap?.call();
+        },
         borderRadius: BorderRadius.circular(AppTheme.roundedMd),
         child: Container(
           width: widget.width,
@@ -239,8 +245,10 @@ class _OutputPageTileState extends State<OutputPageTile> {
         ),
       ),
     ),
-        ),
       ),
+    ),
+        ),
+        ),
     );
   }
 }
@@ -266,6 +274,7 @@ class _HoverActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = context.s;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
       decoration: BoxDecoration(
@@ -279,19 +288,19 @@ class _HoverActions extends StatelessWidget {
             _HoverIconButton(
               icon: LucideIcons.rotateCcw,
               onPressed: onRotateCcw!,
-              tooltip: '반시계방향 회전',
+              tooltip: s.rotateCounterClockwise,
             ),
           if (onRotateCw != null)
             _HoverIconButton(
               icon: LucideIcons.rotateCw,
               onPressed: onRotateCw!,
-              tooltip: '시계방향 회전',
+              tooltip: s.rotateClockwise,
             ),
           if (onRemove != null)
             _HoverIconButton(
               icon: LucideIcons.x,
               onPressed: onRemove!,
-              tooltip: '제거',
+              tooltip: s.removeOutputPage,
             ),
         ],
       ),
