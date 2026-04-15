@@ -70,6 +70,29 @@ class RemoveFromOutputCommand extends PageMixCommand {
   }
 }
 
+/// Rotate a single output page instance 90° (clockwise or counterclockwise).
+/// Inverse is simply a rotation the other way.
+class RotateOutputCommand extends PageMixCommand {
+  RotateOutputCommand({required this.instanceId, required this.clockwise});
+
+  final String instanceId;
+  final bool clockwise;
+
+  @override
+  String get description =>
+      clockwise ? '출력 페이지 시계방향 회전' : '출력 페이지 반시계방향 회전';
+
+  @override
+  void execute(PageMixProvider provider) {
+    provider.rotateOutput(instanceId, clockwise: clockwise);
+  }
+
+  @override
+  void undo(PageMixProvider provider) {
+    provider.rotateOutput(instanceId, clockwise: !clockwise);
+  }
+}
+
 /// Move an output page from [oldIndex] to [newIndex].
 /// Undo removes the moved instance by id and re-inserts it at [oldIndex].
 class ReorderOutputCommand extends PageMixCommand {

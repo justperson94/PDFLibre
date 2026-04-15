@@ -223,6 +223,24 @@ class _PageMixBodyState extends State<_PageMixBody> {
                   provider,
                 );
               },
+              onRotateCw: (ref) => history.execute(
+                RotateOutputCommand(
+                  instanceId: ref.instanceId,
+                  clockwise: true,
+                ),
+                provider,
+              ),
+              onRotateCcw: (ref) => history.execute(
+                RotateOutputCommand(
+                  instanceId: ref.instanceId,
+                  clockwise: false,
+                ),
+                provider,
+              ),
+              onRemove: (ref) => history.execute(
+                RemoveFromOutputCommand(instanceId: ref.instanceId),
+                provider,
+              ),
               onClear: provider.clearOutput,
             ),
           ),

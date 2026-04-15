@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:pdfrx/pdfrx.dart';
 
 import '../../theme/app_theme.dart';
@@ -21,6 +22,9 @@ class OutputPageTile extends StatefulWidget {
     this.rotationTurns = 0,
     this.selected = false,
     this.onTap,
+    this.onRotateCw,
+    this.onRotateCcw,
+    this.onRemove,
     this.width = 120,
     this.height = 160,
     this.previewHeight = 130,
@@ -33,6 +37,9 @@ class OutputPageTile extends StatefulWidget {
   final int rotationTurns;
   final bool selected;
   final VoidCallback? onTap;
+  final VoidCallback? onRotateCw;
+  final VoidCallback? onRotateCcw;
+  final VoidCallback? onRemove;
   final double width;
   final double height;
   final double previewHeight;
@@ -44,6 +51,7 @@ class OutputPageTile extends StatefulWidget {
 class _OutputPageTileState extends State<OutputPageTile> {
   ui.Image? _thumbnail;
   bool _loading = false;
+  bool _hovered = false;
 
   @override
   void initState() {
@@ -124,44 +132,61 @@ class _OutputPageTileState extends State<OutputPageTile> {
         widget.selected ? widget.sourceColor : colors.borderSubtle;
     final borderWidth = widget.selected ? 2.0 : 1.0;
 
-    return InkWell(
-      onTap: widget.onTap,
-      borderRadius: BorderRadius.circular(AppTheme.roundedMd),
-      child: Container(
-        width: widget.width,
-        height: widget.height,
-        decoration: BoxDecoration(
-          color: colors.surfacePrimary,
-          borderRadius: BorderRadius.circular(AppTheme.roundedMd),
-          border: Border.all(color: borderColor, width: borderWidth),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            SizedBox(
-              width: widget.width,
-              height: widget.previewHeight,
-              child: Stack(
-                children: [
-                  Positioned.fill(
-                    child: Container(
-                      color: colors.surfaceSecondary,
-                      alignment: Alignment.center,
-                      child: preview,
+    final hasActions = widget.onRotateCw != null ||
+        widget.onRotateCcw != null ||
+        widget.onRemove != null;
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: InkWell(
+        onTap: widget.onTap,
+        borderRadius: BorderRadius.circular(AppTheme.roundedMd),
+        child: Container(
+          width: widget.width,
+          height: widget.height,
+          decoration: BoxDecoration(
+            color: colors.surfacePrimary,
+            borderRadius: BorderRadius.circular(AppTheme.roundedMd),
+            border: Border.all(color: borderColor, width: borderWidth),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(
+                width: widget.width,
+                height: widget.previewHeight,
+                child: Stack(
+                  children: [
+                    Positioned.fill(
+                      child: Container(
+                        color: colors.surfaceSecondary,
+                        alignment: Alignment.center,
+                        child: preview,
+                      ),
                     ),
-                  ),
-                  Positioned(
-                    top: 6,
-                    left: 6,
-                    child: _IndexBadge(
-                      index: widget.globalIndex,
-                      color: widget.sourceColor,
+                    Positioned(
+                      top: 6,
+                      left: 6,
+                      child: _IndexBadge(
+                        index: widget.globalIndex,
+                        color: widget.sourceColor,
+                      ),
                     ),
-                  ),
-                ],
+                    if (hasActions && _hovered)
+                      Positioned(
+                        top: 4,
+                        right: 4,
+                        child: _HoverActions(
+                          onRotateCcw: widget.onRotateCcw,
+                          onRotateCw: widget.onRotateCw,
+                          onRemove: widget.onRemove,
+                        ),
+                      ),
+                  ],
+                ),
               ),
-            ),
             const SizedBox(height: AppTheme.spacingXs),
             Padding(
               padding: const EdgeInsets.symmetric(
@@ -180,6 +205,80 @@ class _OutputPageTileState extends State<OutputPageTile> {
             ),
             const SizedBox(height: 6),
           ],
+        ),
+      ),
+    ),
+    );
+  }
+}
+
+class _HoverActions extends StatelessWidget {
+  const _HoverActions({
+    this.onRotateCcw,
+    this.onRotateCw,
+    this.onRemove,
+  });
+
+  final VoidCallback? onRotateCcw;
+  final VoidCallback? onRotateCw;
+  final VoidCallback? onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.55),
+        borderRadius: BorderRadius.circular(AppTheme.roundedSm),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (onRotateCcw != null)
+            _HoverIconButton(
+              icon: LucideIcons.rotateCcw,
+              onPressed: onRotateCcw!,
+              tooltip: '반시계방향 회전',
+            ),
+          if (onRotateCw != null)
+            _HoverIconButton(
+              icon: LucideIcons.rotateCw,
+              onPressed: onRotateCw!,
+              tooltip: '시계방향 회전',
+            ),
+          if (onRemove != null)
+            _HoverIconButton(
+              icon: LucideIcons.x,
+              onPressed: onRemove!,
+              tooltip: '제거',
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HoverIconButton extends StatelessWidget {
+  const _HoverIconButton({
+    required this.icon,
+    required this.onPressed,
+    required this.tooltip,
+  });
+
+  final IconData icon;
+  final VoidCallback onPressed;
+  final String tooltip;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(AppTheme.roundedSm),
+        child: Padding(
+          padding: const EdgeInsets.all(4),
+          child: Icon(icon, size: 14, color: Colors.white),
         ),
       ),
     );

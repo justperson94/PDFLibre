@@ -22,6 +22,9 @@ class OutputCanvasWidget extends StatelessWidget {
     required this.onReorder,
     required this.onClear,
     this.onTileTap,
+    this.onRotateCw,
+    this.onRotateCcw,
+    this.onRemove,
     this.selectedInstanceIds = const {},
   });
 
@@ -31,6 +34,9 @@ class OutputCanvasWidget extends StatelessWidget {
   final void Function(int oldIndex, int newIndex) onReorder;
   final VoidCallback onClear;
   final void Function(PageRef ref)? onTileTap;
+  final void Function(PageRef ref)? onRotateCw;
+  final void Function(PageRef ref)? onRotateCcw;
+  final void Function(PageRef ref)? onRemove;
   final Set<String> selectedInstanceIds;
 
   SourcePdf? _sourceFor(String id) {
@@ -92,6 +98,9 @@ class OutputCanvasWidget extends StatelessWidget {
                   documents: documents,
                   onReorder: onReorder,
                   onTileTap: onTileTap,
+                  onRotateCw: onRotateCw,
+                  onRotateCcw: onRotateCcw,
+                  onRemove: onRemove,
                   selectedInstanceIds: selectedInstanceIds,
                 ),
         ),
@@ -157,6 +166,9 @@ class _OutputGrid extends StatelessWidget {
     required this.documents,
     required this.onReorder,
     required this.onTileTap,
+    required this.onRotateCw,
+    required this.onRotateCcw,
+    required this.onRemove,
     required this.selectedInstanceIds,
   });
 
@@ -165,6 +177,9 @@ class _OutputGrid extends StatelessWidget {
   final Map<String, PdfDocument> documents;
   final void Function(int oldIndex, int newIndex) onReorder;
   final void Function(PageRef ref)? onTileTap;
+  final void Function(PageRef ref)? onRotateCw;
+  final void Function(PageRef ref)? onRotateCcw;
+  final void Function(PageRef ref)? onRemove;
   final Set<String> selectedInstanceIds;
 
   @override
@@ -212,6 +227,11 @@ class _OutputGrid extends StatelessWidget {
             rotationTurns: ref.rotationTurns,
             selected: selectedInstanceIds.contains(ref.instanceId),
             onTap: onTileTap == null ? null : () => onTileTap!(ref),
+            onRotateCw:
+                onRotateCw == null ? null : () => onRotateCw!(ref),
+            onRotateCcw:
+                onRotateCcw == null ? null : () => onRotateCcw!(ref),
+            onRemove: onRemove == null ? null : () => onRemove!(ref),
           ),
         );
       },
