@@ -192,6 +192,8 @@ class _PageMixBodyState extends State<_PageMixBody> {
                   );
                 },
                 onRemove: () => provider.removeSource(source.id),
+                onSelectAll: () => provider.selectAllPages(source.id),
+                onClearSelection: () => provider.clearSelection(source.id),
               );
             },
           ),

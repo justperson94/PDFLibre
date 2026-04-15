@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:pdfrx/pdfrx.dart';
 
@@ -23,6 +24,8 @@ class SourceTrayWidget extends StatefulWidget {
     required this.onAddSelection,
     required this.onAddRange,
     required this.onRemove,
+    required this.onSelectAll,
+    required this.onClearSelection,
     this.initiallyExpanded = true,
   });
 
@@ -34,6 +37,8 @@ class SourceTrayWidget extends StatefulWidget {
   final VoidCallback onAddSelection;
   final void Function(String rangeText) onAddRange;
   final VoidCallback onRemove;
+  final VoidCallback onSelectAll;
+  final VoidCallback onClearSelection;
   final bool initiallyExpanded;
 
   @override
@@ -69,7 +74,39 @@ class _SourceTrayWidgetState extends State<SourceTrayWidget> {
     final s = context.s;
     final info = widget.source.info;
 
-    return Container(
+    return Shortcuts(
+      shortcuts: <ShortcutActivator, Intent>{
+        const SingleActivator(LogicalKeyboardKey.keyA, meta: true):
+            const _SelectAllIntent(),
+        const SingleActivator(LogicalKeyboardKey.keyA, control: true):
+            const _SelectAllIntent(),
+        const SingleActivator(LogicalKeyboardKey.escape):
+            const _ClearSelectionIntent(),
+        const SingleActivator(LogicalKeyboardKey.enter):
+            const _AppendSelectionIntent(),
+      },
+      child: Actions(
+        actions: <Type, Action<Intent>>{
+          _SelectAllIntent: CallbackAction<_SelectAllIntent>(
+            onInvoke: (_) {
+              widget.onSelectAll();
+              return null;
+            },
+          ),
+          _ClearSelectionIntent: CallbackAction<_ClearSelectionIntent>(
+            onInvoke: (_) {
+              widget.onClearSelection();
+              return null;
+            },
+          ),
+          _AppendSelectionIntent: CallbackAction<_AppendSelectionIntent>(
+            onInvoke: (_) {
+              if (widget.selection.isNotEmpty) widget.onAddSelection();
+              return null;
+            },
+          ),
+        },
+        child: Container(
       padding: const EdgeInsets.symmetric(
         horizontal: 14,
         vertical: 10,
@@ -184,8 +221,22 @@ class _SourceTrayWidgetState extends State<SourceTrayWidget> {
           ],
         ],
       ),
+        ),
+      ),
     );
   }
+}
+
+class _SelectAllIntent extends Intent {
+  const _SelectAllIntent();
+}
+
+class _ClearSelectionIntent extends Intent {
+  const _ClearSelectionIntent();
+}
+
+class _AppendSelectionIntent extends Intent {
+  const _AppendSelectionIntent();
 }
 
 class _ColorDot extends StatelessWidget {
