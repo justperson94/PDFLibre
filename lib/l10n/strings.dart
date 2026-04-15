@@ -234,6 +234,46 @@ class S {
       : 'Selected pages: $selected / $total';
   String get mergeAction => _ko ? '병합하기' : 'Merge';
 
+  // ── Merge mode tabs (파일 순서 / 페이지 혼합) ─────────────────
+
+  String get modeFileOrder => _ko ? '파일 순서' : 'File order';
+  String get modePageMix => _ko ? '페이지 혼합' : 'Page mix';
+
+  // ── Page mix: source tray ──────────────────────────────────
+
+  String get rangeInputHint =>
+      _ko ? '예: 1-3, 5, 7-10' : 'e.g. 1-3, 5, 7-10';
+  String get addAll => _ko ? '전체 추가' : 'Add all';
+  String get addSelection => _ko ? '선택 추가' : 'Add selection';
+  String get addRange => _ko ? '범위 추가' : 'Add range';
+  String selectedCount(int count) =>
+      _ko ? '$count 선택' : '$count selected';
+  String pageMeta(int pageCount, String size) =>
+      _ko ? '$pageCount 페이지 · $size' : '$pageCount pages · $size';
+  String get collapseTray => _ko ? '접기' : 'Collapse';
+  String get expandTray => _ko ? '펼치기' : 'Expand';
+  String get removeSource => _ko ? '소스 제거' : 'Remove source';
+  String get invalidRange => _ko ? '범위 형식이 올바르지 않습니다' : 'Invalid range format';
+
+  // ── Page mix: output canvas ────────────────────────────────
+
+  String get outputEmptyTitle =>
+      _ko ? '출력 페이지가 비어 있습니다' : 'Output is empty';
+  String get outputEmptyHint => _ko
+      ? '위 트레이에서 페이지를 선택해 추가하거나, 드래그해 이곳에 놓으세요'
+      : 'Select pages in the tray above and add them, or drag them here';
+  String outputPageCount(int count) =>
+      _ko ? '출력 페이지: $count개' : 'Output pages: $count';
+  String outputPageAndSourceCount(int pages, int sources) => _ko
+      ? '출력 페이지: $pages개 · 소스 $sources개'
+      : 'Output pages: $pages · Sources: $sources';
+  String get clearOutput => _ko ? '출력 비우기' : 'Clear output';
+  String pageLabelShort(String name, int page) =>
+      _ko ? '$name · p.$page' : '$name · p.$page';
+  String pageLabelRotated(String name, int page, int degrees) => _ko
+      ? '$name · p.$page · $degrees°'
+      : '$name · p.$page · $degrees°';
+
   // ── Edit commands ───────────────────────────────────────────
 
   String rotateCommand(int page, bool clockwise) => _ko

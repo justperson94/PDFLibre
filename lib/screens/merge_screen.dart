@@ -11,6 +11,10 @@ import '../l10n/strings.dart';
 import '../services/file_service.dart';
 import '../services/pdf_service.dart';
 import '../theme/app_theme.dart';
+import 'page_mix_view.dart';
+
+/// Merge screen sub-modes.
+enum _MergeMode { fileOrder, pageMix }
 
 /// PDF merge full screen
 class MergeScreen extends StatefulWidget {
@@ -25,6 +29,7 @@ class MergeScreen extends StatefulWidget {
 class _MergeScreenState extends State<MergeScreen> {
   final _files = <_MergeFile>[];
   int _activeFileIndex = -1;
+  _MergeMode _mode = _MergeMode.fileOrder;
 
   @override
   void initState() {
@@ -175,11 +180,19 @@ class _MergeScreenState extends State<MergeScreen> {
               children: [
                 _buildToolbar(),
                 Divider(height: 1, color: context.colors.borderSubtle),
-                Expanded(
-                  child: _files.isEmpty ? _buildEmptyState() : _buildContent(),
-                ),
+                _buildModeTabs(),
                 Divider(height: 1, color: context.colors.borderSubtle),
-                _buildBottomBar(),
+                Expanded(
+                  child: _mode == _MergeMode.pageMix
+                      ? PageMixView(initialPaths: widget.initialPaths)
+                      : (_files.isEmpty
+                          ? _buildEmptyState()
+                          : _buildContent()),
+                ),
+                if (_mode == _MergeMode.fileOrder) ...[
+                  Divider(height: 1, color: context.colors.borderSubtle),
+                  _buildBottomBar(),
+                ],
               ],
             ),
             if (_isDragging)
@@ -208,6 +221,55 @@ class _MergeScreenState extends State<MergeScreen> {
                 ),
               ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildModeTabs() {
+    final s = context.s;
+    return Container(
+      height: 40,
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      decoration: BoxDecoration(
+        color: context.colors.surfacePrimary,
+        border: Border(
+          bottom: BorderSide(color: context.colors.borderSubtle, width: 1),
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          _buildModeTab(s.modeFileOrder, _MergeMode.fileOrder),
+          const SizedBox(width: 16),
+          _buildModeTab(s.modePageMix, _MergeMode.pageMix),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildModeTab(String label, _MergeMode mode) {
+    final active = _mode == mode;
+    final colors = context.colors;
+    return InkWell(
+      onTap: () => setState(() => _mode = mode),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(
+              color: active ? colors.accentPrimary : Colors.transparent,
+              width: 2,
+            ),
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: active ? FontWeight.w600 : FontWeight.w500,
+            color: active ? colors.accentPrimary : colors.foregroundSecondary,
+          ),
         ),
       ),
     );
