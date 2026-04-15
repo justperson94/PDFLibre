@@ -49,3 +49,6 @@ Gemini_Generated_Image_*.png
 /app_logo.png
 /assets/app_icon_square.png
 /ui_sample_from_pencil/*_backup_*.pen
+
+# Design mockups (local only, not committed)
+/design_mockups/
