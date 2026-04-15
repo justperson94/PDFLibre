@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:pdfrx/pdfrx.dart';
 
@@ -25,6 +26,8 @@ class OutputPageTile extends StatefulWidget {
     this.onRotateCw,
     this.onRotateCcw,
     this.onRemove,
+    this.onMoveLeft,
+    this.onMoveRight,
     this.width = 120,
     this.height = 160,
     this.previewHeight = 130,
@@ -40,6 +43,8 @@ class OutputPageTile extends StatefulWidget {
   final VoidCallback? onRotateCw;
   final VoidCallback? onRotateCcw;
   final VoidCallback? onRemove;
+  final VoidCallback? onMoveLeft;
+  final VoidCallback? onMoveRight;
   final double width;
   final double height;
   final double previewHeight;
@@ -136,7 +141,33 @@ class _OutputPageTileState extends State<OutputPageTile> {
         widget.onRotateCcw != null ||
         widget.onRemove != null;
 
-    return MouseRegion(
+    return Shortcuts(
+      shortcuts: <ShortcutActivator, Intent>{
+        const SingleActivator(LogicalKeyboardKey.arrowLeft, meta: true):
+            const _MoveLeftIntent(),
+        const SingleActivator(LogicalKeyboardKey.arrowLeft, control: true):
+            const _MoveLeftIntent(),
+        const SingleActivator(LogicalKeyboardKey.arrowRight, meta: true):
+            const _MoveRightIntent(),
+        const SingleActivator(LogicalKeyboardKey.arrowRight, control: true):
+            const _MoveRightIntent(),
+      },
+      child: Actions(
+        actions: <Type, Action<Intent>>{
+          _MoveLeftIntent: CallbackAction<_MoveLeftIntent>(
+            onInvoke: (_) {
+              widget.onMoveLeft?.call();
+              return null;
+            },
+          ),
+          _MoveRightIntent: CallbackAction<_MoveRightIntent>(
+            onInvoke: (_) {
+              widget.onMoveRight?.call();
+              return null;
+            },
+          ),
+        },
+        child: MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
       child: InkWell(
@@ -208,8 +239,18 @@ class _OutputPageTileState extends State<OutputPageTile> {
         ),
       ),
     ),
+        ),
+      ),
     );
   }
+}
+
+class _MoveLeftIntent extends Intent {
+  const _MoveLeftIntent();
+}
+
+class _MoveRightIntent extends Intent {
+  const _MoveRightIntent();
 }
 
 class _HoverActions extends StatelessWidget {

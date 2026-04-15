@@ -232,6 +232,12 @@ class _OutputGrid extends StatelessWidget {
             onRotateCcw:
                 onRotateCcw == null ? null : () => onRotateCcw!(ref),
             onRemove: onRemove == null ? null : () => onRemove!(ref),
+            onMoveLeft: index > 0
+                ? () => onReorder(index, index - 1)
+                : null,
+            onMoveRight: index < output.length - 1
+                ? () => onReorder(index, index + 2)
+                : null,
           ),
         );
       },
