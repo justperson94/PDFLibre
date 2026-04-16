@@ -13,9 +13,16 @@ import '../utils/constants.dart';
 import '../widgets/common/app_logo.dart';
 import '../widgets/common/status_bar.dart';
 
-/// Empty state screen — displayed on initial app launch
+/// Empty state screen — displayed on initial app launch.
+///
+/// When [isDragging] is true, the central drop zone card transforms to
+/// signal that a drop is in progress (accent border + tint, icon/text
+/// swapped to drag prompt). The button and shortcuts stay in place to
+/// avoid layout shift while the pointer is over the window.
 class EmptyStateScreen extends StatefulWidget {
-  const EmptyStateScreen({super.key});
+  const EmptyStateScreen({super.key, this.isDragging = false});
+
+  final bool isDragging;
 
   @override
   State<EmptyStateScreen> createState() => _EmptyStateScreenState();
@@ -71,18 +78,37 @@ class _EmptyStateScreenState extends State<EmptyStateScreen> {
   @override
   Widget build(BuildContext context) {
     final s = context.s;
+    final colors = context.colors;
+    final dragging = widget.isDragging;
+    final dropZoneBg = dragging
+        ? Color.alphaBlend(
+            colors.accentPrimary.withValues(alpha: 0.08),
+            colors.surfacePrimary,
+          )
+        : colors.surfacePrimary;
+    final dropZoneBorderColor =
+        dragging ? colors.accentPrimary : colors.borderSubtle;
+    final dropZoneBorderWidth = dragging ? 2.0 : 1.5;
+    final headingText = dragging ? s.dropHere : s.openPdfPrompt;
+    final hintText = dragging ? s.dropDescription : s.openPdfHint;
+    final headingColor =
+        dragging ? colors.accentPrimary : colors.foregroundPrimary;
+    final iconData = dragging ? LucideIcons.download : LucideIcons.fileText;
+    final iconColor =
+        dragging ? colors.accentPrimary : colors.foregroundMuted;
+
     return Scaffold(
-      backgroundColor: context.colors.surfacePrimary,
+      backgroundColor: colors.surfacePrimary,
       body: Column(
         children: [
           // Top toolbar (48px) — logo only
           _buildToolbar(s),
-          Divider(height: 1, color: context.colors.borderSubtle),
+          Divider(height: 1, color: colors.borderSubtle),
 
           // Center content with drop zone
           Expanded(
             child: Container(
-              color: context.colors.surfaceSecondary,
+              color: colors.surfaceSecondary,
               child: Center(
                 child: SingleChildScrollView(
                   child: Padding(
@@ -91,45 +117,47 @@ class _EmptyStateScreenState extends State<EmptyStateScreen> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         // Drop zone card
-                        Container(
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 180),
+                          curve: Curves.easeOut,
                           padding: const EdgeInsets.symmetric(
                             horizontal: 48,
                             vertical: 40,
                           ),
                           decoration: BoxDecoration(
-                            color: context.colors.surfacePrimary,
+                            color: dropZoneBg,
                             borderRadius: BorderRadius.circular(
                               AppTheme.roundedXl,
                             ),
                             border: Border.all(
-                              color: context.colors.borderSubtle,
-                              width: 1.5,
+                              color: dropZoneBorderColor,
+                              width: dropZoneBorderWidth,
                             ),
                           ),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
-                                LucideIcons.fileText,
+                                iconData,
                                 size: 56,
-                                color: context.colors.foregroundMuted,
+                                color: iconColor,
                               ),
                               const SizedBox(height: AppTheme.spacingXl),
                               Text(
-                                s.openPdfPrompt,
+                                headingText,
                                 style: TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.w700,
-                                  color: context.colors.foregroundPrimary,
+                                  color: headingColor,
                                 ),
                               ),
                               const SizedBox(height: AppTheme.spacingSm),
                               Text(
-                                s.openPdfHint,
+                                hintText,
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontSize: 14,
-                                  color: context.colors.foregroundSecondary,
+                                  color: colors.foregroundSecondary,
                                   height: 1.5,
                                 ),
                               ),

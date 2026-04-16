@@ -70,7 +70,7 @@ class S {
   String get merge => _ko ? '병합' : 'Merge';
   String get convert => _ko ? '변환' : 'Convert';
 
-  // ── Drop overlay ────────────────────────────────────────────
+  // ── Empty state drop zone (drag feedback) ───────────────────
 
   String get dropHere => _ko ? 'PDF 파일을 여기에 놓으세요' : 'Drop PDF files here';
   String get dropDescription =>

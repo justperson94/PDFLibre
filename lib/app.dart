@@ -12,7 +12,6 @@ import 'screens/merge_screen.dart';
 import 'services/window_chrome_service.dart';
 import 'theme/app_theme.dart';
 import 'utils/constants.dart';
-import 'widgets/common/drop_overlay.dart';
 
 class PDFLibreApp extends StatelessWidget {
   const PDFLibreApp({super.key});
@@ -156,18 +155,13 @@ class _DropWrapperState extends State<_DropWrapper> {
           );
         }
       },
-      child: Stack(
-        children: [
-          Consumer<PdfProvider>(
-            builder: (context, pdf, _) {
-              if (pdf.hasDocument) {
-                return const MainScreen();
-              }
-              return const EmptyStateScreen();
-            },
-          ),
-          if (_isDragging) DropOverlay(),
-        ],
+      child: Consumer<PdfProvider>(
+        builder: (context, pdf, _) {
+          if (pdf.hasDocument) {
+            return const MainScreen();
+          }
+          return EmptyStateScreen(isDragging: _isDragging);
+        },
       ),
     );
   }
