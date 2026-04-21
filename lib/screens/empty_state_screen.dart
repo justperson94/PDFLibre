@@ -88,7 +88,9 @@ class _EmptyStateScreenState extends State<EmptyStateScreen> {
         : colors.surfacePrimary;
     final dropZoneBorderColor =
         dragging ? colors.accentPrimary : colors.borderSubtle;
-    final dropZoneBorderWidth = dragging ? 2.0 : 1.5;
+    // NOTE: keep width constant. Border.all defaults to strokeAlignInside, so
+    // changing width shifts the container size and visibly jitters the card.
+    const dropZoneBorderWidth = 1.5;
     final headingText = dragging ? s.dropHere : s.openPdfPrompt;
     final hintText = dragging ? s.dropDescription : s.openPdfHint;
     final headingColor =
@@ -111,15 +113,18 @@ class _EmptyStateScreenState extends State<EmptyStateScreen> {
               color: colors.surfaceSecondary,
               child: Center(
                 child: SingleChildScrollView(
+                  physics: const NeverScrollableScrollPhysics(),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 32),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        // Drop zone card
+                        // Drop zone card — fixed width so text swaps
+                        // don't resize the card during drag transition.
                         AnimatedContainer(
                           duration: const Duration(milliseconds: 180),
                           curve: Curves.easeOut,
+                          width: 440,
                           padding: const EdgeInsets.symmetric(
                             horizontal: 48,
                             vertical: 40,
@@ -152,13 +157,16 @@ class _EmptyStateScreenState extends State<EmptyStateScreen> {
                                 ),
                               ),
                               const SizedBox(height: AppTheme.spacingSm),
-                              Text(
-                                hintText,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: colors.foregroundSecondary,
-                                  height: 1.5,
+                              SizedBox(
+                                height: 42, // 2 lines (fontSize 14 × 1.5 × 2)
+                                child: Text(
+                                  hintText,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: colors.foregroundSecondary,
+                                    height: 1.5,
+                                  ),
                                 ),
                               ),
                               const SizedBox(height: AppTheme.spacingXl),
