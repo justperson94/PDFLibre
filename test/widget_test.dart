@@ -21,6 +21,6 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify EmptyStateScreen is rendered (default language: Korean)
-    expect(find.text('PDF 파일을 열어보세요'), findsOneWidget);
+    expect(find.text('PDF 파일을 여기에 놓으세요'), findsOneWidget);
   });
 }

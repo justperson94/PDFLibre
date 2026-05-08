@@ -91,11 +91,8 @@ class _EmptyStateScreenState extends State<EmptyStateScreen> {
     // NOTE: keep width constant. Border.all defaults to strokeAlignInside, so
     // changing width shifts the container size and visibly jitters the card.
     const dropZoneBorderWidth = 1.5;
-    final headingText = dragging ? s.dropHere : s.openPdfPrompt;
-    final hintText = dragging ? s.dropDescription : s.openPdfHint;
     final headingColor =
         dragging ? colors.accentPrimary : colors.foregroundPrimary;
-    final iconData = dragging ? LucideIcons.download : LucideIcons.fileText;
     final iconColor =
         dragging ? colors.accentPrimary : colors.foregroundMuted;
 
@@ -143,13 +140,13 @@ class _EmptyStateScreenState extends State<EmptyStateScreen> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
-                                iconData,
+                                LucideIcons.download,
                                 size: 56,
                                 color: iconColor,
                               ),
                               const SizedBox(height: AppTheme.spacingXl),
                               Text(
-                                headingText,
+                                s.dropHere,
                                 style: TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.w700,
@@ -157,16 +154,13 @@ class _EmptyStateScreenState extends State<EmptyStateScreen> {
                                 ),
                               ),
                               const SizedBox(height: AppTheme.spacingSm),
-                              SizedBox(
-                                height: 42, // 2 lines (fontSize 14 × 1.5 × 2)
-                                child: Text(
-                                  hintText,
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: colors.foregroundSecondary,
-                                    height: 1.5,
-                                  ),
+                              Text(
+                                s.dropDescription,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: colors.foregroundSecondary,
+                                  height: 1.5,
                                 ),
                               ),
                               const SizedBox(height: AppTheme.spacingXl),

@@ -55,10 +55,6 @@ class S {
 
   // ── Empty state ─────────────────────────────────────────────
 
-  String get openPdfPrompt => _ko ? 'PDF 파일을 열어보세요' : 'Open a PDF file';
-  String get openPdfHint => _ko
-      ? 'PDF 파일을 드래그하여 놓거나, 아래 버튼으로 열 수 있습니다'
-      : 'Drag & drop a PDF file, or use the button below';
   String get openPdfButton => _ko ? 'PDF 파일 열기' : 'Open PDF file';
   String get multiFileMergeHint => _ko
       ? '여러 파일을 드래그하면 병합 화면으로 이동합니다'
