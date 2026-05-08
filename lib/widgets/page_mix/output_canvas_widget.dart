@@ -125,33 +125,40 @@ class _EmptyState extends StatelessWidget {
           style: BorderStyle.solid,
         ),
       ),
+      // FittedBox + scaleDown keeps the icon+title+hint legible at typical
+      // window sizes but shrinks gracefully when the output panel is squeezed
+      // (e.g. small windows with several expanded source trays) instead of
+      // throwing a RenderFlex overflow.
       child: Center(
         child: Padding(
           padding: const EdgeInsets.all(AppTheme.spacingMd),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(LucideIcons.layoutGrid,
-                  size: 32, color: colors.foregroundMuted),
-              const SizedBox(height: AppTheme.spacingSm),
-              Text(
-                s.outputEmptyTitle,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: colors.foregroundSecondary,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(LucideIcons.layoutGrid,
+                    size: 28, color: colors.foregroundMuted),
+                const SizedBox(height: 6),
+                Text(
+                  s.outputEmptyTitle,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: colors.foregroundSecondary,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                s.outputEmptyHint,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 11,
-                  color: colors.foregroundMuted,
+                const SizedBox(height: 2),
+                Text(
+                  s.outputEmptyHint,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: colors.foregroundMuted,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -188,7 +195,10 @@ class _OutputGrid extends StatelessWidget {
     return ReorderableListView.builder(
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-      buildDefaultDragHandles: true,
+      // Default handles render as floating affordances overlapping the canvas
+      // header. Use the tile body itself as the drag start (via the wrapping
+      // ReorderableDragStartListener below).
+      buildDefaultDragHandles: false,
       itemCount: output.length,
       onReorder: onReorder,
       proxyDecorator: (child, _, __) => Material(
@@ -216,10 +226,12 @@ class _OutputGrid extends StatelessWidget {
                 ref.rotationDegrees,
               )
             : s.pageLabelShort(stem, ref.pageIndex + 1);
-        return Padding(
+        return ReorderableDragStartListener(
           key: ValueKey(ref.instanceId),
-          padding: const EdgeInsets.only(right: 12),
-          child: OutputPageTile(
+          index: index,
+          child: Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: OutputPageTile(
             page: page,
             globalIndex: index + 1,
             sourceColor: source.colorTag,
@@ -238,6 +250,7 @@ class _OutputGrid extends StatelessWidget {
             onMoveRight: index < output.length - 1
                 ? () => onReorder(index, index + 2)
                 : null,
+          ),
           ),
         );
       },

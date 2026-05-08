@@ -1,4 +1,7 @@
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
@@ -12,6 +15,8 @@ import '../services/pdf_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/page_mix/output_canvas_widget.dart';
 import '../widgets/page_mix/source_tray_widget.dart';
+
+String _shortcutPrefix() => Platform.isMacOS ? 'Cmd' : 'Ctrl';
 
 /// 페이지 혼합 mode view — source trays on top, output canvas below.
 ///
@@ -130,20 +135,22 @@ class _PageMixBodyState extends State<_PageMixBody> {
 
     return Column(
       children: [
-        // Sources area
-        Container(
-          constraints: const BoxConstraints(maxHeight: 340),
-          decoration: BoxDecoration(
-            color: colors.surfaceSecondary,
-            border: Border(
-              bottom: BorderSide(color: colors.borderSubtle, width: 1),
+        // Sources area — takes all remaining vertical space, scrolls when
+        // trays overflow. Trays align to top, leaving empty surfaceSecondary
+        // space below when only a few sources are loaded.
+        Expanded(
+          child: Container(
+            decoration: BoxDecoration(
+              color: colors.surfaceSecondary,
+              border: Border(
+                bottom: BorderSide(color: colors.borderSubtle, width: 1),
+              ),
             ),
-          ),
-          child: ListView.separated(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 24,
-              vertical: 12,
-            ),
+            child: ListView.separated(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24,
+                vertical: 12,
+              ),
             itemCount: provider.sources.length,
             separatorBuilder: (_, __) =>
                 const SizedBox(height: AppTheme.spacingMd),
@@ -155,8 +162,23 @@ class _PageMixBodyState extends State<_PageMixBody> {
                 source: source,
                 document: doc,
                 selection: provider.selectionFor(source.id),
-                onTogglePage: (idx) =>
-                    provider.togglePageSelection(source.id, idx),
+                onTogglePage: (idx) {
+                  final keys = HardwareKeyboard.instance.logicalKeysPressed;
+                  final shift = keys.contains(LogicalKeyboardKey.shiftLeft) ||
+                      keys.contains(LogicalKeyboardKey.shiftRight);
+                  final modifier =
+                      keys.contains(LogicalKeyboardKey.metaLeft) ||
+                          keys.contains(LogicalKeyboardKey.metaRight) ||
+                          keys.contains(LogicalKeyboardKey.controlLeft) ||
+                          keys.contains(LogicalKeyboardKey.controlRight);
+                  if (shift) {
+                    provider.selectRangeFromAnchor(source.id, idx);
+                  } else if (modifier) {
+                    provider.togglePageSelection(source.id, idx);
+                  } else {
+                    provider.selectOnlyPage(source.id, idx);
+                  }
+                },
                 onAddAll: () => history.execute(
                   AddToOutputCommand(
                     sourceId: source.id,
@@ -197,9 +219,13 @@ class _PageMixBodyState extends State<_PageMixBody> {
               );
             },
           ),
+          ),
         ),
-        // Output canvas
-        Expanded(
+        // Output canvas — fixed height anchored at the bottom (above the
+        // action bar). 240px = 160 tile + ~22 header + ~24 vertical padding +
+        // a little buffer. Stays put when sources scroll.
+        SizedBox(
+          height: 240,
           child: Container(
             color: colors.surfacePrimary,
             padding: const EdgeInsets.symmetric(
@@ -268,6 +294,25 @@ class _PageMixBodyState extends State<_PageMixBody> {
                   fontSize: 12,
                   color: colors.foregroundSecondary,
                 ),
+              ),
+              const SizedBox(width: AppTheme.spacingMd),
+              IconButton(
+                tooltip: s.undoTooltip(_shortcutPrefix()),
+                iconSize: 18,
+                visualDensity: VisualDensity.compact,
+                onPressed: history.canUndo
+                    ? () => history.undo(provider)
+                    : null,
+                icon: const Icon(LucideIcons.undo),
+              ),
+              IconButton(
+                tooltip: s.redoTooltip(_shortcutPrefix()),
+                iconSize: 18,
+                visualDensity: VisualDensity.compact,
+                onPressed: history.canRedo
+                    ? () => history.redo(provider)
+                    : null,
+                icon: const Icon(LucideIcons.redo),
               ),
               const Spacer(),
               FilledButton.icon(

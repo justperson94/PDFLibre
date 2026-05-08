@@ -53,6 +53,49 @@ void main() {
     test('selectRange throws on invalid input', () {
       expect(() => provider.selectRange('a', 'abc'), throwsFormatException);
     });
+
+    test('selectOnlyPage replaces selection with a single page and anchors',
+        () {
+      provider.togglePageSelection('a', 1);
+      provider.togglePageSelection('a', 3);
+      provider.selectOnlyPage('a', 7);
+      expect(provider.selectionFor('a'), {7});
+      expect(provider.selectionAnchor('a'), 7);
+    });
+
+    test('togglePageSelection updates the anchor to the toggled page', () {
+      provider.togglePageSelection('a', 4);
+      expect(provider.selectionAnchor('a'), 4);
+      provider.togglePageSelection('a', 8);
+      expect(provider.selectionAnchor('a'), 8);
+    });
+
+    test('selectRangeFromAnchor uses anchor to fill an inclusive range', () {
+      provider.selectOnlyPage('a', 2); // anchor at 2
+      provider.selectRangeFromAnchor('a', 6);
+      expect(provider.selectionFor('a'), {2, 3, 4, 5, 6});
+      // anchor stays put for repeated shift-clicks
+      expect(provider.selectionAnchor('a'), 2);
+    });
+
+    test('selectRangeFromAnchor handles target before anchor', () {
+      provider.selectOnlyPage('a', 6); // anchor at 6
+      provider.selectRangeFromAnchor('a', 3);
+      expect(provider.selectionFor('a'), {3, 4, 5, 6});
+      expect(provider.selectionAnchor('a'), 6);
+    });
+
+    test('selectRangeFromAnchor without prior anchor falls back to single', () {
+      provider.selectRangeFromAnchor('a', 5);
+      expect(provider.selectionFor('a'), {5});
+      expect(provider.selectionAnchor('a'), 5);
+    });
+
+    test('clearSelection also clears anchor', () {
+      provider.selectOnlyPage('a', 3);
+      provider.clearSelection('a');
+      expect(provider.selectionAnchor('a'), isNull);
+    });
   });
 
   group('PageMixProvider output queue', () {

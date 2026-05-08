@@ -228,6 +228,7 @@ class S {
   String filePageSelection(String name) =>
       _ko ? '$name — 페이지 선택' : '$name — select pages';
   String get selectAll => _ko ? '전체 선택' : 'Select all';
+  String get clearSelection => _ko ? '선택 해제' : 'Clear selection';
   String selectedPages(int selected, int total) => _ko
       ? '선택된 페이지: $selected / $total'
       : 'Selected pages: $selected / $total';

@@ -17,6 +17,8 @@ class PageMixProvider extends ChangeNotifier {
   final List<SourcePdf> _sources = [];
   final Map<String, PdfDocument> _documents = {};
   final Map<String, Set<int>> _selections = {};
+  // Per-source anchor for Shift+Click range selection (Finder/Excel style).
+  final Map<String, int> _anchors = {};
   final List<PageRef> _output = [];
 
   int _nextInstanceSeq = 1;
@@ -47,6 +49,9 @@ class PageMixProvider extends ChangeNotifier {
 
   bool isSelected(String sourceId, int pageIndex) =>
       _selections[sourceId]?.contains(pageIndex) ?? false;
+
+  /// Last-clicked page index used as the anchor for Shift+Click range selects.
+  int? selectionAnchor(String sourceId) => _anchors[sourceId];
 
   // === Source management ===
 
@@ -109,6 +114,7 @@ class PageMixProvider extends ChangeNotifier {
     _documents[sourceId]?.dispose();
     _documents.remove(sourceId);
     _selections.remove(sourceId);
+    _anchors.remove(sourceId);
     _sources.removeAt(removedIndex);
     _output.removeWhere((ref) => ref.sourceId == sourceId);
     notifyListeners();
@@ -116,10 +122,45 @@ class PageMixProvider extends ChangeNotifier {
 
   // === Selection ===
 
+  /// Cmd/Ctrl+Click: toggle a single page's selected state, anchoring on it.
   void togglePageSelection(String sourceId, int pageIndex) {
     final sel = _selections[sourceId];
     if (sel == null) return;
     if (!sel.remove(pageIndex)) sel.add(pageIndex);
+    _anchors[sourceId] = pageIndex;
+    notifyListeners();
+  }
+
+  /// Plain click: replace the selection with this single page and anchor here.
+  void selectOnlyPage(String sourceId, int pageIndex) {
+    final sel = _selections[sourceId];
+    if (sel == null) return;
+    sel
+      ..clear()
+      ..add(pageIndex);
+    _anchors[sourceId] = pageIndex;
+    notifyListeners();
+  }
+
+  /// Shift+Click: replace the selection with the inclusive range from the
+  /// existing anchor to [targetIndex]. With no anchor yet, behaves like
+  /// [selectOnlyPage]. The anchor itself does not move.
+  void selectRangeFromAnchor(String sourceId, int targetIndex) {
+    final sel = _selections[sourceId];
+    if (sel == null) return;
+    final anchor = _anchors[sourceId];
+    if (anchor == null) {
+      sel
+        ..clear()
+        ..add(targetIndex);
+      _anchors[sourceId] = targetIndex;
+    } else {
+      final lo = anchor < targetIndex ? anchor : targetIndex;
+      final hi = anchor < targetIndex ? targetIndex : anchor;
+      sel
+        ..clear()
+        ..addAll(List.generate(hi - lo + 1, (i) => lo + i));
+    }
     notifyListeners();
   }
 
@@ -137,6 +178,7 @@ class PageMixProvider extends ChangeNotifier {
     final sel = _selections[sourceId];
     if (sel == null || sel.isEmpty) return;
     sel.clear();
+    _anchors.remove(sourceId);
     notifyListeners();
   }
 

@@ -7,8 +7,8 @@ import '../../theme/app_theme.dart';
 
 /// Tray thumbnail tile for the 페이지 혼합 source tray.
 ///
-/// Matches the Pencil `Thumb` spec: 64×88 rectangle, 4px corner radius,
-/// source-color selection ring (2px) when [selected]; otherwise subtle border.
+/// 84×116 rectangle, 4px corner radius, source-color selection ring (2px)
+/// when [selected]; otherwise subtle border.
 class PageThumbnailTile extends StatefulWidget {
   const PageThumbnailTile({
     super.key,
@@ -16,8 +16,8 @@ class PageThumbnailTile extends StatefulWidget {
     required this.selected,
     required this.sourceColor,
     required this.onTap,
-    this.width = 64,
-    this.height = 88,
+    this.width = 84,
+    this.height = 116,
   });
 
   final PdfPage page;

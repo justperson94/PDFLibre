@@ -50,6 +50,10 @@ class _SourceTrayWidgetState extends State<SourceTrayWidget> {
   final _rangeController = TextEditingController();
   String? _rangeError;
 
+  bool get _allSelected =>
+      widget.selection.length == widget.source.info.pageCount &&
+      widget.source.info.pageCount > 0;
+
   @override
   void dispose() {
     _rangeController.dispose();
@@ -174,15 +178,26 @@ class _SourceTrayWidgetState extends State<SourceTrayWidget> {
                 onSubmitted: _submitRange,
               ),
               const SizedBox(width: AppTheme.spacingSm),
-              if (widget.selection.isNotEmpty)
-                _TrayActionButton(
-                  icon: LucideIcons.listPlus,
-                  label: s.addSelection,
-                  onTap: widget.onAddSelection,
-                  filled: false,
-                ),
-              if (widget.selection.isNotEmpty)
-                const SizedBox(width: AppTheme.spacingXs),
+              _TrayActionButton(
+                icon: LucideIcons.check,
+                label: _allSelected ? s.clearSelection : s.selectAll,
+                onTap: _allSelected
+                    ? widget.onClearSelection
+                    : widget.onSelectAll,
+                filled: false,
+              ),
+              const SizedBox(width: AppTheme.spacingXs),
+              // Always show 선택 추가 — disabled when no selection — so the
+              // button row doesn't jitter as selection comes and goes.
+              _TrayActionButton(
+                icon: LucideIcons.listPlus,
+                label: s.addSelection,
+                onTap: widget.selection.isEmpty
+                    ? null
+                    : widget.onAddSelection,
+                filled: false,
+              ),
+              const SizedBox(width: AppTheme.spacingXs),
               _TrayActionButton(
                 icon: LucideIcons.plus,
                 label: s.addAll,
@@ -315,36 +330,44 @@ class _TrayActionButton extends StatelessWidget {
 
   final IconData icon;
   final String label;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final bool filled;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final bg = filled ? colors.accentPrimary : colors.surfaceSecondary;
-    final fg = filled ? colors.surfacePrimary : colors.foregroundSecondary;
-    return Material(
-      color: bg,
-      borderRadius: BorderRadius.circular(AppTheme.roundedMd),
-      child: InkWell(
-        onTap: onTap,
+    final disabled = onTap == null;
+    final bg = disabled
+        ? colors.surfaceSecondary
+        : (filled ? colors.accentPrimary : colors.surfaceSecondary);
+    final fg = disabled
+        ? colors.foregroundMuted
+        : (filled ? colors.surfacePrimary : colors.foregroundSecondary);
+    return Opacity(
+      opacity: disabled ? 0.55 : 1.0,
+      child: Material(
+        color: bg,
         borderRadius: BorderRadius.circular(AppTheme.roundedMd),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: 12, color: fg),
-              const SizedBox(width: 4),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
-                  color: fg,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(AppTheme.roundedMd),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, size: 12, color: fg),
+                const SizedBox(width: 4),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                    color: fg,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -368,7 +391,7 @@ class _ThumbnailStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 88,
+      height: 116,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: source.info.pageCount,
