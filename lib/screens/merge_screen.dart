@@ -482,6 +482,21 @@ class _MergeScreenState extends State<MergeScreen> {
                       ),
                       child: Row(
                         children: [
+                          // Drag handle — same pattern as sidebar PageThumbnail
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              right: AppTheme.spacingXs,
+                            ),
+                            child: Icon(
+                              LucideIcons.gripVertical,
+                              size: 14,
+                              color: active
+                                  ? context.colors.surfacePrimary.withValues(
+                                      alpha: 0.7,
+                                    )
+                                  : context.colors.foregroundMuted,
+                            ),
+                          ),
                           // First page thumbnail
                           Container(
                             width: 36,
