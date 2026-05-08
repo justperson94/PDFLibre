@@ -143,9 +143,18 @@ class _DropWrapperState extends State<_DropWrapper> {
           return;
         }
 
-        // Single PDF -> ignore if a PDF is already open
+        // Single PDF -> notify and skip if a PDF is already open. We block the
+        // replacement to protect unsaved edits, but a silent ignore felt
+        // broken — the snackbar tells users why nothing happened.
         final provider = context.read<PdfProvider>();
-        if (provider.hasDocument) return;
+        if (provider.hasDocument) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(S.of(context).pdfAlreadyOpen)),
+            );
+          }
+          return;
+        }
 
         final messenger = ScaffoldMessenger.of(context);
         final success = await provider.loadPdf(pdfPaths.first);

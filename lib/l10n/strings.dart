@@ -40,6 +40,9 @@ class S {
       _ko ? '파일을 열 수 없습니다.' : 'Cannot open file.';
   String get onlyPdfAllowed =>
       _ko ? 'PDF 파일만 열 수 있습니다' : 'Only PDF files can be opened';
+  String get pdfAlreadyOpen => _ko
+      ? '이미 열린 PDF가 있습니다. 먼저 닫고 다시 시도하세요.'
+      : 'A PDF is already open. Close it and try again.';
   String get fileNotFound => _ko ? '파일을 찾을 수 없습니다' : 'File not found';
   String get recentFileRemoved => _ko
       ? '파일을 열 수 없어 최근 목록에서 제거했습니다. 다시 선택해주세요.'
