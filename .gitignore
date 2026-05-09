@@ -52,11 +52,6 @@ Gemini_Generated_Image_*.png
 # Design mockups (local only, not committed)
 /design_mockups/
 
-# Private workflow notes & design source (local-only, never committed)
+# Local-only workflow notes & design source (never committed)
 /CLAUDE.md
-/TODO.md
-/CONCEPT.md
-/CODING_AGENT_PROMPT.md
-/ui_sample_from_pencil/DESIGN_SPEC.md
-/ui_sample_from_pencil/*.pen
-/ui_sample_from_pencil/exports/
+/.notes/
