@@ -12,7 +12,6 @@ class AboutSection extends StatelessWidget {
   const AboutSection({super.key});
 
   static const _githubUrl = 'https://github.com/justperson94/PDFLibre';
-  static const _buildNumber = 1;
 
   static Future<void> _openUrl(String url) async {
     if (Platform.isMacOS) {
@@ -99,7 +98,7 @@ class AboutSection extends StatelessWidget {
         children: [
           _InfoRow(
             label: s.version,
-            value: '${AppConstants.appVersion} (build $_buildNumber)',
+            value: '${AppConstants.appVersion} (build ${AppConstants.buildNumber})',
           ),
           Divider(height: 1, color: context.colors.borderSubtle),
           _InfoRow(label: s.platform, value: _platformLabel()),

@@ -6,10 +6,12 @@ import 'app.dart';
 import 'providers/history_provider.dart';
 import 'providers/pdf_provider.dart';
 import 'providers/settings_provider.dart';
+import 'utils/constants.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   pdfrxFlutterInitialize(dismissPdfiumWasmWarnings: true);
+  await AppConstants.loadVersionInfo();
   final settings = SettingsProvider();
   await settings.load();
   runApp(
