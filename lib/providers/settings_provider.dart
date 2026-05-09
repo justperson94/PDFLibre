@@ -36,7 +36,7 @@ class SettingsProvider extends ChangeNotifier {
   static const String defaultFilenameRuleConvert = '{원본}_page{페이지}';
 
   AppThemeMode _themeMode = AppThemeMode.system;
-  AppLanguage _language = AppLanguage.ko;
+  AppLanguage _language = AppLanguage.en;
   SaveLocationMode _saveMode = SaveLocationMode.askEveryTime;
   String _saveFolder = '';
   String _filenameRuleSave = defaultFilenameRuleSave;
@@ -196,11 +196,11 @@ class SettingsProvider extends ChangeNotifier {
 
   AppLanguage _decodeLanguage(String? v) {
     switch (v) {
-      case 'en':
-        return AppLanguage.en;
       case 'ko':
-      default:
         return AppLanguage.ko;
+      case 'en':
+      default:
+        return AppLanguage.en;
     }
   }
 

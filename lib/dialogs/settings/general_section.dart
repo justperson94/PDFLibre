@@ -126,8 +126,8 @@ class GeneralSection extends StatelessWidget {
                 color: context.colors.foregroundPrimary,
               ),
               items: const [
-                DropdownMenuItem(value: AppLanguage.ko, child: Text('한국어')),
                 DropdownMenuItem(value: AppLanguage.en, child: Text('English')),
+                DropdownMenuItem(value: AppLanguage.ko, child: Text('한국어')),
               ],
               onChanged: (v) {
                 if (v != null) settings.setLanguage(v);
