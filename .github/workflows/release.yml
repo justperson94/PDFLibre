@@ -1,0 +1,83 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Build only — do not publish to Releases'
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+jobs:
+  build-macos:
+    name: Build macOS
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.35.6'
+          cache: true
+
+      - name: Install create-dmg
+        run: brew install create-dmg
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Build macOS (release)
+        run: flutter build macos --release
+
+      - name: Resolve app metadata
+        id: meta
+        run: |
+          APP_PATH="build/macos/Build/Products/Release/PDFLibre.app"
+          if [ ! -d "$APP_PATH" ]; then
+            echo "App bundle not found at $APP_PATH" >&2
+            ls build/macos/Build/Products/Release || true
+            exit 1
+          fi
+          VERSION="${GITHUB_REF_NAME#v}"
+          if [ -z "$VERSION" ] || [ "$GITHUB_REF_NAME" = "$VERSION" ]; then
+            VERSION=$(grep '^version:' pubspec.yaml | awk '{print $2}' | cut -d'+' -f1)
+          fi
+          echo "app_path=$APP_PATH" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "dmg_name=PDFLibre-${VERSION}-macos.dmg" >> "$GITHUB_OUTPUT"
+
+      - name: Package as DMG
+        run: |
+          mkdir -p dist
+          create-dmg \
+            --volname "PDFLibre ${{ steps.meta.outputs.version }}" \
+            --window-size 540 360 \
+            --icon-size 96 \
+            --icon "PDFLibre.app" 140 180 \
+            --app-drop-link 400 180 \
+            --no-internet-enable \
+            "dist/${{ steps.meta.outputs.dmg_name }}" \
+            "${{ steps.meta.outputs.app_path }}"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pdflibre-macos
+          path: dist/${{ steps.meta.outputs.dmg_name }}
+          if-no-files-found: error
+
+      - name: Publish to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v') && (github.event_name != 'workflow_dispatch' || inputs.dry_run == false)
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/${{ steps.meta.outputs.dmg_name }}
+          generate_release_notes: true
+          draft: false
+          prerelease: false
