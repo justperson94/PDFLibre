@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 /// Access via `context.colors` (see [AppColorsExt]).
 class AppColors extends ThemeExtension<AppColors> {
   const AppColors({
-    required this.brandBlue,
     required this.accentPrimary,
     required this.accentHover,
     required this.surfacePrimary,
@@ -21,7 +20,6 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.danger,
   });
 
-  final Color brandBlue;
   final Color accentPrimary;
   final Color accentHover;
   final Color surfacePrimary;
@@ -37,7 +35,6 @@ class AppColors extends ThemeExtension<AppColors> {
 
   // ── Light palette ──────────────────────────────────────────────
   static const light = AppColors(
-    brandBlue: Color(0xFF5A7EB5),
     accentPrimary: Color(0xFFEE6B5B),
     accentHover: Color(0xFFD95A4A),
     surfacePrimary: Color(0xFFFFFFFF),
@@ -54,7 +51,6 @@ class AppColors extends ThemeExtension<AppColors> {
 
   // ── Dark palette ───────────────────────────────────────────────
   static const dark = AppColors(
-    brandBlue: Color(0xFF7BA3D4),
     accentPrimary: Color(0xFFEE6B5B),
     accentHover: Color(0xFFF07D6F),
     surfacePrimary: Color(0xFF1A1A1A),
@@ -71,7 +67,6 @@ class AppColors extends ThemeExtension<AppColors> {
 
   @override
   AppColors copyWith({
-    Color? brandBlue,
     Color? accentPrimary,
     Color? accentHover,
     Color? surfacePrimary,
@@ -86,7 +81,6 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? danger,
   }) {
     return AppColors(
-      brandBlue: brandBlue ?? this.brandBlue,
       accentPrimary: accentPrimary ?? this.accentPrimary,
       accentHover: accentHover ?? this.accentHover,
       surfacePrimary: surfacePrimary ?? this.surfacePrimary,
@@ -106,7 +100,6 @@ class AppColors extends ThemeExtension<AppColors> {
   AppColors lerp(AppColors? other, double t) {
     if (other is! AppColors) return this;
     return AppColors(
-      brandBlue: Color.lerp(brandBlue, other.brandBlue, t)!,
       accentPrimary: Color.lerp(accentPrimary, other.accentPrimary, t)!,
       accentHover: Color.lerp(accentHover, other.accentHover, t)!,
       surfacePrimary: Color.lerp(surfacePrimary, other.surfacePrimary, t)!,

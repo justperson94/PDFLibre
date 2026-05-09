@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../theme/app_theme.dart';
 
-/// Branded app logo: icon + "PDF"(blue) + "Libre"(coral)
+/// Branded app logo: icon + "PDF"(neutral) + "Libre"(coral accent).
 class AppLogo extends StatelessWidget {
   const AppLogo({
     super.key,
@@ -40,7 +40,7 @@ class AppLogo extends StatelessWidget {
                 style: TextStyle(
                   fontSize: fontSize,
                   fontWeight: FontWeight.w800,
-                  color: colors.brandBlue,
+                  color: colors.foregroundPrimary,
                 ),
               ),
               TextSpan(

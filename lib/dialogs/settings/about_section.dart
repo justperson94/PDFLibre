@@ -64,7 +64,7 @@ class AboutSection extends StatelessWidget {
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.w700,
-                color: context.colors.brandBlue,
+                color: context.colors.foregroundPrimary,
               ),
             ),
             Text(
@@ -115,7 +115,7 @@ class AboutSection extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
-                      color: context.colors.brandBlue,
+                      color: context.colors.accentPrimary,
                       decoration: TextDecoration.underline,
                     ),
                   ),
@@ -123,7 +123,7 @@ class AboutSection extends StatelessWidget {
                   Icon(
                     LucideIcons.externalLink,
                     size: 12,
-                    color: context.colors.brandBlue,
+                    color: context.colors.accentPrimary,
                   ),
                 ],
               ),
