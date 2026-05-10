@@ -81,3 +81,63 @@ jobs:
           generate_release_notes: true
           draft: false
           prerelease: false
+
+  build-windows:
+    name: Build Windows
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.35.6'
+          cache: true
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Build Windows (release)
+        run: flutter build windows --release
+
+      - name: Resolve build metadata
+        id: meta
+        shell: pwsh
+        run: |
+          $build = "build/windows/x64/runner/Release"
+          if (-not (Test-Path $build)) {
+            Write-Error "Build output not found at $build"
+            exit 1
+          }
+          if ($env:GITHUB_REF_NAME -match '^v(.+)$') {
+            $version = $Matches[1]
+          } else {
+            $line = (Select-String -Path pubspec.yaml -Pattern '^version:').Line
+            $version = ($line -split '\s+')[1] -split '\+' | Select-Object -First 1
+          }
+          $zipName = "PDFLibre-$version-windows.zip"
+          "build_dir=$build" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          "zip_name=$zipName" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+
+      - name: Package as ZIP
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          Compress-Archive -Path "${{ steps.meta.outputs.build_dir }}/*" -DestinationPath "dist/${{ steps.meta.outputs.zip_name }}"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pdflibre-windows
+          path: dist/${{ steps.meta.outputs.zip_name }}
+          if-no-files-found: error
+
+      - name: Publish to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v') && (github.event_name != 'workflow_dispatch' || inputs.dry_run == false)
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/${{ steps.meta.outputs.zip_name }}
+          generate_release_notes: true
+          draft: false
+          prerelease: false
