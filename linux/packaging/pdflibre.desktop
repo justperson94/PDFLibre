@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=PDFLibre
+GenericName=PDF Toolkit
+Comment=Free, open-source desktop PDF toolkit
+Exec=pdflibre %F
+Icon=pdflibre
+Terminal=false
+Categories=Office;Utility;Viewer;
+MimeType=application/pdf;
+StartupWMClass=pdflibre
+Keywords=PDF;merge;split;convert;rotate;
