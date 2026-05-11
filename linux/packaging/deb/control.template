@@ -1,0 +1,13 @@
+Package: pdflibre
+Version: __VERSION__
+Architecture: amd64
+Maintainer: justperson94 <noreply@github.com>
+Depends: libgtk-3-0, libstdc++6, libc6
+Section: utility
+Priority: optional
+Homepage: https://github.com/justperson94/PDFLibre
+Description: Free, open-source desktop PDF toolkit
+ PDFLibre is a free, open-source desktop PDF toolkit that handles
+ everyday operations: merging, splitting, converting pages to images,
+ rotating, and rearranging pages across multiple files. Runs entirely
+ offline — files never leave your machine.

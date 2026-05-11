@@ -182,6 +182,8 @@ jobs:
           echo "bundle_dir=$BUNDLE" >> "$GITHUB_OUTPUT"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "tar_name=PDFLibre-${VERSION}-linux-x64.tar.gz" >> "$GITHUB_OUTPUT"
+          echo "appimage_name=PDFLibre-${VERSION}-x86_64.AppImage" >> "$GITHUB_OUTPUT"
+          echo "deb_name=pdflibre_${VERSION}_amd64.deb" >> "$GITHUB_OUTPUT"
 
       - name: Package as tar.gz
         run: |
@@ -189,18 +191,81 @@ jobs:
           tar -czf "dist/${{ steps.meta.outputs.tar_name }}" \
             -C "${{ steps.meta.outputs.bundle_dir }}" .
 
+      - name: Install AppImage and FUSE dependencies
+        run: |
+          sudo apt-get install -y libfuse2 file desktop-file-utils
+
+      - name: Download AppImage tools
+        run: |
+          wget -q https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+          wget -q https://github.com/linuxdeploy/linuxdeploy-plugin-gtk/releases/download/continuous/linuxdeploy-plugin-gtk.sh
+          chmod +x linuxdeploy-x86_64.AppImage linuxdeploy-plugin-gtk.sh
+
+      - name: Assemble AppDir
+        run: |
+          mkdir -p AppDir/usr/lib/pdflibre
+          cp -r ${{ steps.meta.outputs.bundle_dir }}/* AppDir/usr/lib/pdflibre/
+          install -Dm755 linux/packaging/AppRun.sh AppDir/AppRun
+          install -Dm644 linux/packaging/pdflibre.desktop \
+            AppDir/usr/share/applications/pdflibre.desktop
+          install -Dm644 linux/packaging/icons/pdflibre-256.png \
+            AppDir/usr/share/icons/hicolor/256x256/apps/pdflibre.png
+          cp linux/packaging/pdflibre.desktop AppDir/pdflibre.desktop
+          cp linux/packaging/icons/pdflibre-256.png AppDir/pdflibre.png
+
+      - name: Build AppImage
+        env:
+          DEPLOY_GTK_VERSION: '3'
+        run: |
+          ./linuxdeploy-x86_64.AppImage \
+            --appdir AppDir \
+            --plugin gtk \
+            --output appimage
+          mv PDFLibre*.AppImage "dist/${{ steps.meta.outputs.appimage_name }}"
+
+      - name: Assemble .deb tree
+        run: |
+          DEB_ROOT="deb-root"
+          VERSION="${{ steps.meta.outputs.version }}"
+          mkdir -p "$DEB_ROOT/DEBIAN"
+          mkdir -p "$DEB_ROOT/usr/bin"
+          mkdir -p "$DEB_ROOT/usr/lib/pdflibre"
+          mkdir -p "$DEB_ROOT/usr/share/applications"
+          mkdir -p "$DEB_ROOT/usr/share/icons/hicolor/256x256/apps"
+          mkdir -p "$DEB_ROOT/usr/share/doc/pdflibre"
+          cp -r ${{ steps.meta.outputs.bundle_dir }}/* "$DEB_ROOT/usr/lib/pdflibre/"
+          printf '#!/bin/sh\nexec /usr/lib/pdflibre/pdflibre "$@"\n' \
+            > "$DEB_ROOT/usr/bin/pdflibre"
+          chmod 0755 "$DEB_ROOT/usr/bin/pdflibre"
+          cp linux/packaging/pdflibre.desktop \
+            "$DEB_ROOT/usr/share/applications/pdflibre.desktop"
+          cp linux/packaging/icons/pdflibre-256.png \
+            "$DEB_ROOT/usr/share/icons/hicolor/256x256/apps/pdflibre.png"
+          cp LICENSE "$DEB_ROOT/usr/share/doc/pdflibre/copyright"
+          sed "s/__VERSION__/$VERSION/" linux/packaging/deb/control.template \
+            > "$DEB_ROOT/DEBIAN/control"
+          install -m 0755 linux/packaging/deb/postinst.sh "$DEB_ROOT/DEBIAN/postinst"
+
+      - name: Build .deb
+        run: |
+          dpkg-deb --build --root-owner-group deb-root \
+            "dist/${{ steps.meta.outputs.deb_name }}"
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: pdflibre-linux
-          path: dist/${{ steps.meta.outputs.tar_name }}
+          path: dist/*
           if-no-files-found: error
 
       - name: Publish to GitHub Release
         if: startsWith(github.ref, 'refs/tags/v') && (github.event_name != 'workflow_dispatch' || inputs.dry_run == false)
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/${{ steps.meta.outputs.tar_name }}
+          files: |
+            dist/${{ steps.meta.outputs.tar_name }}
+            dist/${{ steps.meta.outputs.appimage_name }}
+            dist/${{ steps.meta.outputs.deb_name }}
           generate_release_notes: true
           draft: false
           prerelease: false
