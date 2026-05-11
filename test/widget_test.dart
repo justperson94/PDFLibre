@@ -20,7 +20,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // Verify EmptyStateScreen is rendered (default language: Korean)
-    expect(find.text('PDF 파일을 여기에 놓으세요'), findsOneWidget);
+    // Verify EmptyStateScreen is rendered (default language: English)
+    expect(find.text('Drop PDF files here'), findsOneWidget);
   });
 }

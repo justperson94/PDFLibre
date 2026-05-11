@@ -91,34 +91,82 @@ class _PageThumbnailTileState extends State<PageThumbnailTile> {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final borderColor =
-        widget.selected ? widget.sourceColor : colors.borderSubtle;
-    final borderWidth = widget.selected ? 2.0 : 1.0;
+    final radius = BorderRadius.circular(AppTheme.roundedSm);
 
     return InkWell(
       onTap: widget.onTap,
-      borderRadius: BorderRadius.circular(AppTheme.roundedSm),
-      child: Container(
+      borderRadius: radius,
+      child: SizedBox(
         width: widget.width,
         height: widget.height,
-        decoration: BoxDecoration(
-          color: colors.surfaceSecondary,
-          borderRadius: BorderRadius.circular(AppTheme.roundedSm),
-          border: Border.all(color: borderColor, width: borderWidth),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: _thumbnail != null
-            ? RawImage(image: _thumbnail, fit: BoxFit.contain)
-            : Center(
-                child: SizedBox(
-                  width: 14,
-                  height: 14,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 1.5,
-                    color: colors.foregroundMuted,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            // Base tile — fixed size, subtle 1px border always present so the
+            // thumbnail area never shifts when selection toggles.
+            Container(
+              decoration: BoxDecoration(
+                color: colors.surfaceSecondary,
+                borderRadius: radius,
+                border: Border.all(color: colors.borderSubtle, width: 1),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: _thumbnail != null
+                  ? RawImage(image: _thumbnail, fit: BoxFit.contain)
+                  : Center(
+                      child: SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 1.5,
+                          color: colors.foregroundMuted,
+                        ),
+                      ),
+                    ),
+            ),
+            // Selection overlay — tinted wash + thick colored ring + check
+            // badge. Drawn on top so the underlying tile never resizes.
+            if (widget.selected) ...[
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: widget.sourceColor.withValues(alpha: 0.22),
+                      borderRadius: radius,
+                      border: Border.all(color: widget.sourceColor, width: 2.5),
+                    ),
                   ),
                 ),
               ),
+              Positioned(
+                top: 4,
+                right: 4,
+                child: IgnorePointer(
+                  child: Container(
+                    width: 20,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      color: widget.sourceColor,
+                      shape: BoxShape.circle,
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color(0x33000000),
+                          blurRadius: 3,
+                          offset: Offset(0, 1),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.check_rounded,
+                      size: 14,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }
