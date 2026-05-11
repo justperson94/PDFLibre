@@ -81,3 +81,126 @@ jobs:
           generate_release_notes: true
           draft: false
           prerelease: false
+
+  build-windows:
+    name: Build Windows
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.35.6'
+          cache: true
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Build Windows (release)
+        run: flutter build windows --release
+
+      - name: Resolve build metadata
+        id: meta
+        shell: pwsh
+        run: |
+          $build = "build/windows/x64/runner/Release"
+          if (-not (Test-Path $build)) {
+            Write-Error "Build output not found at $build"
+            exit 1
+          }
+          if ($env:GITHUB_REF_NAME -match '^v(.+)$') {
+            $version = $Matches[1]
+          } else {
+            $line = (Select-String -Path pubspec.yaml -Pattern '^version:').Line
+            $version = ($line -split '\s+')[1] -split '\+' | Select-Object -First 1
+          }
+          $zipName = "PDFLibre-$version-windows.zip"
+          "build_dir=$build" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          "zip_name=$zipName" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+
+      - name: Package as ZIP
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          Compress-Archive -Path "${{ steps.meta.outputs.build_dir }}/*" -DestinationPath "dist/${{ steps.meta.outputs.zip_name }}"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pdflibre-windows
+          path: dist/${{ steps.meta.outputs.zip_name }}
+          if-no-files-found: error
+
+      - name: Publish to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v') && (github.event_name != 'workflow_dispatch' || inputs.dry_run == false)
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/${{ steps.meta.outputs.zip_name }}
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+
+  build-linux:
+    name: Build Linux
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Linux build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config \
+            libgtk-3-dev liblzma-dev libstdc++-12-dev
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.35.6'
+          cache: true
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Build Linux (release)
+        run: flutter build linux --release
+
+      - name: Resolve build metadata
+        id: meta
+        run: |
+          BUNDLE="build/linux/x64/release/bundle"
+          if [ ! -d "$BUNDLE" ]; then
+            echo "Build output not found at $BUNDLE" >&2
+            ls build/linux/x64/release || true
+            exit 1
+          fi
+          VERSION="${GITHUB_REF_NAME#v}"
+          if [ -z "$VERSION" ] || [ "$GITHUB_REF_NAME" = "$VERSION" ]; then
+            VERSION=$(grep '^version:' pubspec.yaml | awk '{print $2}' | cut -d'+' -f1)
+          fi
+          echo "bundle_dir=$BUNDLE" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tar_name=PDFLibre-${VERSION}-linux-x64.tar.gz" >> "$GITHUB_OUTPUT"
+
+      - name: Package as tar.gz
+        run: |
+          mkdir -p dist
+          tar -czf "dist/${{ steps.meta.outputs.tar_name }}" \
+            -C "${{ steps.meta.outputs.bundle_dir }}" .
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pdflibre-linux
+          path: dist/${{ steps.meta.outputs.tar_name }}
+          if-no-files-found: error
+
+      - name: Publish to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v') && (github.event_name != 'workflow_dispatch' || inputs.dry_run == false)
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/${{ steps.meta.outputs.tar_name }}
+          generate_release_notes: true
+          draft: false
+          prerelease: false
