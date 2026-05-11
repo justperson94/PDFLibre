@@ -19,6 +19,7 @@ class SourceTrayWidget extends StatefulWidget {
     required this.source,
     required this.document,
     required this.selection,
+    required this.outputCountFor,
     required this.onTogglePage,
     required this.onAddAll,
     required this.onAddSelection,
@@ -32,6 +33,7 @@ class SourceTrayWidget extends StatefulWidget {
   final SourcePdf source;
   final PdfDocument document;
   final Set<int> selection;
+  final int Function(int pageIndex) outputCountFor;
   final void Function(int pageIndex) onTogglePage;
   final VoidCallback onAddAll;
   final VoidCallback onAddSelection;
@@ -231,6 +233,7 @@ class _SourceTrayWidgetState extends State<SourceTrayWidget> {
               source: widget.source,
               document: widget.document,
               selection: widget.selection,
+              outputCountFor: widget.outputCountFor,
               onTogglePage: widget.onTogglePage,
             ),
           ],
@@ -380,12 +383,14 @@ class _ThumbnailStrip extends StatelessWidget {
     required this.source,
     required this.document,
     required this.selection,
+    required this.outputCountFor,
     required this.onTogglePage,
   });
 
   final SourcePdf source;
   final PdfDocument document;
   final Set<int> selection;
+  final int Function(int pageIndex) outputCountFor;
   final void Function(int pageIndex) onTogglePage;
 
   @override
@@ -401,6 +406,7 @@ class _ThumbnailStrip extends StatelessWidget {
             page: document.pages[i],
             selected: selection.contains(i),
             sourceColor: source.colorTag,
+            outputCount: outputCountFor(i),
             onTap: () => onTogglePage(i),
           );
         },

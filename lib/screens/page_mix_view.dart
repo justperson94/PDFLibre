@@ -162,6 +162,8 @@ class _PageMixBodyState extends State<_PageMixBody> {
                 source: source,
                 document: doc,
                 selection: provider.selectionFor(source.id),
+                outputCountFor: (idx) =>
+                    provider.outputCountFor(source.id, idx),
                 onTogglePage: (idx) {
                   final keys = HardwareKeyboard.instance.logicalKeysPressed;
                   final shift = keys.contains(LogicalKeyboardKey.shiftLeft) ||

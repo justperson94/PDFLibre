@@ -7,8 +7,12 @@ import '../../theme/app_theme.dart';
 
 /// Tray thumbnail tile for the 페이지 혼합 source tray.
 ///
-/// 84×116 rectangle, 4px corner radius, source-color selection ring (2px)
-/// when [selected]; otherwise subtle border.
+/// 84×116 rectangle, 4px corner radius.
+/// - [selected]: source-color ring + tinted wash + check badge (overlay only,
+///   the tile itself never resizes).
+/// - [outputCount] > 0: a small "in output" indicator at the bottom-left
+///   (badge with count) so the user can see at a glance which source pages
+///   are already in the output queue, independent of current selection.
 class PageThumbnailTile extends StatefulWidget {
   const PageThumbnailTile({
     super.key,
@@ -16,6 +20,7 @@ class PageThumbnailTile extends StatefulWidget {
     required this.selected,
     required this.sourceColor,
     required this.onTap,
+    this.outputCount = 0,
     this.width = 84,
     this.height = 116,
   });
@@ -24,6 +29,7 @@ class PageThumbnailTile extends StatefulWidget {
   final bool selected;
   final Color sourceColor;
   final VoidCallback onTap;
+  final int outputCount;
   final double width;
   final double height;
 
@@ -165,6 +171,57 @@ class _PageThumbnailTileState extends State<PageThumbnailTile> {
                 ),
               ),
             ],
+            // "In output" badge — independent of selection. Bottom-left so it
+            // doesn't collide with the selection check badge at top-right.
+            // Shows count when the page was added more than once (duplicates
+            // are allowed via PageRef.instanceId).
+            if (widget.outputCount > 0)
+              Positioned(
+                left: 4,
+                bottom: 4,
+                child: IgnorePointer(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
+                    constraints: const BoxConstraints(minWidth: 20),
+                    decoration: BoxDecoration(
+                      color: colors.foregroundPrimary,
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color(0x33000000),
+                          blurRadius: 3,
+                          offset: Offset(0, 1),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.check_circle_rounded,
+                          size: 11,
+                          color: colors.surfacePrimary,
+                        ),
+                        if (widget.outputCount > 1) ...[
+                          const SizedBox(width: 3),
+                          Text(
+                            '${widget.outputCount}',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              color: colors.surfacePrimary,
+                              height: 1.0,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),

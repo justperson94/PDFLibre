@@ -50,6 +50,17 @@ class PageMixProvider extends ChangeNotifier {
   bool isSelected(String sourceId, int pageIndex) =>
       _selections[sourceId]?.contains(pageIndex) ?? false;
 
+  /// Number of times this source page appears in the output queue.
+  /// Duplicates are allowed (each instance has its own [PageRef.instanceId]),
+  /// so this returns 0, 1, or more.
+  int outputCountFor(String sourceId, int pageIndex) {
+    var count = 0;
+    for (final ref in _output) {
+      if (ref.sourceId == sourceId && ref.pageIndex == pageIndex) count++;
+    }
+    return count;
+  }
+
   /// Last-clicked page index used as the anchor for Shift+Click range selects.
   int? selectionAnchor(String sourceId) => _anchors[sourceId];
 
