@@ -130,6 +130,21 @@ class _PageThumbnailTileState extends State<PageThumbnailTile> {
                       ),
                     ),
             ),
+            // "Already in output" dim overlay — desaturating wash so the
+            // page reads as "used" at a glance. Sits *under* the selection
+            // overlay so a currently-selected page still pops with its
+            // source color even if also in the output.
+            if (widget.outputCount > 0)
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.32),
+                      borderRadius: radius,
+                    ),
+                  ),
+                ),
+              ),
             // Selection overlay — tinted wash + thick colored ring + check
             // badge. Drawn on top so the underlying tile never resizes.
             if (widget.selected) ...[
