@@ -131,6 +131,19 @@ class S {
       : 'The PDF file is corrupted or in an unsupported format.\nPlease select another file.';
   String get pickAnotherFile => _ko ? '다른 파일 선택' : 'Select another file';
 
+  // ── Password dialog ─────────────────────────────────────────
+
+  String get passwordDialogTitle =>
+      _ko ? '비밀번호가 필요한 PDF' : 'Password-protected PDF';
+  String get passwordDialogSubtitle =>
+      _ko ? '이 PDF를 열려면 비밀번호를 입력하세요.' : 'Enter the password to open this PDF.';
+  String get passwordWrong =>
+      _ko ? '비밀번호가 올바르지 않습니다. 다시 시도하세요.' : 'Incorrect password — please try again.';
+  String get passwordLabel => _ko ? '비밀번호' : 'Password';
+  String get passwordOpen => _ko ? '열기' : 'Open';
+  String get passwordShow => _ko ? '비밀번호 표시' : 'Show password';
+  String get passwordHide => _ko ? '비밀번호 숨기기' : 'Hide password';
+
   // ── Close confirmation ──────────────────────────────────────
 
   String get closeDocTitle => _ko ? '문서 닫기' : 'Close document';

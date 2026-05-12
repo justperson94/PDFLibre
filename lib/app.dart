@@ -12,6 +12,7 @@ import 'screens/merge_screen.dart';
 import 'services/window_chrome_service.dart';
 import 'theme/app_theme.dart';
 import 'utils/constants.dart';
+import 'utils/pdf_open_helper.dart';
 
 class PDFLibreApp extends StatelessWidget {
   const PDFLibreApp({super.key});
@@ -157,11 +158,14 @@ class _DropWrapperState extends State<_DropWrapper> {
         }
 
         final messenger = ScaffoldMessenger.of(context);
-        final success = await provider.loadPdf(pdfPaths.first);
+        final cannotOpenLabel = S.of(context).cannotOpenFile;
+        final success = await loadPdfInteractive(
+          context,
+          provider,
+          pdfPaths.first,
+        );
         if (!success && mounted) {
-          messenger.showSnackBar(
-            SnackBar(content: Text(S.of(context).cannotOpenFile)),
-          );
+          messenger.showSnackBar(SnackBar(content: Text(cannotOpenLabel)));
         }
       },
       child: Consumer<PdfProvider>(

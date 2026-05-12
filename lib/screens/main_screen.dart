@@ -20,6 +20,7 @@ import '../services/file_service.dart';
 import '../services/pdf_service.dart';
 import '../services/recent_files_service.dart';
 import '../theme/app_theme.dart';
+import '../utils/pdf_open_helper.dart';
 import '../widgets/common/status_bar.dart';
 import '../widgets/sidebar/sidebar.dart';
 import '../widgets/toolbar/top_toolbar.dart';
@@ -66,7 +67,7 @@ class _MainScreenState extends State<MainScreen> {
     if (path == null || !mounted) return;
 
     final provider = context.read<PdfProvider>();
-    final success = await provider.loadPdf(path);
+    final success = await loadPdfInteractive(context, provider, path);
 
     if (success && mounted) {
       context.read<HistoryProvider>().clear();

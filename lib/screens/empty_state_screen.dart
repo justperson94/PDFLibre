@@ -9,6 +9,7 @@ import '../providers/pdf_provider.dart';
 import '../services/file_service.dart';
 import '../services/recent_files_service.dart';
 import '../theme/app_theme.dart';
+import '../utils/pdf_open_helper.dart';
 import '../utils/constants.dart';
 import '../widgets/common/app_logo.dart';
 import '../widgets/common/status_bar.dart';
@@ -52,7 +53,7 @@ class _EmptyStateScreenState extends State<EmptyStateScreen> {
   Future<void> _loadPdf(String path, {bool fromRecent = false}) async {
     final s = S.of(context);
     final provider = context.read<PdfProvider>();
-    final success = await provider.loadPdf(path);
+    final success = await loadPdfInteractive(context, provider, path);
 
     if (success) {
       await RecentFilesService.add(path);

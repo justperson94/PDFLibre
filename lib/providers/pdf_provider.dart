@@ -53,8 +53,15 @@ class PdfProvider extends ChangeNotifier {
   int getPageRotation(int displayIndex) =>
       _rotations[_pageOrder[displayIndex]] ?? 0;
 
-  /// Load a PDF file
-  Future<bool> loadPdf(String filePath) async {
+  /// Load a PDF file.
+  ///
+  /// [passwordProvider] is called when the PDF is encrypted; it returns the
+  /// password to attempt, or null to abort. pdfrx will keep invoking the
+  /// callback until it returns a working password or null.
+  Future<bool> loadPdf(
+    String filePath, {
+    PdfPasswordProvider? passwordProvider,
+  }) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -71,7 +78,11 @@ class PdfProvider extends ChangeNotifier {
 
       // Read file as bytes and pass directly to pdfium (bypasses macOS sandbox)
       final bytes = await file.readAsBytes();
-      _document = await PdfDocument.openData(bytes, sourceName: filePath);
+      _document = await PdfDocument.openData(
+        bytes,
+        sourceName: filePath,
+        passwordProvider: passwordProvider,
+      );
       _originalPdfBytes = bytes;
       _pdfBytes = bytes;
       _version++;
@@ -117,7 +128,7 @@ class PdfProvider extends ChangeNotifier {
 
     _version++;
     debugPrint(
-      '[PDFLibre] Rotate page ${originalPageIndex + 1} ${clockwise ? 'CW' : 'CCW'} 90° → ${newRotation}°',
+      '[PDFLibre] Rotate page ${originalPageIndex + 1} ${clockwise ? 'CW' : 'CCW'} 90° → $newRotation°',
     );
     notifyListeners();
     _scheduleRebuild();
