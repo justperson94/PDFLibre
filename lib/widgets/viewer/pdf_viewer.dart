@@ -1,9 +1,24 @@
-import 'dart:typed_data';
+import 'dart:io' show Platform;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pdfrx/pdfrx.dart';
 
 import '../../theme/app_theme.dart';
+
+/// Mouse-wheel scroll multiplier for the PDF body viewer.
+///
+/// pdfrx's default of 0.2 is tuned for continuous trackpad deltas. On Windows
+/// and Linux the OS reports a chunky ~120-unit delta per wheel notch, which
+/// at 0.2 produces a tiny 24-logical-pixel step per click — extremely
+/// sluggish. Bumping the multiplier on those platforms restores the
+/// per-notch step to a comfortable ~70px. macOS trackpad keeps the original
+/// continuous feel.
+double _pdfWheelMultiplier() {
+  if (kIsWeb) return 0.6;
+  if (Platform.isWindows || Platform.isLinux) return 0.6;
+  return 0.2;
+}
 
 /// PDF rendering viewer widget (based on pdfrx)
 class PdfViewerWidget extends StatefulWidget {
@@ -79,6 +94,7 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
             offset: Offset(0, 2),
           ),
           enableKeyboardNavigation: false,
+          scrollByMouseWheel: _pdfWheelMultiplier(),
         ),
         initialPageNumber: widget.currentPage,
       ),
