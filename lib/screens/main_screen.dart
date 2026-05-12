@@ -479,6 +479,8 @@ class _MainScreenState extends State<MainScreen> {
                                           controller: _viewerController,
                                           currentPage: pdf.currentPage,
                                           onPageChanged: pdf.setPage,
+                                          passwordProvider:
+                                              pdf.viewerPasswordProvider,
                                         )
                                       : const SizedBox.shrink(),
                                 ),

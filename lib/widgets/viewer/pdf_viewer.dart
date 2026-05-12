@@ -29,6 +29,7 @@ class PdfViewerWidget extends StatefulWidget {
     required this.controller,
     required this.currentPage,
     required this.onPageChanged,
+    this.passwordProvider,
   });
 
   final Uint8List pdfBytes;
@@ -36,6 +37,11 @@ class PdfViewerWidget extends StatefulWidget {
   final PdfViewerController controller;
   final int currentPage;
   final ValueChanged<int> onPageChanged;
+
+  /// Supplies the password when the underlying [PdfViewer.data] reopens the
+  /// bytes (it loads its own document instance separately from the provider).
+  /// Null for unencrypted PDFs.
+  final PdfPasswordProvider? passwordProvider;
 
   @override
   State<PdfViewerWidget> createState() => _PdfViewerWidgetState();
@@ -85,6 +91,7 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
         widget.pdfBytes,
         sourceName: widget.sourceName,
         controller: widget.controller,
+        passwordProvider: widget.passwordProvider,
         params: PdfViewerParams(
           margin: AppTheme.spacingXl,
           backgroundColor: c.surfaceSecondary,

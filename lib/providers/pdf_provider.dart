@@ -27,6 +27,12 @@ class PdfProvider extends ChangeNotifier {
   /// Page display order (display index -> original page index)
   List<int> _pageOrder = [];
 
+  /// The password that successfully unlocked the current document, if any.
+  /// Held in memory only — never persisted — so the secondary
+  /// [PdfViewer.data] load that pdfrx performs in the body widget can
+  /// supply the same password without prompting the user a second time.
+  String? _password;
+
   Timer? _encodeTimer;
 
   // === Getters ===
@@ -45,6 +51,16 @@ class PdfProvider extends ChangeNotifier {
   String get originalFilePath => _originalFilePath;
   Map<int, int> get rotations => Map.unmodifiable(_rotations);
   List<int> get pageOrder => List.unmodifiable(_pageOrder);
+
+  /// A PasswordProvider that immediately returns the cached password for the
+  /// currently-loaded document, or null if the document was not encrypted.
+  /// Use when handing the same bytes to a secondary pdfrx widget (e.g. the
+  /// in-app viewer) that performs its own open call.
+  PdfPasswordProvider? get viewerPasswordProvider {
+    final pw = _password;
+    if (pw == null) return null;
+    return () => pw;
+  }
 
   /// Original page index for a given display index
   int getOriginalPageIndex(int displayIndex) => _pageOrder[displayIndex];
@@ -70,6 +86,7 @@ class PdfProvider extends ChangeNotifier {
       _encodeTimer?.cancel();
       _document?.dispose();
       _document = null;
+      _password = null;
 
       final file = File(filePath);
       if (!file.existsSync()) {
@@ -78,11 +95,26 @@ class PdfProvider extends ChangeNotifier {
 
       // Read file as bytes and pass directly to pdfium (bypasses macOS sandbox)
       final bytes = await file.readAsBytes();
+
+      // Wrap the caller's PasswordProvider so we can capture the password
+      // that successfully unlocked the document. pdfrx invokes the provider
+      // in a loop until one of its returns works; after openData returns
+      // we know the most recent non-null value is the correct one.
+      String? candidatePassword;
+      PdfPasswordProvider? captureProvider;
+      if (passwordProvider != null) {
+        captureProvider = () async {
+          final value = await passwordProvider();
+          candidatePassword = value;
+          return value;
+        };
+      }
       _document = await PdfDocument.openData(
         bytes,
         sourceName: filePath,
-        passwordProvider: passwordProvider,
+        passwordProvider: captureProvider,
       );
+      _password = candidatePassword;
       _originalPdfBytes = bytes;
       _pdfBytes = bytes;
       _version++;
@@ -100,6 +132,7 @@ class PdfProvider extends ChangeNotifier {
       _document = null;
       _pdfBytes = null;
       _originalPdfBytes = null;
+      _password = null;
       _originalFilePath = '';
       _fileName = '';
       _fileSize = '';
@@ -227,6 +260,7 @@ class PdfProvider extends ChangeNotifier {
     _document = null;
     _pdfBytes = null;
     _originalPdfBytes = null;
+    _password = null;
     _originalFilePath = '';
     _fileName = '';
     _fileSize = '';
