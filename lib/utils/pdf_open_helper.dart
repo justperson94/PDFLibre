@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 import 'package:pdfrx/pdfrx.dart';
 
@@ -13,11 +15,34 @@ class PdfPasswordCache {
   PdfPasswordCache._();
 
   static final Map<String, String> _store = {};
+  // In-flight prompt completers keyed by cacheKey. When two concurrent
+  // open flows ask for the same encrypted file's password (which has been
+  // observed with the merge screen in release builds), the second caller
+  // joins the first caller's pending prompt instead of stacking a second
+  // dialog box on top.
+  static final Map<String, Completer<String?>> _pending = {};
 
   static String? get(String key) => _store[key];
   static void put(String key, String value) => _store[key] = value;
   static void remove(String key) => _store.remove(key);
-  static void clear() => _store.clear();
+  static void clear() {
+    _store.clear();
+    _pending.clear();
+  }
+
+  /// If another caller is already prompting for [key], return its future.
+  static Future<String?>? awaitPending(String key) => _pending[key]?.future;
+
+  /// Reserve a prompt slot for [key]. Caller must complete the returned
+  /// completer (with the result of the prompt) when the dialog resolves.
+  static Completer<String?> beginPrompt(String key) {
+    final c = Completer<String?>();
+    _pending[key] = c;
+    return c;
+  }
+
+  /// Release the in-flight slot for [key] after the completer has resolved.
+  static void endPrompt(String key) => _pending.remove(key);
 }
 
 /// Mutable signal an open flow can read after [makePasswordProvider]
@@ -79,11 +104,32 @@ PdfPasswordProvider makePasswordProvider(
       outcome?.cancelled = true;
       return null;
     }
-    final password = await showPasswordDialog(
-      context,
-      fileName: fileName,
-      retry: attempts > 0,
-    );
+
+    // If another open flow is already prompting for this file, join its
+    // result instead of opening a second dialog on top.
+    if (cacheKey != null) {
+      final pending = PdfPasswordCache.awaitPending(cacheKey);
+      if (pending != null) {
+        attempts++;
+        final shared = await pending;
+        if (shared == null) outcome?.cancelled = true;
+        return shared;
+      }
+    }
+
+    final completer =
+        cacheKey != null ? PdfPasswordCache.beginPrompt(cacheKey) : null;
+    String? password;
+    try {
+      password = await showPasswordDialog(
+        context,
+        fileName: fileName,
+        retry: attempts > 0,
+      );
+    } finally {
+      if (cacheKey != null) PdfPasswordCache.endPrompt(cacheKey);
+      completer?.complete(password);
+    }
     attempts++;
     if (password == null) {
       outcome?.cancelled = true;
