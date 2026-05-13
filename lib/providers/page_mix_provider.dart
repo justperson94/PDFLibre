@@ -368,9 +368,13 @@ class PageMixProvider extends ChangeNotifier {
     for (final doc in _documents.values) {
       doc.dispose();
     }
-    for (final source in _sources) {
-      PdfPasswordCache.remove(source.info.filePath);
-    }
+    // NOTE: do not clear PdfPasswordCache here. PageMixView is re-created
+    // every time the user toggles between "File order" and "Page mix"
+    // tabs in MergeScreen, so disposing this provider does not mean the
+    // user is done with these files. The cache is cleared at the higher
+    // boundaries instead: MergeScreen.dispose() (real exit),
+    // removeSource() (explicit user X), reset() (explicit user clear),
+    // and PdfProvider.closeDocument() (main viewer close).
     super.dispose();
   }
 }
