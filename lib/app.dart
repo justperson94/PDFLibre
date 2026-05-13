@@ -159,12 +159,12 @@ class _DropWrapperState extends State<_DropWrapper> {
 
         final messenger = ScaffoldMessenger.of(context);
         final cannotOpenLabel = S.of(context).cannotOpenFile;
-        final success = await loadPdfInteractive(
+        final result = await loadPdfInteractive(
           context,
           provider,
           pdfPaths.first,
         );
-        if (!success && mounted) {
+        if (result == PdfOpenResult.error && mounted) {
           messenger.showSnackBar(SnackBar(content: Text(cannotOpenLabel)));
         }
       },

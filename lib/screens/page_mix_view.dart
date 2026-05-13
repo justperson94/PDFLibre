@@ -13,6 +13,7 @@ import '../providers/page_mix_provider.dart';
 import '../services/file_service.dart';
 import '../services/pdf_service.dart';
 import '../theme/app_theme.dart';
+import '../utils/pdf_open_helper.dart';
 import '../widgets/page_mix/output_canvas_widget.dart';
 import '../widgets/page_mix/source_tray_widget.dart';
 
@@ -60,7 +61,18 @@ class _PageMixBodyState extends State<_PageMixBody> {
   Future<void> _loadInitial() async {
     final provider = context.read<PageMixProvider>();
     for (final path in widget.initialPaths!) {
-      await provider.addSource(path);
+      if (!mounted) return;
+      await provider.addSource(
+        path,
+        passwordProvider: makePasswordProvider(
+          context,
+          fileName: Uri.file(path).pathSegments.last,
+          cacheKey: path,
+        ),
+        // PageMixProvider does not surface a per-file error UI yet; if the
+        // user cancels the password prompt, addSource just resolves null and
+        // the source is skipped silently — the desired behaviour.
+      );
     }
   }
 
@@ -72,7 +84,18 @@ class _PageMixBodyState extends State<_PageMixBody> {
     if (paths.isEmpty || !mounted) return;
     final provider = context.read<PageMixProvider>();
     for (final path in paths) {
-      await provider.addSource(path);
+      if (!mounted) return;
+      await provider.addSource(
+        path,
+        passwordProvider: makePasswordProvider(
+          context,
+          fileName: Uri.file(path).pathSegments.last,
+          cacheKey: path,
+        ),
+        // PageMixProvider does not surface a per-file error UI yet; if the
+        // user cancels the password prompt, addSource just resolves null and
+        // the source is skipped silently — the desired behaviour.
+      );
     }
   }
 

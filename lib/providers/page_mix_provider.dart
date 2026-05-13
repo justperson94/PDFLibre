@@ -7,6 +7,7 @@ import '../models/page_mix.dart';
 import '../models/pdf_file_info.dart';
 import '../services/file_service.dart';
 import '../services/pdf_service.dart';
+import '../utils/pdf_open_helper.dart';
 
 /// Provider for the "페이지 혼합" merge mode.
 ///
@@ -70,7 +71,12 @@ class PageMixProvider extends ChangeNotifier {
   ///
   /// Returns the new [SourcePdf] on success, or null on failure (error is
   /// set on [error]). Idempotent: loading a file already added is a no-op.
-  Future<SourcePdf?> addSource(String filePath) async {
+  ///
+  /// [passwordProvider] is forwarded to pdfrx when the file is encrypted.
+  Future<SourcePdf?> addSource(
+    String filePath, {
+    PdfPasswordProvider? passwordProvider,
+  }) async {
     // Dedup: same file path → existing source
     final existing = _sources.where((s) => s.info.filePath == filePath);
     if (existing.isNotEmpty) {
@@ -87,7 +93,11 @@ class PageMixProvider extends ChangeNotifier {
         throw FileSystemException('파일을 찾을 수 없습니다', filePath);
       }
       final bytes = await file.readAsBytes();
-      final doc = await PdfDocument.openData(bytes, sourceName: filePath);
+      final doc = await PdfDocument.openData(
+        bytes,
+        sourceName: filePath,
+        passwordProvider: passwordProvider,
+      );
 
       final id = filePath;
       final info = PdfFileInfo(
@@ -122,12 +132,14 @@ class PageMixProvider extends ChangeNotifier {
     final removedIndex = _sources.indexWhere((s) => s.id == sourceId);
     if (removedIndex < 0) return;
 
+    final removed = _sources[removedIndex];
     _documents[sourceId]?.dispose();
     _documents.remove(sourceId);
     _selections.remove(sourceId);
     _anchors.remove(sourceId);
     _sources.removeAt(removedIndex);
     _output.removeWhere((ref) => ref.sourceId == sourceId);
+    PdfPasswordCache.remove(removed.info.filePath);
     notifyListeners();
   }
 
@@ -338,6 +350,9 @@ class PageMixProvider extends ChangeNotifier {
     for (final doc in _documents.values) {
       doc.dispose();
     }
+    for (final source in _sources) {
+      PdfPasswordCache.remove(source.info.filePath);
+    }
     _documents.clear();
     _sources.clear();
     _selections.clear();
@@ -352,6 +367,9 @@ class PageMixProvider extends ChangeNotifier {
   void dispose() {
     for (final doc in _documents.values) {
       doc.dispose();
+    }
+    for (final source in _sources) {
+      PdfPasswordCache.remove(source.info.filePath);
     }
     super.dispose();
   }

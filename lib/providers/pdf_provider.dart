@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:pdfrx/pdfrx.dart';
 
 import '../services/file_service.dart';
+import '../utils/pdf_open_helper.dart';
 
 /// Provider for managing PDF document state
 class PdfProvider extends ChangeNotifier {
@@ -222,9 +223,12 @@ class PdfProvider extends ChangeNotifier {
     }
 
     try {
+      final cachedPassword = _password;
       final sourceDoc = await PdfDocument.openData(
         _originalPdfBytes!,
         sourceName: 'temp_source',
+        passwordProvider:
+            cachedPassword == null ? null : () => cachedPassword,
       );
       final targetDoc = await PdfDocument.createNew(sourceName: 'temp_target');
 
@@ -257,6 +261,11 @@ class PdfProvider extends ChangeNotifier {
   void closeDocument() {
     _encodeTimer?.cancel();
     _document?.dispose();
+    // Drop the cached unlock password for this file so reopening it later
+    // (or by someone else on this machine) forces a fresh prompt.
+    if (_originalFilePath.isNotEmpty) {
+      PdfPasswordCache.remove(_originalFilePath);
+    }
     _document = null;
     _pdfBytes = null;
     _originalPdfBytes = null;

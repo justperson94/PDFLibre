@@ -67,14 +67,18 @@ class _MainScreenState extends State<MainScreen> {
     if (path == null || !mounted) return;
 
     final provider = context.read<PdfProvider>();
-    final success = await loadPdfInteractive(context, provider, path);
+    final result = await loadPdfInteractive(context, provider, path);
+    if (!mounted) return;
 
-    if (success && mounted) {
-      context.read<HistoryProvider>().clear();
-      RecentFilesService.add(path);
-    }
-    if (!success && mounted) {
-      showErrorDialog(context, onPickFile: _openFile);
+    switch (result) {
+      case PdfOpenResult.success:
+        context.read<HistoryProvider>().clear();
+        RecentFilesService.add(path);
+      case PdfOpenResult.cancelled:
+        // Silent — user dismissed the password prompt.
+        break;
+      case PdfOpenResult.error:
+        showErrorDialog(context, onPickFile: _openFile);
     }
   }
 
