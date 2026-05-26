@@ -53,6 +53,15 @@ class PdfProvider extends ChangeNotifier {
   Map<int, int> get rotations => Map.unmodifiable(_rotations);
   List<int> get pageOrder => List.unmodifiable(_pageOrder);
 
+  /// True when the currently-loaded document required (and was unlocked
+  /// with) a password.
+  bool get isEncrypted => _password != null;
+
+  /// The password that unlocked the current document, if any. In-memory
+  /// only; surfaced to flows that need to re-encrypt or decrypt via the
+  /// bundled qpdf binary.
+  String? get currentPassword => _password;
+
   /// A PasswordProvider that immediately returns the cached password for the
   /// currently-loaded document, or null if the document was not encrypted.
   /// Use when handing the same bytes to a secondary pdfrx widget (e.g. the

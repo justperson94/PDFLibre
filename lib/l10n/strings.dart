@@ -144,6 +144,39 @@ class S {
   String get passwordShow => _ko ? '비밀번호 표시' : 'Show password';
   String get passwordHide => _ko ? '비밀번호 숨기기' : 'Hide password';
 
+  // ── Password manage (set / remove) ──────────────────────────
+
+  String get passwordManageTooltip => _ko ? '암호 설정' : 'Password';
+  String get passwordSetTitle => _ko ? '비밀번호 설정' : 'Set password';
+  String get passwordRemoveTitle => _ko ? '비밀번호 제거' : 'Remove password';
+  String get passwordSetSubtitle => _ko
+      ? '이 PDF에 새 비밀번호를 설정합니다. 새 파일로 저장됩니다.'
+      : 'Set a new password on this PDF. A new file will be saved.';
+  String get passwordRemoveSubtitle => _ko
+      ? '이 PDF에서 비밀번호를 제거합니다. 새 파일로 저장됩니다.'
+      : 'Remove the password from this PDF. A new file will be saved.';
+  String get passwordNew => _ko ? '새 비밀번호' : 'New password';
+  String get passwordConfirm => _ko ? '비밀번호 확인' : 'Confirm password';
+  String get passwordCurrent => _ko ? '현재 비밀번호' : 'Current password';
+  String get passwordMismatch =>
+      _ko ? '두 비밀번호가 일치하지 않습니다.' : 'The two passwords do not match.';
+  String get passwordEmpty =>
+      _ko ? '비밀번호를 입력하세요.' : 'Please enter a password.';
+  String get passwordApply => _ko ? '적용' : 'Apply';
+  String get passwordSaveAs =>
+      _ko ? '암호화된 PDF로 저장' : 'Save encrypted PDF as…';
+  String get passwordSaveAsRemoved =>
+      _ko ? '비밀번호 제거한 PDF로 저장' : 'Save decrypted PDF as…';
+  String get passwordSetSuccess =>
+      _ko ? '비밀번호가 설정되었습니다.' : 'Password set.';
+  String get passwordRemoveSuccess =>
+      _ko ? '비밀번호가 제거되었습니다.' : 'Password removed.';
+  String get passwordToolUnavailable => _ko
+      ? '암호 변경 도구를 찾을 수 없습니다.'
+      : 'Password tool unavailable in this build.';
+  String get passwordOperationFailed =>
+      _ko ? '암호 변경에 실패했습니다.' : 'Password operation failed.';
+
   // ── Close confirmation ──────────────────────────────────────
 
   String get closeDocTitle => _ko ? '문서 닫기' : 'Close document';
