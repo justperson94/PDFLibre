@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:pdfrx/pdfrx.dart';
 
 import '../services/file_service.dart';
+import '../utils/pdf_open_helper.dart';
 
 /// Provider for managing PDF document state
 class PdfProvider extends ChangeNotifier {
@@ -27,6 +28,12 @@ class PdfProvider extends ChangeNotifier {
   /// Page display order (display index -> original page index)
   List<int> _pageOrder = [];
 
+  /// The password that successfully unlocked the current document, if any.
+  /// Held in memory only — never persisted — so the secondary
+  /// [PdfViewer.data] load that pdfrx performs in the body widget can
+  /// supply the same password without prompting the user a second time.
+  String? _password;
+
   Timer? _encodeTimer;
 
   // === Getters ===
@@ -46,6 +53,25 @@ class PdfProvider extends ChangeNotifier {
   Map<int, int> get rotations => Map.unmodifiable(_rotations);
   List<int> get pageOrder => List.unmodifiable(_pageOrder);
 
+  /// True when the currently-loaded document required (and was unlocked
+  /// with) a password.
+  bool get isEncrypted => _password != null;
+
+  /// The password that unlocked the current document, if any. In-memory
+  /// only; surfaced to flows that need to re-encrypt or decrypt via the
+  /// bundled qpdf binary.
+  String? get currentPassword => _password;
+
+  /// A PasswordProvider that immediately returns the cached password for the
+  /// currently-loaded document, or null if the document was not encrypted.
+  /// Use when handing the same bytes to a secondary pdfrx widget (e.g. the
+  /// in-app viewer) that performs its own open call.
+  PdfPasswordProvider? get viewerPasswordProvider {
+    final pw = _password;
+    if (pw == null) return null;
+    return () => pw;
+  }
+
   /// Original page index for a given display index
   int getOriginalPageIndex(int displayIndex) => _pageOrder[displayIndex];
 
@@ -53,8 +79,15 @@ class PdfProvider extends ChangeNotifier {
   int getPageRotation(int displayIndex) =>
       _rotations[_pageOrder[displayIndex]] ?? 0;
 
-  /// Load a PDF file
-  Future<bool> loadPdf(String filePath) async {
+  /// Load a PDF file.
+  ///
+  /// [passwordProvider] is called when the PDF is encrypted; it returns the
+  /// password to attempt, or null to abort. pdfrx will keep invoking the
+  /// callback until it returns a working password or null.
+  Future<bool> loadPdf(
+    String filePath, {
+    PdfPasswordProvider? passwordProvider,
+  }) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -63,6 +96,7 @@ class PdfProvider extends ChangeNotifier {
       _encodeTimer?.cancel();
       _document?.dispose();
       _document = null;
+      _password = null;
 
       final file = File(filePath);
       if (!file.existsSync()) {
@@ -71,7 +105,26 @@ class PdfProvider extends ChangeNotifier {
 
       // Read file as bytes and pass directly to pdfium (bypasses macOS sandbox)
       final bytes = await file.readAsBytes();
-      _document = await PdfDocument.openData(bytes, sourceName: filePath);
+
+      // Wrap the caller's PasswordProvider so we can capture the password
+      // that successfully unlocked the document. pdfrx invokes the provider
+      // in a loop until one of its returns works; after openData returns
+      // we know the most recent non-null value is the correct one.
+      String? candidatePassword;
+      PdfPasswordProvider? captureProvider;
+      if (passwordProvider != null) {
+        captureProvider = () async {
+          final value = await passwordProvider();
+          candidatePassword = value;
+          return value;
+        };
+      }
+      _document = await PdfDocument.openData(
+        bytes,
+        sourceName: filePath,
+        passwordProvider: captureProvider,
+      );
+      _password = candidatePassword;
       _originalPdfBytes = bytes;
       _pdfBytes = bytes;
       _version++;
@@ -89,6 +142,7 @@ class PdfProvider extends ChangeNotifier {
       _document = null;
       _pdfBytes = null;
       _originalPdfBytes = null;
+      _password = null;
       _originalFilePath = '';
       _fileName = '';
       _fileSize = '';
@@ -117,7 +171,7 @@ class PdfProvider extends ChangeNotifier {
 
     _version++;
     debugPrint(
-      '[PDFLibre] Rotate page ${originalPageIndex + 1} ${clockwise ? 'CW' : 'CCW'} 90° → ${newRotation}°',
+      '[PDFLibre] Rotate page ${originalPageIndex + 1} ${clockwise ? 'CW' : 'CCW'} 90° → $newRotation°',
     );
     notifyListeners();
     _scheduleRebuild();
@@ -178,9 +232,12 @@ class PdfProvider extends ChangeNotifier {
     }
 
     try {
+      final cachedPassword = _password;
       final sourceDoc = await PdfDocument.openData(
         _originalPdfBytes!,
         sourceName: 'temp_source',
+        passwordProvider:
+            cachedPassword == null ? null : () => cachedPassword,
       );
       final targetDoc = await PdfDocument.createNew(sourceName: 'temp_target');
 
@@ -213,9 +270,15 @@ class PdfProvider extends ChangeNotifier {
   void closeDocument() {
     _encodeTimer?.cancel();
     _document?.dispose();
+    // Drop the cached unlock password for this file so reopening it later
+    // (or by someone else on this machine) forces a fresh prompt.
+    if (_originalFilePath.isNotEmpty) {
+      PdfPasswordCache.remove(_originalFilePath);
+    }
     _document = null;
     _pdfBytes = null;
     _originalPdfBytes = null;
+    _password = null;
     _originalFilePath = '';
     _fileName = '';
     _fileSize = '';

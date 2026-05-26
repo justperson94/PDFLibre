@@ -6,8 +6,11 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:pdfrx/pdfrx.dart';
 import 'package:provider/provider.dart';
 
+import 'package:path/path.dart' as p;
+
 import '../dialogs/convert_dialog.dart';
 import '../dialogs/error_dialog.dart';
+import '../dialogs/password_manage_dialog.dart';
 import '../dialogs/progress_dialog.dart';
 import '../dialogs/settings_dialog.dart';
 import '../dialogs/split_dialog.dart';
@@ -18,8 +21,10 @@ import '../providers/pdf_provider.dart';
 import '../providers/settings_provider.dart';
 import '../services/file_service.dart';
 import '../services/pdf_service.dart';
+import '../services/qpdf_service.dart';
 import '../services/recent_files_service.dart';
 import '../theme/app_theme.dart';
+import '../utils/pdf_open_helper.dart';
 import '../widgets/common/status_bar.dart';
 import '../widgets/sidebar/sidebar.dart';
 import '../widgets/toolbar/top_toolbar.dart';
@@ -66,14 +71,18 @@ class _MainScreenState extends State<MainScreen> {
     if (path == null || !mounted) return;
 
     final provider = context.read<PdfProvider>();
-    final success = await provider.loadPdf(path);
+    final result = await loadPdfInteractive(context, provider, path);
+    if (!mounted) return;
 
-    if (success && mounted) {
-      context.read<HistoryProvider>().clear();
-      RecentFilesService.add(path);
-    }
-    if (!success && mounted) {
-      showErrorDialog(context, onPickFile: _openFile);
+    switch (result) {
+      case PdfOpenResult.success:
+        context.read<HistoryProvider>().clear();
+        RecentFilesService.add(path);
+      case PdfOpenResult.cancelled:
+        // Silent — user dismissed the password prompt.
+        break;
+      case PdfOpenResult.error:
+        showErrorDialog(context, onPickFile: _openFile);
     }
   }
 
@@ -170,6 +179,113 @@ class _MainScreenState extends State<MainScreen> {
 
   void _openSettings() {
     showSettingsDialog(context);
+  }
+
+  Future<void> _onPassword() async {
+    final s = S.of(context);
+    final pdf = context.read<PdfProvider>();
+    final originalPath = pdf.originalFilePath;
+    if (originalPath.isEmpty) return;
+
+    if (!await QpdfService.isAvailable()) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(s.passwordToolUnavailable)),
+      );
+      return;
+    }
+
+    final isEncrypted = pdf.isEncrypted;
+
+    if (isEncrypted) {
+      // Encrypted: ask the user whether to change or remove the password.
+      if (!mounted) return;
+      final action = await showModalBottomSheet<_PasswordAction>(
+        context: context,
+        builder: (sheetContext) => _PasswordActionSheet(),
+      );
+      if (action == null || !mounted) return;
+      if (action == _PasswordAction.remove) {
+        final confirmed = await showRemovePasswordConfirm(context);
+        if (!confirmed || !mounted) return;
+        await _runRemovePassword(originalPath, pdf.currentPassword!);
+      } else {
+        if (!mounted) return;
+        final newPw = await showSetPasswordDialog(context, isChange: true);
+        if (newPw == null || !mounted) return;
+        await _runSetPassword(originalPath, newPw, pdf.currentPassword);
+      }
+    } else {
+      if (!mounted) return;
+      final newPw = await showSetPasswordDialog(context, isChange: false);
+      if (newPw == null || !mounted) return;
+      await _runSetPassword(originalPath, newPw, null);
+    }
+  }
+
+  Future<void> _runSetPassword(
+    String inputPath,
+    String newPassword,
+    String? currentPassword,
+  ) async {
+    final s = S.of(context);
+    final defaultName = '${_stripPdfExt(p.basename(inputPath))}-protected.pdf';
+    final outputPath = await FileService.pickSaveFile(
+      defaultName: defaultName,
+      extension: 'pdf',
+      dialogTitle: s.passwordSaveAs,
+    );
+    if (outputPath == null || !mounted) return;
+
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await QpdfService.setPassword(
+        inputPath: inputPath,
+        outputPath: outputPath,
+        userPassword: newPassword,
+        currentPassword: currentPassword,
+      );
+      messenger.showSnackBar(SnackBar(content: Text(s.passwordSetSuccess)));
+    } on QpdfException catch (e) {
+      messenger.showSnackBar(
+        SnackBar(content: Text('${s.passwordOperationFailed} (${e.code.name})')),
+      );
+    }
+  }
+
+  Future<void> _runRemovePassword(
+    String inputPath,
+    String currentPassword,
+  ) async {
+    final s = S.of(context);
+    final defaultName = '${_stripPdfExt(p.basename(inputPath))}-unprotected.pdf';
+    final outputPath = await FileService.pickSaveFile(
+      defaultName: defaultName,
+      extension: 'pdf',
+      dialogTitle: s.passwordSaveAsRemoved,
+    );
+    if (outputPath == null || !mounted) return;
+
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await QpdfService.removePassword(
+        inputPath: inputPath,
+        outputPath: outputPath,
+        currentPassword: currentPassword,
+      );
+      messenger.showSnackBar(SnackBar(content: Text(s.passwordRemoveSuccess)));
+    } on QpdfException catch (e) {
+      messenger.showSnackBar(
+        SnackBar(content: Text('${s.passwordOperationFailed} (${e.code.name})')),
+      );
+    }
+  }
+
+  String _stripPdfExt(String name) {
+    if (name.toLowerCase().endsWith('.pdf')) {
+      return name.substring(0, name.length - 4);
+    }
+    return name;
   }
 
   Future<void> _onConvert() async {
@@ -439,6 +555,8 @@ class _MainScreenState extends State<MainScreen> {
                         );
                       },
                       onConvert: _onConvert,
+                      onPassword: _onPassword,
+                      isEncrypted: pdf.isEncrypted,
                       onSettings: _openSettings,
                     ),
 
@@ -478,6 +596,8 @@ class _MainScreenState extends State<MainScreen> {
                                           controller: _viewerController,
                                           currentPage: pdf.currentPage,
                                           onPageChanged: pdf.setPage,
+                                          passwordProvider:
+                                              pdf.viewerPasswordProvider,
                                         )
                                       : const SizedBox.shrink(),
                                 ),
@@ -570,4 +690,30 @@ class _CloseIntent extends Intent {
 
 class _SettingsIntent extends Intent {
   const _SettingsIntent();
+}
+
+enum _PasswordAction { change, remove }
+
+class _PasswordActionSheet extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final s = context.s;
+    return SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: const Icon(LucideIcons.keyRound),
+            title: Text(s.passwordSetTitle),
+            onTap: () => Navigator.of(context).pop(_PasswordAction.change),
+          ),
+          ListTile(
+            leading: const Icon(LucideIcons.unlock),
+            title: Text(s.passwordRemoveTitle),
+            onTap: () => Navigator.of(context).pop(_PasswordAction.remove),
+          ),
+        ],
+      ),
+    );
+  }
 }

@@ -27,14 +27,51 @@ jobs:
           flutter-version: '3.35.6'
           cache: true
 
-      - name: Install create-dmg
-        run: brew install create-dmg
+      - name: Install create-dmg and qpdf
+        run: brew install create-dmg qpdf
 
       - name: Flutter pub get
         run: flutter pub get
 
       - name: Build macOS (release)
         run: flutter build macos --release
+
+      - name: Bundle qpdf sidecar into PDFLibre.app
+        # Copy qpdf and the three Homebrew dylibs it links against into the
+        # .app's Resources/ and rewrite the install names so qpdf resolves
+        # its deps via @loader_path at runtime — no LD_LIBRARY_PATH or rpath
+        # tricks needed. Ad-hoc codesign at the end so install_name_tool's
+        # mutation does not invalidate the binary.
+        run: |
+          set -euxo pipefail
+          APP_PATH="build/macos/Build/Products/Release/PDFLibre.app"
+          RES="$APP_PATH/Contents/Resources"
+          QPDF_PREFIX=$(brew --prefix qpdf)
+          JPEG_PREFIX=$(brew --prefix jpeg-turbo)
+          SSL_PREFIX=$(brew --prefix openssl@3)
+          cp "$QPDF_PREFIX/bin/qpdf" "$RES/qpdf"
+          cp -L "$QPDF_PREFIX/lib/libqpdf.30.dylib" "$RES/libqpdf.30.dylib"
+          cp -L "$JPEG_PREFIX/lib/libjpeg.8.dylib" "$RES/libjpeg.8.dylib"
+          cp -L "$SSL_PREFIX/lib/libcrypto.3.dylib" "$RES/libcrypto.3.dylib"
+          chmod +w "$RES/qpdf" "$RES"/*.dylib
+          install_name_tool -id "@rpath/libqpdf.30.dylib"   "$RES/libqpdf.30.dylib"
+          install_name_tool -id "@rpath/libjpeg.8.dylib"    "$RES/libjpeg.8.dylib"
+          install_name_tool -id "@rpath/libcrypto.3.dylib" "$RES/libcrypto.3.dylib"
+          install_name_tool -change "@rpath/libqpdf.30.dylib" \
+            "@loader_path/libqpdf.30.dylib" "$RES/qpdf"
+          install_name_tool -change "$QPDF_PREFIX/lib/libqpdf.30.dylib" \
+            "@loader_path/libqpdf.30.dylib" "$RES/libqpdf.30.dylib" || true
+          install_name_tool -change \
+            "/opt/homebrew/opt/qpdf/lib/libqpdf.30.dylib" \
+            "@loader_path/libqpdf.30.dylib" "$RES/libqpdf.30.dylib" || true
+          install_name_tool -change \
+            "/opt/homebrew/opt/jpeg-turbo/lib/libjpeg.8.dylib" \
+            "@loader_path/libjpeg.8.dylib" "$RES/libqpdf.30.dylib"
+          install_name_tool -change \
+            "/opt/homebrew/opt/openssl@3/lib/libcrypto.3.dylib" \
+            "@loader_path/libcrypto.3.dylib" "$RES/libqpdf.30.dylib"
+          codesign --force --sign - "$RES/qpdf" "$RES"/*.dylib
+          "$RES/qpdf" --version
 
       - name: Resolve app metadata
         id: meta
@@ -100,6 +137,27 @@ jobs:
       - name: Build Windows (release)
         run: flutter build windows --release
 
+      - name: Bundle qpdf sidecar
+        shell: pwsh
+        env:
+          QPDF_VERSION: '12.3.2'
+        run: |
+          $url = "https://github.com/qpdf/qpdf/releases/download/v$env:QPDF_VERSION/qpdf-$env:QPDF_VERSION-mingw64.zip"
+          Invoke-WebRequest -Uri $url -OutFile qpdf.zip
+          Expand-Archive -Path qpdf.zip -DestinationPath qpdf_extracted
+          $bin = Get-ChildItem -Path qpdf_extracted -Recurse -Filter "qpdf.exe" | Select-Object -First 1
+          if (-not $bin) { throw "qpdf.exe not found in archive" }
+          $sourceDir = $bin.Directory.FullName
+          $dest = "build/windows/x64/runner/Release/data"
+          New-Item -ItemType Directory -Force -Path $dest | Out-Null
+          # Copy qpdf.exe plus every DLL shipped alongside it (libqpdf, jpeg,
+          # zlib, etc.). They all need to sit next to the exe for it to run.
+          Copy-Item "$sourceDir/qpdf.exe" -Destination $dest -Force
+          Get-ChildItem -Path $sourceDir -Filter "*.dll" | ForEach-Object {
+            Copy-Item $_.FullName -Destination $dest -Force
+          }
+          & "$dest/qpdf.exe" --version
+
       - name: Resolve build metadata
         id: meta
         shell: pwsh
@@ -152,7 +210,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y clang cmake ninja-build pkg-config \
-            libgtk-3-dev liblzma-dev libstdc++-12-dev
+            libgtk-3-dev liblzma-dev libstdc++-12-dev \
+            patchelf
 
       - uses: subosito/flutter-action@v2
         with:
@@ -165,6 +224,37 @@ jobs:
 
       - name: Build Linux (release)
         run: flutter build linux --release
+
+      - name: Bundle qpdf sidecar
+        env:
+          QPDF_VERSION: '12.3.2'
+        run: |
+          set -euxo pipefail
+          BUNDLE="build/linux/x64/release/bundle"
+          curl -fLo qpdf.zip \
+            "https://github.com/qpdf/qpdf/releases/download/v${QPDF_VERSION}/qpdf-${QPDF_VERSION}-bin-linux-x86_64.zip"
+          mkdir -p qpdf_extracted
+          unzip -q qpdf.zip -d qpdf_extracted
+          # The archive lays out: qpdf-<ver>/bin/qpdf, qpdf-<ver>/lib/libqpdf.so*
+          QPDF_BIN=$(find qpdf_extracted -type f -name 'qpdf' -perm -u+x | head -n1)
+          if [ -z "$QPDF_BIN" ]; then
+            echo "qpdf binary not found in archive" >&2
+            find qpdf_extracted -maxdepth 3 -type f | sort
+            exit 1
+          fi
+          QPDF_LIBDIR=$(dirname "$(dirname "$QPDF_BIN")")/lib
+          mkdir -p "$BUNDLE/lib"
+          cp "$QPDF_BIN" "$BUNDLE/qpdf"
+          chmod +x "$BUNDLE/qpdf"
+          # Copy libqpdf and any auxiliary shared objects shipped with the
+          # binary so the bundled qpdf is self-contained.
+          if [ -d "$QPDF_LIBDIR" ]; then
+            find "$QPDF_LIBDIR" -maxdepth 1 -name '*.so*' -exec cp -P {} "$BUNDLE/lib/" \;
+          fi
+          # Rewrite the rpath so qpdf finds its libs at $ORIGIN/lib instead
+          # of the build host's absolute path.
+          patchelf --set-rpath '$ORIGIN/lib' "$BUNDLE/qpdf"
+          LD_LIBRARY_PATH="$BUNDLE/lib" "$BUNDLE/qpdf" --version
 
       - name: Resolve build metadata
         id: meta

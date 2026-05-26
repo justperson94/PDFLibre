@@ -1,9 +1,24 @@
-import 'dart:typed_data';
+import 'dart:io' show Platform;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pdfrx/pdfrx.dart';
 
 import '../../theme/app_theme.dart';
+
+/// Mouse-wheel scroll multiplier for the PDF body viewer.
+///
+/// pdfrx's default of 0.2 is tuned for continuous trackpad deltas. On Windows
+/// and Linux the OS reports a chunky ~120-unit delta per wheel notch, which
+/// at 0.2 produces a tiny 24-logical-pixel step per click — extremely
+/// sluggish. Bumping the multiplier on those platforms restores the
+/// per-notch step to a comfortable ~70px. macOS trackpad keeps the original
+/// continuous feel.
+double _pdfWheelMultiplier() {
+  if (kIsWeb) return 0.6;
+  if (Platform.isWindows || Platform.isLinux) return 0.6;
+  return 0.2;
+}
 
 /// PDF rendering viewer widget (based on pdfrx)
 class PdfViewerWidget extends StatefulWidget {
@@ -14,6 +29,7 @@ class PdfViewerWidget extends StatefulWidget {
     required this.controller,
     required this.currentPage,
     required this.onPageChanged,
+    this.passwordProvider,
   });
 
   final Uint8List pdfBytes;
@@ -21,6 +37,11 @@ class PdfViewerWidget extends StatefulWidget {
   final PdfViewerController controller;
   final int currentPage;
   final ValueChanged<int> onPageChanged;
+
+  /// Supplies the password when the underlying [PdfViewer.data] reopens the
+  /// bytes (it loads its own document instance separately from the provider).
+  /// Null for unencrypted PDFs.
+  final PdfPasswordProvider? passwordProvider;
 
   @override
   State<PdfViewerWidget> createState() => _PdfViewerWidgetState();
@@ -70,6 +91,7 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
         widget.pdfBytes,
         sourceName: widget.sourceName,
         controller: widget.controller,
+        passwordProvider: widget.passwordProvider,
         params: PdfViewerParams(
           margin: AppTheme.spacingXl,
           backgroundColor: c.surfaceSecondary,
@@ -79,6 +101,7 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
             offset: Offset(0, 2),
           ),
           enableKeyboardNavigation: false,
+          scrollByMouseWheel: _pdfWheelMultiplier(),
         ),
         initialPageNumber: widget.currentPage,
       ),

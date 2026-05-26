@@ -11,6 +11,7 @@ import '../l10n/strings.dart';
 import '../services/file_service.dart';
 import '../services/pdf_service.dart';
 import '../theme/app_theme.dart';
+import '../utils/pdf_open_helper.dart';
 import 'page_mix_view.dart';
 
 /// Merge screen sub-modes.
@@ -52,6 +53,9 @@ class _MergeScreenState extends State<MergeScreen> {
   void dispose() {
     for (final file in _files) {
       file.document.dispose();
+      // Forget the password as soon as the merge session ends, so the
+      // user has to re-authenticate the file next time it is opened.
+      PdfPasswordCache.remove(file.path);
     }
     super.dispose();
   }
@@ -60,10 +64,22 @@ class _MergeScreenState extends State<MergeScreen> {
   Future<void> _loadPaths(List<String> paths) async {
     final s = S.of(context);
     for (final path in paths) {
+      final outcome = PasswordPromptOutcome();
       try {
         final bytes = await File(path).readAsBytes();
-        final doc = await PdfDocument.openData(bytes, sourceName: path);
         final name = Uri.file(path).pathSegments.last;
+        final doc = await PdfDocument.openData(
+          bytes,
+          sourceName: path,
+          passwordProvider: mounted
+              ? makePasswordProvider(
+                  context,
+                  fileName: name,
+                  cacheKey: path,
+                  outcome: outcome,
+                )
+              : null,
+        );
         final size = FileService.formatFileSize(bytes.length);
 
         final file = _MergeFile(
@@ -77,6 +93,9 @@ class _MergeScreenState extends State<MergeScreen> {
         }
         _files.add(file);
       } catch (e) {
+        // Skip the error toast when the user just cancelled the password
+        // prompt — the file is simply omitted from the merge set.
+        if (outcome.cancelled) continue;
         if (mounted) {
           ScaffoldMessenger.of(
             context,

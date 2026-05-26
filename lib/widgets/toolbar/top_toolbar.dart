@@ -26,6 +26,8 @@ class TopToolbar extends StatelessWidget {
     this.onSplit,
     this.onMerge,
     this.onConvert,
+    this.onPassword,
+    this.isEncrypted = false,
     this.onSettings,
   });
 
@@ -41,6 +43,8 @@ class TopToolbar extends StatelessWidget {
   final VoidCallback? onSplit;
   final VoidCallback? onMerge;
   final VoidCallback? onConvert;
+  final VoidCallback? onPassword;
+  final bool isEncrypted;
   final VoidCallback? onSettings;
 
   @override
@@ -132,6 +136,15 @@ class TopToolbar extends StatelessWidget {
             tooltip: s.convertToImage,
             label: s.convertLabel,
             onTap: onConvert,
+          ),
+          const SizedBox(width: AppTheme.spacingXs),
+          ToolbarButton(
+            icon: isEncrypted ? LucideIcons.lock : LucideIcons.unlock,
+            tooltip: s.passwordManageTooltip,
+            iconColor: isEncrypted
+                ? context.colors.accentPrimary
+                : null,
+            onTap: onPassword,
           ),
 
           const Spacer(),
