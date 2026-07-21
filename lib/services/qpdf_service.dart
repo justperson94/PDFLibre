@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 
 /// Wraps the bundled `qpdf` CLI to add or remove passwords on a PDF.
@@ -39,17 +40,24 @@ class QpdfService {
   }
 
   /// Returns true if the bundled binary exists and runs.
+  ///
+  /// 성공 결과만 캐시한다 — 첫 실행이 일시적으로 실패한 경우(예: Gatekeeper/
+  /// AV 지연)를 음성으로 고착시키면 세션 내내 암호 기능이 잠기기 때문.
   static Future<bool> isAvailable() async {
-    if (_isAvailable != null) return _isAvailable!;
+    if (_isAvailable == true) return true;
     final path = binaryPath;
-    if (path == null) return _isAvailable = false;
-    final file = File(path);
-    if (!file.existsSync()) return _isAvailable = false;
+    if (path == null) return false;
+    if (!File(path).existsSync()) return false;
     try {
       final result = await Process.run(path, ['--version']);
-      return _isAvailable = result.exitCode == 0;
-    } catch (_) {
-      return _isAvailable = false;
+      if (result.exitCode == 0) return _isAvailable = true;
+      debugPrint(
+        '[PDFLibre] qpdf --version exited ${result.exitCode}: ${result.stderr}',
+      );
+      return false;
+    } catch (e) {
+      debugPrint('[PDFLibre] qpdf availability probe failed: $e');
+      return false;
     }
   }
 
@@ -94,6 +102,7 @@ class QpdfService {
     final args = <String>[
       '--password=$currentPassword',
       '--decrypt',
+      '--',
       inputPath,
       outputPath,
     ];
@@ -108,11 +117,26 @@ class QpdfService {
     if (!File(path).existsSync()) {
       throw QpdfException(QpdfError.notFound, 'qpdf not found at $path');
     }
-    final result = await Process.run(path, args);
-    // qpdf exit codes: 0 ok, 3 ok-with-warnings, anything else is an error.
-    if (result.exitCode == 0 || result.exitCode == 3) return;
-    final stderr = (result.stderr as String?)?.trim() ?? '';
-    throw QpdfException(_classifyError(stderr), stderr);
+    // 인자에 평문 암호가 포함되므로 argv로 직접 넘기지 않는다 — 실행 중인
+    // 프로세스의 argv는 같은 머신의 다른 사용자도 ps로 읽을 수 있다.
+    // qpdf의 @argfile 문법(한 줄에 인자 하나)으로 전달하고, 파일은
+    // mkdtemp(0700) 디렉토리에 두었다가 실행 직후 삭제한다.
+    final tmpDir = await Directory.systemTemp.createTemp('pdflibre_qpdf_');
+    try {
+      final argFile = File(p.join(tmpDir.path, 'args'));
+      await argFile.writeAsString(args.join('\n'));
+      final result = await Process.run(path, ['@${argFile.path}']);
+      // qpdf exit codes: 0 ok, 3 ok-with-warnings, anything else is an error.
+      if (result.exitCode == 0 || result.exitCode == 3) return;
+      final stderr = (result.stderr as String?)?.trim() ?? '';
+      throw QpdfException(_classifyError(stderr), stderr);
+    } finally {
+      try {
+        await tmpDir.delete(recursive: true);
+      } catch (e) {
+        debugPrint('[PDFLibre] qpdf argfile cleanup failed: $e');
+      }
+    }
   }
 
   static QpdfError _classifyError(String message) {
