@@ -21,20 +21,28 @@ String _shortcutPrefix() => Platform.isMacOS ? 'Cmd' : 'Ctrl';
 
 /// 페이지 혼합 mode view — source trays on top, output canvas below.
 ///
-/// Owns its own [PageMixProvider] + [PageMixHistoryProvider] so that the
-/// mix state is independent from the "파일 순서" mode and is cleaned up on
-/// unmount.
+/// [PageMixProvider]와 [PageMixHistoryProvider]는 MergeScreen이 소유한다.
+/// 이 뷰는 모드 탭 전환 때마다 재생성되므로, 프로바이더를 여기서 만들면
+/// 탭을 오갈 때 소스/출력/히스토리 상태가 사라진다. 또한 MergeScreen이
+/// 소유해야 페이지 혼합 모드가 아닐 때 드롭된 파일도 소스로 추가할 수 있다.
 class PageMixView extends StatelessWidget {
-  const PageMixView({super.key, this.initialPaths});
+  const PageMixView({
+    super.key,
+    required this.provider,
+    required this.history,
+    this.initialPaths,
+  });
 
+  final PageMixProvider provider;
+  final PageMixHistoryProvider history;
   final List<String>? initialPaths;
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => PageMixProvider()),
-        ChangeNotifierProvider(create: (_) => PageMixHistoryProvider()),
+        ChangeNotifierProvider.value(value: provider),
+        ChangeNotifierProvider.value(value: history),
       ],
       child: _PageMixBody(initialPaths: initialPaths),
     );
@@ -238,7 +246,13 @@ class _PageMixBodyState extends State<_PageMixBody> {
                     provider,
                   );
                 },
-                onRemove: () => provider.removeSource(source.id),
+                onRemove: () {
+                  provider.removeSource(source.id);
+                  // 소스 제거는 되돌릴 수 없으므로(문서가 dispose됨) 남은
+                  // 히스토리가 사라진 소스를 가리켜 redo로 부활시키지 않도록
+                  // 스택을 비운다.
+                  history.clear();
+                },
                 onSelectAll: () => provider.selectAllPages(source.id),
                 onClearSelection: () => provider.clearSelection(source.id),
               );
@@ -294,7 +308,8 @@ class _PageMixBodyState extends State<_PageMixBody> {
                 RemoveFromOutputCommand(instanceId: ref.instanceId),
                 provider,
               ),
-              onClear: provider.clearOutput,
+              onClear: () =>
+                  history.execute(ClearOutputCommand(), provider),
             ),
           ),
         ),

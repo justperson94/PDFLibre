@@ -334,6 +334,14 @@ class PageMixProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// 출력 큐 전체를 [refs]로 교체한다 (ClearOutputCommand의 undo 전용).
+  void setOutput(List<PageRef> refs) {
+    _output
+      ..clear()
+      ..addAll(refs);
+    notifyListeners();
+  }
+
   /// Inject a source without loading a document. Test-only helper for
   /// exercising selection/output queue logic without PDF I/O.
   @visibleForTesting

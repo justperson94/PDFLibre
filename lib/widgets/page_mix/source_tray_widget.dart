@@ -50,6 +50,7 @@ class SourceTrayWidget extends StatefulWidget {
 class _SourceTrayWidgetState extends State<SourceTrayWidget> {
   late bool _expanded = widget.initiallyExpanded;
   final _rangeController = TextEditingController();
+  final _rangeFocus = FocusNode();
   String? _rangeError;
 
   bool get _allSelected =>
@@ -57,7 +58,20 @@ class _SourceTrayWidgetState extends State<SourceTrayWidget> {
       widget.source.info.pageCount > 0;
 
   @override
+  void initState() {
+    super.initState();
+    // 포커스 상태에 따라 트레이 단축키를 켜고 끄기 위해 rebuild한다.
+    _rangeFocus.addListener(_onRangeFocusChanged);
+  }
+
+  void _onRangeFocusChanged() {
+    if (mounted) setState(() {});
+  }
+
+  @override
   void dispose() {
+    _rangeFocus.removeListener(_onRangeFocusChanged);
+    _rangeFocus.dispose();
     _rangeController.dispose();
     super.dispose();
   }
@@ -81,16 +95,21 @@ class _SourceTrayWidgetState extends State<SourceTrayWidget> {
     final info = widget.source.info;
 
     return Shortcuts(
-      shortcuts: <ShortcutActivator, Intent>{
-        const SingleActivator(LogicalKeyboardKey.keyA, meta: true):
-            const _SelectAllIntent(),
-        const SingleActivator(LogicalKeyboardKey.keyA, control: true):
-            const _SelectAllIntent(),
-        const SingleActivator(LogicalKeyboardKey.escape):
-            const _ClearSelectionIntent(),
-        const SingleActivator(LogicalKeyboardKey.enter):
-            const _AppendSelectionIntent(),
-      },
+      // 범위 입력 필드에 포커스가 있는 동안에는 트레이 단축키를 끈다 —
+      // Cmd/Ctrl+A는 텍스트 전체선택, Esc/Enter는 필드 기본 동작이어야
+      // 하는데 트레이 단축키가 먼저 가로채는 것을 방지한다.
+      shortcuts: _rangeFocus.hasFocus
+          ? const <ShortcutActivator, Intent>{}
+          : <ShortcutActivator, Intent>{
+              const SingleActivator(LogicalKeyboardKey.keyA, meta: true):
+                  const _SelectAllIntent(),
+              const SingleActivator(LogicalKeyboardKey.keyA, control: true):
+                  const _SelectAllIntent(),
+              const SingleActivator(LogicalKeyboardKey.escape):
+                  const _ClearSelectionIntent(),
+              const SingleActivator(LogicalKeyboardKey.enter):
+                  const _AppendSelectionIntent(),
+            },
       child: Actions(
         actions: <Type, Action<Intent>>{
           _SelectAllIntent: CallbackAction<_SelectAllIntent>(
@@ -175,6 +194,7 @@ class _SourceTrayWidgetState extends State<SourceTrayWidget> {
               const SizedBox(width: AppTheme.spacingSm),
               _RangeInput(
                 controller: _rangeController,
+                focusNode: _rangeFocus,
                 hintText: s.rangeInputHint,
                 errorText: _rangeError,
                 onSubmitted: _submitRange,
@@ -274,12 +294,14 @@ class _ColorDot extends StatelessWidget {
 class _RangeInput extends StatelessWidget {
   const _RangeInput({
     required this.controller,
+    required this.focusNode,
     required this.hintText,
     required this.onSubmitted,
     this.errorText,
   });
 
   final TextEditingController controller;
+  final FocusNode focusNode;
   final String hintText;
   final String? errorText;
   final VoidCallback onSubmitted;
@@ -291,6 +313,7 @@ class _RangeInput extends StatelessWidget {
       width: 160,
       child: TextField(
         controller: controller,
+        focusNode: focusNode,
         style: TextStyle(fontSize: 11, color: colors.foregroundPrimary),
         decoration: InputDecoration(
           hintText: hintText,

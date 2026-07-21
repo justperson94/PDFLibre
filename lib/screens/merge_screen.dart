@@ -8,6 +8,8 @@ import 'package:pdfrx/pdfrx.dart';
 
 import '../dialogs/progress_dialog.dart';
 import '../l10n/strings.dart';
+import '../providers/page_mix_history_provider.dart';
+import '../providers/page_mix_provider.dart';
 import '../services/file_service.dart';
 import '../services/pdf_service.dart';
 import '../theme/app_theme.dart';
@@ -31,6 +33,11 @@ class _MergeScreenState extends State<MergeScreen> {
   final _files = <_MergeFile>[];
   int _activeFileIndex = -1;
   _MergeMode _mode = _MergeMode.fileOrder;
+
+  // 페이지 혼합 모드 상태 — 뷰가 아닌 여기서 소유해야 탭 전환에도 상태가
+  // 유지되고, 혼합 모드 중 드롭된 파일을 소스 트레이로 넘길 수 있다.
+  final _pageMix = PageMixProvider();
+  final _pageMixHistory = PageMixHistoryProvider();
 
   @override
   void initState() {
@@ -57,6 +64,12 @@ class _MergeScreenState extends State<MergeScreen> {
       // user has to re-authenticate the file next time it is opened.
       PdfPasswordCache.remove(file.path);
     }
+    // 페이지 혼합 모드의 소스들도 동일하게 암호를 잊는다.
+    for (final source in _pageMix.sources) {
+      PdfPasswordCache.remove(source.info.filePath);
+    }
+    _pageMix.dispose();
+    _pageMixHistory.dispose();
     super.dispose();
   }
 
@@ -110,6 +123,21 @@ class _MergeScreenState extends State<MergeScreen> {
     if (mounted) setState(() {});
   }
 
+  /// 페이지 혼합 모드에서 드롭된 파일을 소스 트레이로 추가한다.
+  Future<void> _addPathsToPageMix(List<String> paths) async {
+    for (final path in paths) {
+      if (!mounted) return;
+      await _pageMix.addSource(
+        path,
+        passwordProvider: makePasswordProvider(
+          context,
+          fileName: Uri.file(path).pathSegments.last,
+          cacheKey: path,
+        ),
+      );
+    }
+  }
+
   Future<void> _addFiles() async {
     final s = S.of(context);
     final paths = await FileService.pickMultiplePdfFiles(
@@ -122,6 +150,8 @@ class _MergeScreenState extends State<MergeScreen> {
   void _removeFile(int index) {
     final file = _files.removeAt(index);
     file.document.dispose();
+    // 명시적으로 제거한 파일의 암호는 즉시 잊는다 (removeSource와 동일 규칙).
+    PdfPasswordCache.remove(file.path);
 
     if (_files.isEmpty) {
       _activeFileIndex = -1;
@@ -189,7 +219,14 @@ class _MergeScreenState extends State<MergeScreen> {
             .where((f) => f.path.toLowerCase().endsWith('.pdf'))
             .map((f) => f.path)
             .toList();
-        if (pdfPaths.isNotEmpty) _loadPaths(pdfPaths);
+        if (pdfPaths.isEmpty) return;
+        // 현재 보이는 모드로 라우팅 — 혼합 모드에서 파일 순서 목록에만
+        // 추가하면 사용자에게는 드롭이 무시된 것처럼 보인다.
+        if (_mode == _MergeMode.pageMix) {
+          _addPathsToPageMix(pdfPaths);
+        } else {
+          _loadPaths(pdfPaths);
+        }
       },
       child: Scaffold(
         backgroundColor: context.colors.surfacePrimary,
@@ -203,7 +240,11 @@ class _MergeScreenState extends State<MergeScreen> {
                 Divider(height: 1, color: context.colors.borderSubtle),
                 Expanded(
                   child: _mode == _MergeMode.pageMix
-                      ? PageMixView(initialPaths: widget.initialPaths)
+                      ? PageMixView(
+                          provider: _pageMix,
+                          history: _pageMixHistory,
+                          initialPaths: widget.initialPaths,
+                        )
                       : (_files.isEmpty
                           ? _buildEmptyState()
                           : _buildContent()),

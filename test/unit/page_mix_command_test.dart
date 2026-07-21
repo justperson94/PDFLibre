@@ -49,6 +49,49 @@ void main() {
       expect(provider.totalOutputPages, 1);
       expect(provider.output.first.sourceId, 'b');
     });
+
+    test('redo preserves instanceId so later redo commands stay valid', () {
+      final cmd =
+          AddToOutputCommand(sourceId: 'a', pageIndices: const [0]);
+      history.execute(cmd, provider);
+      final originalId = provider.output.single.instanceId;
+
+      // 추가 → 회전 → undo×2 → redo×2 시나리오: redo에서 새 인스턴스 ID가
+      // 발급되면 회전 redo가 옛 ID를 찾지 못해 조용히 무효화된다.
+      history.execute(
+        RotateOutputCommand(instanceId: originalId, clockwise: true),
+        provider,
+      );
+      history.undo(provider); // 회전 취소
+      history.undo(provider); // 추가 취소
+      expect(provider.totalOutputPages, 0);
+
+      history.redo(provider); // 추가 재실행
+      expect(provider.output.single.instanceId, originalId);
+
+      history.redo(provider); // 회전 재실행
+      expect(provider.output.single.rotationTurns, 1);
+    });
+  });
+
+  group('ClearOutputCommand', () {
+    test('clears the queue, undo restores contents and order', () {
+      final r0 = provider.addPageToOutput('a', 0);
+      final r1 = provider.addPageToOutput('b', 1);
+      final r2 = provider.addPageToOutput('a', 2);
+
+      history.execute(ClearOutputCommand(), provider);
+      expect(provider.totalOutputPages, 0);
+
+      history.undo(provider);
+      expect(
+        provider.output.map((r) => r.instanceId).toList(),
+        [r0.instanceId, r1.instanceId, r2.instanceId],
+      );
+
+      history.redo(provider);
+      expect(provider.totalOutputPages, 0);
+    });
   });
 
   group('RemoveFromOutputCommand', () {

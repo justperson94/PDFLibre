@@ -26,9 +26,17 @@ class AddToOutputCommand extends PageMixCommand {
 
   @override
   void execute(PageMixProvider provider) {
-    _createdRefs.clear();
-    for (final idx in pageIndices) {
-      _createdRefs.add(provider.addPageToOutput(sourceId, idx));
+    if (_createdRefs.isEmpty) {
+      for (final idx in pageIndices) {
+        _createdRefs.add(provider.addPageToOutput(sourceId, idx));
+      }
+    } else {
+      // Redo: 처음 실행 때 만든 PageRef를 그대로 재사용해 instanceId를
+      // 보존한다. 새 ref를 발급하면 redo 스택의 후속 커맨드(회전/제거/
+      // 이동)가 옛 id를 찾지 못해 조용히 무효화된다.
+      for (final ref in _createdRefs) {
+        provider.insertIntoOutput(provider.output.length, ref);
+      }
     }
   }
 
@@ -67,6 +75,26 @@ class RemoveFromOutputCommand extends PageMixCommand {
     final ref = _removedRef;
     if (ref == null || _removedIndex < 0) return;
     provider.insertIntoOutput(_removedIndex, ref);
+  }
+}
+
+/// Empty the entire output queue. Undo restores the previous contents
+/// (same [PageRef] instances, so ids stay valid for older commands).
+class ClearOutputCommand extends PageMixCommand {
+  List<PageRef> _cleared = const [];
+
+  @override
+  String get description => '출력 비우기';
+
+  @override
+  void execute(PageMixProvider provider) {
+    _cleared = List.of(provider.output);
+    provider.clearOutput();
+  }
+
+  @override
+  void undo(PageMixProvider provider) {
+    provider.setOutput(_cleared);
   }
 }
 
