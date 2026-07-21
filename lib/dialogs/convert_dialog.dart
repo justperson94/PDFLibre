@@ -233,38 +233,39 @@ class _ConvertDialogState extends State<_ConvertDialog> {
           ],
         ),
         const SizedBox(height: AppTheme.spacingSm),
-        Row(
+        // 포맷/DPI 칩과 동일하게 Wrap 사용 — Row는 좁은 폭이나 긴 로케일
+        // 문자열에서 가로 오버플로우가 난다.
+        Wrap(
+          spacing: AppTheme.spacingSm,
+          runSpacing: AppTheme.spacingSm,
           children: List.generate(3, (i) {
             final selected = _pageSelection == i;
-            return Padding(
-              padding: const EdgeInsets.only(right: AppTheme.spacingSm),
-              child: GestureDetector(
-                onTap: () => setState(() => _pageSelection = i),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppTheme.spacingMd,
-                    vertical: AppTheme.spacingSm,
-                  ),
-                  decoration: BoxDecoration(
+            return GestureDetector(
+              onTap: () => setState(() => _pageSelection = i),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppTheme.spacingMd,
+                  vertical: AppTheme.spacingSm,
+                ),
+                decoration: BoxDecoration(
+                  color: selected
+                      ? context.colors.accentPrimary
+                      : context.colors.surfaceSecondary,
+                  borderRadius: BorderRadius.circular(AppTheme.roundedMd),
+                  border: Border.all(
                     color: selected
                         ? context.colors.accentPrimary
-                        : context.colors.surfaceSecondary,
-                    borderRadius: BorderRadius.circular(AppTheme.roundedMd),
-                    border: Border.all(
-                      color: selected
-                          ? context.colors.accentPrimary
-                          : context.colors.borderSubtle,
-                    ),
+                        : context.colors.borderSubtle,
                   ),
-                  child: Text(
-                    labels[i],
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      color: selected
-                          ? context.colors.surfacePrimary
-                          : context.colors.foregroundSecondary,
-                    ),
+                ),
+                child: Text(
+                  labels[i],
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: selected
+                        ? context.colors.surfacePrimary
+                        : context.colors.foregroundSecondary,
                   ),
                 ),
               ),
