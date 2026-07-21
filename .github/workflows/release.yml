@@ -144,7 +144,10 @@ jobs:
   build-windows:
     name: Build Windows
     needs: test
-    runs-on: windows-latest
+    # windows-latest가 windows-2025로 넘어가면서 Flutter가 Visual Studio
+    # 인스턴스를 찾지 못해 CMake 생성 단계에서 실패한다 (v1.4.0 1차 시도).
+    # VS 툴체인이 검증된 windows-2022로 고정.
+    runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
 
