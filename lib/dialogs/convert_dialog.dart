@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
@@ -71,12 +72,16 @@ class _ConvertDialogState extends State<_ConvertDialog> {
     }
   }
 
-  int _getDpi() {
+  /// 선택된 DPI. 커스텀 입력이 비었거나 숫자가 아니면 null.
+  int? _getDpi() {
     if (_dpiSelection < _dpiPresets.length) {
       return _dpiPresets[_dpiSelection];
     }
-    return int.tryParse(_customDpiController.text) ?? 300;
+    return int.tryParse(_customDpiController.text.trim());
   }
+
+  bool get _isJpegSelected =>
+      AppConstants.supportedImageFormats[_formatSelection] == 'JPEG';
 
   Future<void> _onConvert() async {
     // Validate page range
@@ -98,7 +103,7 @@ class _ConvertDialogState extends State<_ConvertDialog> {
 
     // Validate DPI
     final dpi = _getDpi();
-    if (dpi < 1 || dpi > 2400) {
+    if (dpi == null || dpi < 1 || dpi > 2400) {
       _showError(S.of(context).dpiRangeError);
       return;
     }
@@ -153,8 +158,12 @@ class _ConvertDialogState extends State<_ConvertDialog> {
                     _buildFormatSelection(),
                     const SizedBox(height: AppTheme.spacingXl),
                     _buildDpiSelection(),
-                    const SizedBox(height: AppTheme.spacingXl),
-                    _buildQualitySlider(),
+                    // 품질(압축률)은 JPEG에만 적용된다 — 다른 포맷에서는
+                    // 인코더가 값을 무시하므로 슬라이더를 숨긴다.
+                    if (_isJpegSelected) ...[
+                      const SizedBox(height: AppTheme.spacingXl),
+                      _buildQualitySlider(),
+                    ],
                   ],
                 ),
               ),
@@ -428,6 +437,7 @@ class _ConvertDialogState extends State<_ConvertDialog> {
             child: TextField(
               controller: _customDpiController,
               keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               decoration: InputDecoration(
                 hintText: s.dpiValue,
                 hintStyle: TextStyle(

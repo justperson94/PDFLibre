@@ -24,6 +24,7 @@ import '../services/pdf_service.dart';
 import '../services/qpdf_service.dart';
 import '../services/recent_files_service.dart';
 import '../theme/app_theme.dart';
+import '../utils/file_naming.dart';
 import '../utils/pdf_open_helper.dart';
 import '../widgets/common/status_bar.dart';
 import '../widgets/sidebar/sidebar.dart';
@@ -362,7 +363,7 @@ class _MainScreenState extends State<MainScreen> {
               source: pdf.document!,
               pageIndices: [result.pageIndices[i]],
               rotations: pdf.rotations,
-              outputPath: '$dir/$fileName.pdf',
+              outputPath: uniqueOutputPath('$dir/$fileName.pdf'),
             );
           }
         },

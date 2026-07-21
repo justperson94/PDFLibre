@@ -6,6 +6,7 @@ import 'package:pdfrx/pdfrx.dart';
 
 import '../dialogs/progress_dialog.dart';
 import '../models/page_mix.dart';
+import '../utils/file_naming.dart';
 
 /// PDF processing service (rendering, conversion, splitting, merging)
 class PdfService {
@@ -92,7 +93,8 @@ class PdfService {
           ? fileNameBuilder(pageNumber)
           : 'page_$pageNumber';
       final fileName = '$baseName.$ext';
-      await File('$outputDir/$fileName').writeAsBytes(bytes);
+      final outputPath = uniqueOutputPath('$outputDir/$fileName');
+      await File(outputPath).writeAsBytes(bytes);
     }
   }
 
@@ -299,8 +301,6 @@ Uint8List _encodeImageIsolate(_EncodeRequest req) {
       return Uint8List.fromList(img.encodeTiff(image));
     case 'BMP':
       return Uint8List.fromList(img.encodeBmp(image));
-    case 'WEBP':
-      return Uint8List.fromList(img.encodePng(image));
     default:
       throw ArgumentError('Unsupported format: ${req.format}');
   }

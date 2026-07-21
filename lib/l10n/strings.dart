@@ -367,6 +367,9 @@ class S {
   String get ruleSave => _ko ? '저장' : 'Save';
   String get ruleSplit => _ko ? '분할' : 'Split';
   String get ruleConvert => _ko ? '이미지 변환' : 'Image convert';
+  String get ruleMissingPageToken => _ko
+      ? '{페이지} 토큰이 없어 파일명이 겹칠 수 있습니다. 겹치는 파일에는 번호가 자동으로 붙습니다.'
+      : 'No {페이지} token — names may collide; duplicates get a number suffix.';
   String get resetDefaults => _ko ? '기본값으로 초기화' : 'Reset to defaults';
   String get resetDefaultsDone => _ko ? '출력 설정이 초기화되었습니다' : 'Output settings reset';
 

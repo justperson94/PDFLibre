@@ -130,6 +130,7 @@ class _DefaultsSectionState extends State<DefaultsSection> {
           label: s.ruleSplit,
           controller: _ruleSplitCtl,
           previewPage: 3,
+          warnWhenNoPageToken: true,
           onChanged: sp.setFilenameRuleSplit,
         ),
         const SizedBox(height: AppTheme.spacingSm),
@@ -138,6 +139,7 @@ class _DefaultsSectionState extends State<DefaultsSection> {
           controller: _ruleConvertCtl,
           previewPage: 3,
           previewSuffix: '.jpg',
+          warnWhenNoPageToken: true,
           onChanged: sp.setFilenameRuleConvert,
         ),
       ],
@@ -319,6 +321,7 @@ class _FilenameRuleRow extends StatefulWidget {
     required this.previewPage,
     required this.onChanged,
     this.previewSuffix = '.pdf',
+    this.warnWhenNoPageToken = false,
   });
 
   final String label;
@@ -326,6 +329,10 @@ class _FilenameRuleRow extends StatefulWidget {
   final int? previewPage;
   final ValueChanged<String> onChanged;
   final String previewSuffix;
+
+  /// 페이지별로 파일이 생성되는 규칙(분할/변환)에서 {페이지} 토큰이 빠지면
+  /// 파일명이 겹치므로 경고를 표시한다.
+  final bool warnWhenNoPageToken;
 
   @override
   State<_FilenameRuleRow> createState() => _FilenameRuleRowState();
@@ -414,6 +421,14 @@ class _FilenameRuleRowState extends State<_FilenameRuleRow> {
             ),
           ],
         ),
+        if (widget.warnWhenNoPageToken &&
+            !widget.controller.text.contains('{페이지}')) ...[
+          const SizedBox(height: AppTheme.spacingXs),
+          Text(
+            context.s.ruleMissingPageToken,
+            style: TextStyle(fontSize: 11, color: context.colors.danger),
+          ),
+        ],
       ],
     );
   }
