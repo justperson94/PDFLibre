@@ -15,28 +15,61 @@ import 'package:path/path.dart' as p;
 ///   macOS:   PDFLibre.app/Contents/Resources/qpdf
 ///   Windows: \[exe_dir]/data/qpdf.exe
 ///   Linux:   \[exe_dir]/qpdf
+///
+/// qpdf는 CI 릴리즈 빌드에만 번들되므로, 로컬 `flutter run`(디버그/프로필)
+/// 에서는 번들 경로에 바이너리가 없다. 이 경우에만 시스템에 설치된 qpdf
+/// (Homebrew/패키지 매니저 경로)로 폴백해 개발 중에도 암호 기능을 쓸 수
+/// 있게 한다. 릴리즈 빌드는 번들 경로만 사용한다.
 class QpdfService {
   QpdfService._();
 
   static String? _resolvedPath;
   static bool? _isAvailable;
 
-  /// Absolute path to the bundled qpdf binary, or null if not located.
-  static String? get binaryPath {
-    if (_resolvedPath != null) return _resolvedPath;
+  /// 번들 qpdf가 위치해야 할 경로 (릴리즈 아티팩트 기준).
+  static String? get _bundledPath {
     final exe = Platform.resolvedExecutable;
     if (Platform.isMacOS) {
       // resolvedExecutable = ".../PDFLibre.app/Contents/MacOS/PDFLibre"
       final contents = p.dirname(p.dirname(exe));
-      _resolvedPath = p.join(contents, 'Resources', 'qpdf');
+      return p.join(contents, 'Resources', 'qpdf');
     } else if (Platform.isWindows) {
-      final dir = p.dirname(exe);
-      _resolvedPath = p.join(dir, 'data', 'qpdf.exe');
+      return p.join(p.dirname(exe), 'data', 'qpdf.exe');
     } else if (Platform.isLinux) {
-      final dir = p.dirname(exe);
-      _resolvedPath = p.join(dir, 'qpdf');
+      return p.join(p.dirname(exe), 'qpdf');
     }
-    return _resolvedPath;
+    return null;
+  }
+
+  /// 개발 빌드 전용: 시스템에 설치된 qpdf 후보 경로.
+  static List<String> get _devFallbackPaths {
+    if (Platform.isWindows) {
+      return const [r'C:\Program Files\qpdf\bin\qpdf.exe'];
+    }
+    return const [
+      '/opt/homebrew/bin/qpdf', // macOS (Apple Silicon Homebrew)
+      '/usr/local/bin/qpdf', // macOS (Intel Homebrew) / Linux
+      '/usr/bin/qpdf', // Linux 패키지 매니저
+    ];
+  }
+
+  /// Absolute path to the qpdf binary, or null if not located.
+  static String? get binaryPath {
+    if (_resolvedPath != null) return _resolvedPath;
+    final bundled = _bundledPath;
+    if (bundled != null && File(bundled).existsSync()) {
+      return _resolvedPath = bundled;
+    }
+    if (!kReleaseMode) {
+      for (final candidate in _devFallbackPaths) {
+        if (File(candidate).existsSync()) {
+          debugPrint('[PDFLibre] Using system qpdf (dev fallback): $candidate');
+          return _resolvedPath = candidate;
+        }
+      }
+    }
+    // 미발견 시 번들 기대 경로를 반환해 에러 메시지에 경로가 남게 한다.
+    return _resolvedPath = bundled;
   }
 
   /// Returns true if the bundled binary exists and runs.
