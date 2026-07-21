@@ -32,7 +32,14 @@ class ZoomControls extends StatelessWidget {
               overlayColor: c.accentPrimary.withValues(alpha: 0.15),
               trackHeight: 3,
             ),
-            child: Slider(min: 25, max: 400, value: zoom, onChanged: onChanged),
+            // 뷰어의 실제 줌 범위(핀치/맞춤 배율)는 슬라이더 범위를 벗어날 수
+            // 있으므로 클램프한다 — 범위 밖 값은 debug에서 assert 크래시.
+            child: Slider(
+              min: 25,
+              max: 400,
+              value: zoom.clamp(25, 400),
+              onChanged: onChanged,
+            ),
           ),
         ),
         Icon(

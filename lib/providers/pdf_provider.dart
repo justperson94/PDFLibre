@@ -184,12 +184,20 @@ class PdfProvider extends ChangeNotifier {
     if (oldDisplayIndex < 0 || oldDisplayIndex >= _pageOrder.length) return;
     if (newDisplayIndex < 0 || newDisplayIndex >= _pageOrder.length) return;
 
+    // 현재 페이지는 "몇 번째 표시 위치"가 아니라 "어느 원본 페이지"를 보고
+    // 있는지가 기준이다. 다른 페이지가 현재 위치를 가로질러 이동해도 같은
+    // 원본 페이지를 계속 가리키도록, 이동 전 원본 인덱스를 기억했다가
+    // 이동 후 새 표시 위치를 되찾는다.
+    final currentOriginal =
+        (_currentPage >= 1 && _currentPage <= _pageOrder.length)
+            ? _pageOrder[_currentPage - 1]
+            : null;
+
     final item = _pageOrder.removeAt(oldDisplayIndex);
     _pageOrder.insert(newDisplayIndex, item);
 
-    // Follow the moved page if it was the current page
-    if (_currentPage == oldDisplayIndex + 1) {
-      _currentPage = newDisplayIndex + 1;
+    if (currentOriginal != null) {
+      _currentPage = _pageOrder.indexOf(currentOriginal) + 1;
     }
 
     _version++;
@@ -231,15 +239,17 @@ class PdfProvider extends ChangeNotifier {
       return;
     }
 
+    PdfDocument? sourceDoc;
+    PdfDocument? targetDoc;
     try {
       final cachedPassword = _password;
-      final sourceDoc = await PdfDocument.openData(
+      sourceDoc = await PdfDocument.openData(
         _originalPdfBytes!,
         sourceName: 'temp_source',
         passwordProvider:
             cachedPassword == null ? null : () => cachedPassword,
       );
-      final targetDoc = await PdfDocument.createNew(sourceName: 'temp_target');
+      targetDoc = await PdfDocument.createNew(sourceName: 'temp_target');
 
       final newPages = <PdfPage>[];
       for (final origIdx in _pageOrder) {
@@ -253,8 +263,6 @@ class PdfProvider extends ChangeNotifier {
       targetDoc.pages = newPages;
       await targetDoc.assemble();
       final bytes = await targetDoc.encodePdf();
-      targetDoc.dispose();
-      sourceDoc.dispose();
 
       if (_version != versionAtStart) return;
 
@@ -263,12 +271,20 @@ class PdfProvider extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       debugPrint('[PDFLibre] Rebuild viewer bytes failed: $e');
+    } finally {
+      // assemble()/encodePdf()가 던져도 네이티브 문서 핸들이 누수되지 않게
+      // 성공/실패 공통 경로에서 해제한다.
+      targetDoc?.dispose();
+      sourceDoc?.dispose();
     }
   }
 
   /// Close document
   void closeDocument() {
     _encodeTimer?.cancel();
+    // 진행 중인 _rebuildViewerBytes가 있다면 버전 가드에 걸려 결과를 버리게
+    // 한다 — 닫힌 문서의 바이트가 _pdfBytes로 되살아나는 것을 방지.
+    _version++;
     _document?.dispose();
     // Drop the cached unlock password for this file so reopening it later
     // (or by someone else on this machine) forces a fresh prompt.
