@@ -1,3 +1,4 @@
+import '../l10n/strings.dart';
 import '../providers/pdf_provider.dart';
 
 /// Abstract interface for edit operations (Undo/Redo pattern)
@@ -20,8 +21,7 @@ class RotatePageCommand extends EditCommand {
   final bool clockwise;
 
   @override
-  String get description =>
-      '${pageIndex + 1}페이지 ${clockwise ? "시계방향" : "반시계방향"} 회전';
+  String get description => S.current.rotateCommand(pageIndex + 1, clockwise);
 
   @override
   void execute(PdfProvider pdf) {
@@ -42,7 +42,7 @@ class ReorderPageCommand extends EditCommand {
   final int newIndex;
 
   @override
-  String get description => '${oldIndex + 1}페이지 → ${newIndex + 1}번째로 이동';
+  String get description => S.current.reorderCommand(oldIndex + 1, newIndex + 1);
 
   @override
   void execute(PdfProvider pdf) {

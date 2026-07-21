@@ -577,6 +577,8 @@ class _MergeScreenState extends State<MergeScreen> {
                             clipBehavior: Clip.antiAlias,
                             child: _PageGridThumbnail(
                               page: file.document.pages.first,
+                              // 36×48 슬롯 — 2x 해상도면 충분하다.
+                              renderWidth: 72,
                             ),
                           ),
                           const SizedBox(width: AppTheme.spacingSm),
@@ -865,8 +867,13 @@ class _MergeScreenState extends State<MergeScreen> {
 
 /// PDF page thumbnail for merge screen grid
 class _PageGridThumbnail extends StatefulWidget {
-  const _PageGridThumbnail({required this.page});
+  const _PageGridThumbnail({required this.page, this.renderWidth = 300});
+
   final PdfPage page;
+
+  /// 렌더 픽셀 폭. 표시 크기에 맞춰 낮추면 메모리를 아낀다 (36px 사이드바
+  /// 슬롯에 300px 이미지를 유지할 필요가 없음).
+  final double renderWidth;
 
   @override
   State<_PageGridThumbnail> createState() => _PageGridThumbnailState();
@@ -902,7 +909,7 @@ class _PageGridThumbnailState extends State<_PageGridThumbnail> {
     if (_loading) return;
     _loading = true;
     try {
-      const thumbWidth = 300.0;
+      final thumbWidth = widget.renderWidth;
       final scale = thumbWidth / widget.page.width;
       final thumbHeight = widget.page.height * scale;
 
@@ -923,8 +930,9 @@ class _PageGridThumbnailState extends State<_PageGridThumbnail> {
       } else {
         image.dispose();
       }
-    } catch (_) {
+    } catch (e) {
       // Keep placeholder on render failure
+      debugPrint('[PDFLibre] Merge thumbnail render failed: $e');
     } finally {
       _loading = false;
     }

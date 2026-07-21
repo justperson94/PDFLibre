@@ -31,12 +31,14 @@ Future<void> showErrorDialog(BuildContext context, {VoidCallback? onPickFile}) {
                       width: 64,
                       height: 64,
                       decoration: BoxDecoration(
-                        color: context.colors.accentPrimary.withValues(alpha: 0.1),
+                        // 에러는 브랜드 액센트가 아니라 danger 시맨틱 색으로 —
+                        // 암호 다이얼로그의 에러 표기와 동일한 규칙.
+                        color: context.colors.danger.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
                         LucideIcons.alertTriangle,
-                        color: context.colors.accentPrimary,
+                        color: context.colors.danger,
                         size: 28,
                       ),
                     ),

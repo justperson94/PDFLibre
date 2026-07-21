@@ -69,6 +69,7 @@ class SettingsProvider extends ChangeNotifier {
         prefs.getString(_kFnRuleSplit) ?? defaultFilenameRuleSplit;
     _filenameRuleConvert =
         prefs.getString(_kFnRuleConvert) ?? defaultFilenameRuleConvert;
+    S.current = S(_language);
     _loaded = true;
     notifyListeners();
   }
@@ -84,6 +85,7 @@ class SettingsProvider extends ChangeNotifier {
   Future<void> setLanguage(AppLanguage lang) async {
     if (_language == lang) return;
     _language = lang;
+    S.current = S(lang);
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_kLanguage, lang.name);

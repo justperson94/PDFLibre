@@ -58,7 +58,9 @@ class AppColors extends ThemeExtension<AppColors> {
     surfaceTertiary: Color(0xFF2E2E2E),
     foregroundPrimary: Color(0xFFE8E8E8),
     foregroundSecondary: Color(0xFFA0A0A0),
-    foregroundMuted: Color(0xFF6A6A6A),
+    // 8A: surfacePrimary(#1A1A1A) 위에서 대비 ≈5.0:1 (WCAG AA 충족).
+    // 기존 6A는 3.2:1로 11px 힌트 텍스트가 AA 미달이었다.
+    foregroundMuted: Color(0xFF8A8A8A),
     borderSubtle: Color(0xFF3A3A3A),
     toolbarBg: Color(0xFF1E1E1E),
     sidebarBg: Color(0xFF242424),

@@ -1,5 +1,6 @@
-import 'page_mix.dart';
+import '../l10n/strings.dart';
 import '../providers/page_mix_provider.dart';
+import 'page_mix.dart';
 
 /// Undo/Redo command interface for page-mix operations.
 abstract class PageMixCommand {
@@ -21,8 +22,7 @@ class AddToOutputCommand extends PageMixCommand {
   final List<PageRef> _createdRefs = [];
 
   @override
-  String get description =>
-      '출력에 ${pageIndices.length}페이지 추가';
+  String get description => S.current.addToOutputCommand(pageIndices.length);
 
   @override
   void execute(PageMixProvider provider) {
@@ -59,7 +59,7 @@ class RemoveFromOutputCommand extends PageMixCommand {
   int _removedIndex = -1;
 
   @override
-  String get description => '출력에서 페이지 제거';
+  String get description => S.current.removeFromOutputCommand;
 
   @override
   void execute(PageMixProvider provider) {
@@ -84,7 +84,7 @@ class ClearOutputCommand extends PageMixCommand {
   List<PageRef> _cleared = const [];
 
   @override
-  String get description => '출력 비우기';
+  String get description => S.current.clearOutput;
 
   @override
   void execute(PageMixProvider provider) {
@@ -107,8 +107,7 @@ class RotateOutputCommand extends PageMixCommand {
   final bool clockwise;
 
   @override
-  String get description =>
-      clockwise ? '출력 페이지 시계방향 회전' : '출력 페이지 반시계방향 회전';
+  String get description => S.current.rotateOutputCommand(clockwise);
 
   @override
   void execute(PageMixProvider provider) {
@@ -135,7 +134,7 @@ class ReorderOutputCommand extends PageMixCommand {
   final int newIndex;
 
   @override
-  String get description => '페이지 ${oldIndex + 1} → ${newIndex + 1}번째로 이동';
+  String get description => S.current.reorderCommand(oldIndex + 1, newIndex + 1);
 
   @override
   void execute(PageMixProvider provider) {

@@ -1,17 +1,21 @@
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
+import 'package:path/path.dart' as p;
 
 /// File picking and saving service
 class FileService {
   static String? _lastDirectory;
 
-  /// Extract directory from file path and update last used directory
+  /// Extract directory from file path and update last used directory.
+  /// p.dirname을 써야 Windows의 `\` 경로에서도 동작한다 (`/` split은
+  /// Windows에서 항상 실패해 "마지막 폴더 기억"이 무력화됐다).
   static void _updateLastDirectory(String? path) {
-    if (path == null) return;
-    final lastSlash = path.lastIndexOf('/');
-    if (lastSlash > 0) {
-      _lastDirectory = path.substring(0, lastSlash);
+    if (path == null || path.isEmpty) return;
+    final dir = p.dirname(path);
+    if (dir.isNotEmpty && dir != '.') {
+      _lastDirectory = dir;
     }
   }
 
@@ -89,8 +93,9 @@ class FileService {
     if (override != null && override.isNotEmpty) {
       try {
         if (Directory(override).existsSync()) return override;
-      } catch (_) {
+      } catch (e) {
         // Fall through to last-used directory.
+        debugPrint('[PDFLibre] Fixed save folder check failed: $e');
       }
     }
     return _lastDirectory;

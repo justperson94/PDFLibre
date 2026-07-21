@@ -17,6 +17,10 @@ class S {
 
   static S of(BuildContext context) => context.read<SettingsProvider>().s;
 
+  /// BuildContext가 없는 계층(커맨드 설명, 프로바이더 예외 메시지)용 현재
+  /// 언어 인스턴스. SettingsProvider가 로드/언어 변경 시 갱신한다.
+  static S current = S(AppLanguage.en);
+
   // ── App-wide ────────────────────────────────────────────────
 
   String get appTagline =>
@@ -331,6 +335,13 @@ class S {
       : 'Rotate page $page ${clockwise ? "clockwise" : "counterclockwise"}';
   String reorderCommand(int from, int to) =>
       _ko ? '$from페이지 → $to번째로 이동' : 'Move page $from → position $to';
+  String addToOutputCommand(int count) =>
+      _ko ? '출력에 $count페이지 추가' : 'Add $count pages to output';
+  String get removeFromOutputCommand =>
+      _ko ? '출력에서 페이지 제거' : 'Remove page from output';
+  String rotateOutputCommand(bool clockwise) => _ko
+      ? '출력 페이지 ${clockwise ? "시계방향" : "반시계방향"} 회전'
+      : 'Rotate output page ${clockwise ? "clockwise" : "counterclockwise"}';
 
   // ── Settings dialog ─────────────────────────────────────────
 

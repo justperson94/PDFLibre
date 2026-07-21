@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:pdfrx/pdfrx.dart';
 
+import '../l10n/strings.dart';
 import '../services/file_service.dart';
 import '../utils/pdf_open_helper.dart';
 
@@ -100,7 +101,7 @@ class PdfProvider extends ChangeNotifier {
 
       final file = File(filePath);
       if (!file.existsSync()) {
-        throw FileSystemException('파일을 찾을 수 없습니다', filePath);
+        throw FileSystemException(S.current.fileNotFound, filePath);
       }
 
       // Read file as bytes and pass directly to pdfium (bypasses macOS sandbox)
