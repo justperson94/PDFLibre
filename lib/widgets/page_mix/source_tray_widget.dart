@@ -415,23 +415,85 @@ class _ThumbnailStrip extends StatelessWidget {
   final int Function(int pageIndex) outputCountFor;
   final void Function(int pageIndex) onTogglePage;
 
+  /// 드래그 페이로드 — 선택된 페이지를 끌면 선택 전체, 아니면 그 페이지만.
+  TrayDragData _dragDataFor(int pageIndex) {
+    if (selection.contains(pageIndex) && selection.isNotEmpty) {
+      return TrayDragData(
+        sourceId: source.id,
+        pageIndices: selection.toList()..sort(),
+      );
+    }
+    return TrayDragData(sourceId: source.id, pageIndices: [pageIndex]);
+  }
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       height: 116,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
+        // 트레이를 좌우로 훑을 때 근처 썸네일을 미리 렌더해 스크롤 끊김을
+        // 줄인다 (타일 84px 기준 약 7장 분량).
+        cacheExtent: 600,
         itemCount: source.info.pageCount,
         separatorBuilder: (_, __) => const SizedBox(width: AppTheme.spacingSm),
         itemBuilder: (_, i) {
-          return PageThumbnailTile(
+          final tile = PageThumbnailTile(
             page: document.pages[i],
             selected: selection.contains(i),
             sourceColor: source.colorTag,
             outputCount: outputCountFor(i),
             onTap: () => onTogglePage(i),
           );
+          return Draggable<TrayDragData>(
+            data: _dragDataFor(i),
+            feedback: _DragFeedback(
+              color: source.colorTag,
+              count: _dragDataFor(i).pageIndices.length,
+            ),
+            childWhenDragging: Opacity(opacity: 0.4, child: tile),
+            child: tile,
+          );
         },
+      ),
+    );
+  }
+}
+
+/// 드래그 중 커서를 따라다니는 미리보기 — 소스 색 카드에 페이지 수 표시.
+class _DragFeedback extends StatelessWidget {
+  const _DragFeedback({required this.color, required this.count});
+
+  final Color color;
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: Container(
+        width: 64,
+        height: 88,
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.9),
+          borderRadius: BorderRadius.circular(AppTheme.roundedMd),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x40000000),
+              blurRadius: 8,
+              offset: Offset(0, 3),
+            ),
+          ],
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          '$count',
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+          ),
+        ),
       ),
     );
   }

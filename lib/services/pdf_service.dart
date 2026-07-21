@@ -169,17 +169,25 @@ class PdfService {
   /// and assembles a new PDF in the given output order. The caller retains
   /// ownership of the source [PdfDocument]s — this function does not dispose them.
   ///
+  /// [onProgress]는 페이지 해석 단계마다 호출된다 (total = refs + 최종
+  /// 인코딩 1단계). [cancelToken]이 취소되면 null을 반환한다.
+  ///
   /// Throws [StateError] if a ref points to a source not present in
   /// [sourceDocuments] or a page index out of bounds.
-  static Future<Uint8List> mergeFromPageRefs({
+  static Future<Uint8List?> mergeFromPageRefs({
     required List<PageRef> refs,
     required Map<String, PdfDocument> sourceDocuments,
+    void Function(int current, int total)? onProgress,
+    CancelToken? cancelToken,
   }) async {
+    final total = refs.length + 1;
     final newDoc = await PdfDocument.createNew(sourceName: 'merged.pdf');
     try {
       final pages = <PdfPage>[];
       var hasRotation = false;
-      for (final ref in refs) {
+      for (var i = 0; i < refs.length; i++) {
+        if (cancelToken?.isCancelled ?? false) return null;
+        final ref = refs[i];
         final source = sourceDocuments[ref.sourceId];
         if (source == null) {
           throw StateError('Source not loaded: ${ref.sourceId}');
@@ -196,27 +204,39 @@ class PdfService {
           page = page.rotatedCW90();
         }
         pages.add(page);
+        onProgress?.call(i + 1, total);
+        // 대량 병합 시 UI가 진행률을 그릴 수 있게 주기적으로 양보한다.
+        if (i % 20 == 19) await Future<void>.delayed(Duration.zero);
       }
       newDoc.pages = pages;
       if (hasRotation) {
         await newDoc.assemble();
       }
-      return await newDoc.encodePdf();
+      final bytes = await newDoc.encodePdf();
+      if (cancelToken?.isCancelled ?? false) return null;
+      onProgress?.call(total, total);
+      return bytes;
     } finally {
       newDoc.dispose();
     }
   }
 
   /// Merge from [PageRef]s and write to a file.
+  /// 취소된 경우 파일을 쓰지 않는다.
   static Future<void> mergeFromPageRefsToFile({
     required List<PageRef> refs,
     required Map<String, PdfDocument> sourceDocuments,
     required String outputPath,
+    void Function(int current, int total)? onProgress,
+    CancelToken? cancelToken,
   }) async {
     final bytes = await mergeFromPageRefs(
       refs: refs,
       sourceDocuments: sourceDocuments,
+      onProgress: onProgress,
+      cancelToken: cancelToken,
     );
+    if (bytes == null) return;
     await File(outputPath).writeAsBytes(bytes);
   }
 

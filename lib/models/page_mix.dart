@@ -2,6 +2,17 @@ import 'package:flutter/material.dart';
 
 import 'pdf_file_info.dart';
 
+/// 트레이 → 출력 캔버스 드래그 페이로드.
+///
+/// 드래그를 시작한 페이지가 현재 선택에 포함되어 있으면 선택 전체를,
+/// 아니면 그 페이지 하나만 담는다.
+class TrayDragData {
+  const TrayDragData({required this.sourceId, required this.pageIndices});
+
+  final String sourceId;
+  final List<int> pageIndices;
+}
+
 /// Palette of distinguishable source tag colors used to visually identify
 /// pages by their source PDF in the page-mix output canvas.
 ///

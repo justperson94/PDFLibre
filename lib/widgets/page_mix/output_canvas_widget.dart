@@ -25,6 +25,7 @@ class OutputCanvasWidget extends StatelessWidget {
     this.onRotateCw,
     this.onRotateCcw,
     this.onRemove,
+    this.onDropPages,
     this.selectedInstanceIds = const {},
   });
 
@@ -37,6 +38,10 @@ class OutputCanvasWidget extends StatelessWidget {
   final void Function(PageRef ref)? onRotateCw;
   final void Function(PageRef ref)? onRotateCcw;
   final void Function(PageRef ref)? onRemove;
+
+  /// 트레이 썸네일을 캔버스에 드롭했을 때 호출 — 출력 끝에 추가된다.
+  final void Function(TrayDragData data)? onDropPages;
+
   final Set<String> selectedInstanceIds;
 
   SourcePdf? _sourceFor(String id) {
@@ -52,6 +57,29 @@ class OutputCanvasWidget extends StatelessWidget {
     final colors = context.colors;
     final uniqueSources = output.map((r) => r.sourceId).toSet().length;
 
+    return DragTarget<TrayDragData>(
+      onWillAcceptWithDetails: (_) => onDropPages != null,
+      onAcceptWithDetails: (details) => onDropPages?.call(details.data),
+      builder: (context, candidates, _) => Container(
+        // foregroundDecoration이라 하이라이트가 레이아웃을 밀지 않는다.
+        foregroundDecoration: candidates.isNotEmpty
+            ? BoxDecoration(
+                borderRadius: BorderRadius.circular(AppTheme.roundedMd),
+                border: Border.all(color: colors.accentPrimary, width: 2),
+                color: colors.accentPrimary.withValues(alpha: 0.06),
+              )
+            : null,
+        child: _buildBody(context, s, colors, uniqueSources),
+      ),
+    );
+  }
+
+  Widget _buildBody(
+    BuildContext context,
+    S s,
+    AppColors colors,
+    int uniqueSources,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [

@@ -135,13 +135,13 @@ class _PageMixBodyState extends State<_PageMixBody> {
       context: context,
       title: s.mergingPdf,
       task: (onProgress, cancelToken) async {
-        onProgress(0, 1);
         await PdfService.mergeFromPageRefsToFile(
           refs: refs,
           sourceDocuments: docs.cast(),
           outputPath: path,
+          onProgress: onProgress,
+          cancelToken: cancelToken,
         );
-        onProgress(1, 1);
       },
     );
 
@@ -302,6 +302,13 @@ class _PageMixBodyState extends State<_PageMixBody> {
                 provider,
               ),
               onClear: () => history.execute(ClearOutputCommand(), provider),
+              onDropPages: (data) => history.execute(
+                AddToOutputCommand(
+                  sourceId: data.sourceId,
+                  pageIndices: data.pageIndices,
+                ),
+                provider,
+              ),
             ),
           ),
         ),
