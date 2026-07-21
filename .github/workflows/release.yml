@@ -15,8 +15,30 @@ permissions:
   contents: write
 
 jobs:
+  test:
+    name: Analyze & Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.35.6'
+          cache: true
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Run tests
+        run: flutter test
+
   build-macos:
     name: Build macOS
+    needs: test
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
@@ -121,6 +143,7 @@ jobs:
 
   build-windows:
     name: Build Windows
+    needs: test
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -202,6 +225,7 @@ jobs:
 
   build-linux:
     name: Build Linux
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
