@@ -36,7 +36,10 @@ class AboutSection extends StatelessWidget {
           const SizedBox(height: AppTheme.spacingMd),
           Text(
             '© 2026 justperson94 · MIT License',
-            style: TextStyle(fontSize: 11, color: context.colors.foregroundMuted),
+            style: TextStyle(
+              fontSize: 11,
+              color: context.colors.foregroundMuted,
+            ),
           ),
         ],
       ),
@@ -98,7 +101,8 @@ class AboutSection extends StatelessWidget {
         children: [
           _InfoRow(
             label: s.version,
-            value: '${AppConstants.appVersion} (build ${AppConstants.buildNumber})',
+            value:
+                '${AppConstants.appVersion} (build ${AppConstants.buildNumber})',
           ),
           Divider(height: 1, color: context.colors.borderSubtle),
           _InfoRow(label: s.platform, value: _platformLabel()),

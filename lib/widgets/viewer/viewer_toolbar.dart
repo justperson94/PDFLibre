@@ -33,9 +33,7 @@ class ViewerToolbar extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: AppTheme.spacingLg),
       decoration: BoxDecoration(
         color: c.surfacePrimary,
-        border: Border(
-          bottom: BorderSide(color: c.borderSubtle, width: 1),
-        ),
+        border: Border(bottom: BorderSide(color: c.borderSubtle, width: 1)),
       ),
       child: Row(
         children: [

@@ -40,7 +40,9 @@ class _PasswordDialogState extends State<_PasswordDialog> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _focusNode.requestFocus());
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _focusNode.requestFocus(),
+    );
   }
 
   @override
@@ -168,10 +170,7 @@ class _PasswordDialogState extends State<_PasswordDialog> {
                         Expanded(
                           child: Text(
                             s.passwordWrong,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: c.danger,
-                            ),
+                            style: TextStyle(fontSize: 12, color: c.danger),
                           ),
                         ),
                       ],
@@ -194,8 +193,7 @@ class _PasswordDialogState extends State<_PasswordDialog> {
                     style: OutlinedButton.styleFrom(
                       minimumSize: const Size(90, 40),
                       shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(AppTheme.roundedMd),
+                        borderRadius: BorderRadius.circular(AppTheme.roundedMd),
                       ),
                       side: BorderSide(color: c.borderSubtle),
                       foregroundColor: c.foregroundSecondary,
@@ -210,8 +208,7 @@ class _PasswordDialogState extends State<_PasswordDialog> {
                       foregroundColor: c.surfacePrimary,
                       minimumSize: const Size(90, 40),
                       shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(AppTheme.roundedMd),
+                        borderRadius: BorderRadius.circular(AppTheme.roundedMd),
                       ),
                     ),
                     child: Text(

@@ -132,133 +132,132 @@ class _SourceTrayWidgetState extends State<SourceTrayWidget> {
           ),
         },
         child: Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 14,
-        vertical: 10,
-      ),
-      decoration: BoxDecoration(
-        color: colors.surfacePrimary,
-        borderRadius: BorderRadius.circular(AppTheme.roundedSm * 2),
-        border: Border.all(color: colors.borderSubtle, width: 1),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Header row
-          Row(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            color: colors.surfacePrimary,
+            borderRadius: BorderRadius.circular(AppTheme.roundedSm * 2),
+            border: Border.all(color: colors.borderSubtle, width: 1),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Expanded(
-                child: Wrap(
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  spacing: 10,
-                  runSpacing: 4,
-                  children: [
-                    _ColorDot(color: widget.source.colorTag),
-                    Text(
-                      info.fileName,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: colors.foregroundPrimary,
-                      ),
-                    ),
-                    Text(
-                      s.pageMeta(info.pageCount, info.fileSize),
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: colors.foregroundMuted,
-                      ),
-                    ),
-                    if (widget.selection.isNotEmpty)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: colors.surfaceSecondary,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Text(
-                          s.selectedCount(widget.selection.length),
+              // Header row
+              Row(
+                children: [
+                  Expanded(
+                    child: Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 10,
+                      runSpacing: 4,
+                      children: [
+                        _ColorDot(color: widget.source.colorTag),
+                        Text(
+                          info.fileName,
                           style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                            color: colors.foregroundSecondary,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: colors.foregroundPrimary,
                           ),
                         ),
-                      ),
-                  ],
+                        Text(
+                          s.pageMeta(info.pageCount, info.fileSize),
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: colors.foregroundMuted,
+                          ),
+                        ),
+                        if (widget.selection.isNotEmpty)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: colors.surfaceSecondary,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Text(
+                              s.selectedCount(widget.selection.length),
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                                color: colors.foregroundSecondary,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: AppTheme.spacingSm),
+                  _RangeInput(
+                    controller: _rangeController,
+                    focusNode: _rangeFocus,
+                    hintText: s.rangeInputHint,
+                    errorText: _rangeError,
+                    onSubmitted: _submitRange,
+                  ),
+                  const SizedBox(width: AppTheme.spacingSm),
+                  _TrayActionButton(
+                    icon: LucideIcons.check,
+                    label: _allSelected ? s.clearSelection : s.selectAll,
+                    onTap: _allSelected
+                        ? widget.onClearSelection
+                        : widget.onSelectAll,
+                    filled: false,
+                  ),
+                  const SizedBox(width: AppTheme.spacingXs),
+                  // Always show 선택 추가 — disabled when no selection — so the
+                  // button row doesn't jitter as selection comes and goes.
+                  _TrayActionButton(
+                    icon: LucideIcons.listPlus,
+                    label: s.addSelection,
+                    onTap: widget.selection.isEmpty
+                        ? null
+                        : widget.onAddSelection,
+                    filled: false,
+                  ),
+                  const SizedBox(width: AppTheme.spacingXs),
+                  _TrayActionButton(
+                    icon: LucideIcons.plus,
+                    label: s.addAll,
+                    onTap: widget.onAddAll,
+                    filled: true,
+                  ),
+                  const SizedBox(width: AppTheme.spacingSm),
+                  IconButton(
+                    tooltip: _expanded ? s.collapseTray : s.expandTray,
+                    iconSize: 16,
+                    visualDensity: VisualDensity.compact,
+                    color: colors.foregroundMuted,
+                    onPressed: () => setState(() => _expanded = !_expanded),
+                    icon: Icon(
+                      _expanded
+                          ? LucideIcons.chevronUp
+                          : LucideIcons.chevronDown,
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: s.removeSource,
+                    iconSize: 16,
+                    visualDensity: VisualDensity.compact,
+                    color: colors.foregroundMuted,
+                    onPressed: widget.onRemove,
+                    icon: const Icon(LucideIcons.x),
+                  ),
+                ],
+              ),
+              if (_expanded) ...[
+                const SizedBox(height: AppTheme.spacingSm),
+                _ThumbnailStrip(
+                  source: widget.source,
+                  document: widget.document,
+                  selection: widget.selection,
+                  outputCountFor: widget.outputCountFor,
+                  onTogglePage: widget.onTogglePage,
                 ),
-              ),
-              const SizedBox(width: AppTheme.spacingSm),
-              _RangeInput(
-                controller: _rangeController,
-                focusNode: _rangeFocus,
-                hintText: s.rangeInputHint,
-                errorText: _rangeError,
-                onSubmitted: _submitRange,
-              ),
-              const SizedBox(width: AppTheme.spacingSm),
-              _TrayActionButton(
-                icon: LucideIcons.check,
-                label: _allSelected ? s.clearSelection : s.selectAll,
-                onTap: _allSelected
-                    ? widget.onClearSelection
-                    : widget.onSelectAll,
-                filled: false,
-              ),
-              const SizedBox(width: AppTheme.spacingXs),
-              // Always show 선택 추가 — disabled when no selection — so the
-              // button row doesn't jitter as selection comes and goes.
-              _TrayActionButton(
-                icon: LucideIcons.listPlus,
-                label: s.addSelection,
-                onTap: widget.selection.isEmpty
-                    ? null
-                    : widget.onAddSelection,
-                filled: false,
-              ),
-              const SizedBox(width: AppTheme.spacingXs),
-              _TrayActionButton(
-                icon: LucideIcons.plus,
-                label: s.addAll,
-                onTap: widget.onAddAll,
-                filled: true,
-              ),
-              const SizedBox(width: AppTheme.spacingSm),
-              IconButton(
-                tooltip: _expanded ? s.collapseTray : s.expandTray,
-                iconSize: 16,
-                visualDensity: VisualDensity.compact,
-                color: colors.foregroundMuted,
-                onPressed: () => setState(() => _expanded = !_expanded),
-                icon: Icon(
-                  _expanded ? LucideIcons.chevronUp : LucideIcons.chevronDown,
-                ),
-              ),
-              IconButton(
-                tooltip: s.removeSource,
-                iconSize: 16,
-                visualDensity: VisualDensity.compact,
-                color: colors.foregroundMuted,
-                onPressed: widget.onRemove,
-                icon: const Icon(LucideIcons.x),
-              ),
+              ],
             ],
           ),
-          if (_expanded) ...[
-            const SizedBox(height: AppTheme.spacingSm),
-            _ThumbnailStrip(
-              source: widget.source,
-              document: widget.document,
-              selection: widget.selection,
-              outputCountFor: widget.outputCountFor,
-              onTogglePage: widget.onTogglePage,
-            ),
-          ],
-        ],
-      ),
         ),
       ),
     );

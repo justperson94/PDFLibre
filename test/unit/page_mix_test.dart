@@ -16,10 +16,7 @@ void main() {
 
     test('forIndex wraps modulo palette size', () {
       final size = SourceColorPalette.colors.length;
-      expect(
-        SourceColorPalette.forIndex(0),
-        SourceColorPalette.forIndex(size),
-      );
+      expect(SourceColorPalette.forIndex(0), SourceColorPalette.forIndex(size));
       expect(
         SourceColorPalette.forIndex(1),
         SourceColorPalette.forIndex(size + 1),
@@ -27,10 +24,7 @@ void main() {
     });
 
     test('forIndex returns first color for 0', () {
-      expect(
-        SourceColorPalette.forIndex(0),
-        SourceColorPalette.colors.first,
-      );
+      expect(SourceColorPalette.forIndex(0), SourceColorPalette.colors.first);
     });
   });
 
@@ -43,9 +37,21 @@ void main() {
     );
 
     test('equality uses id, filePath and colorTag', () {
-      final a = SourcePdf(id: 's1', info: info, colorTag: const Color(0xFF112233));
-      final b = SourcePdf(id: 's1', info: info, colorTag: const Color(0xFF112233));
-      final c = SourcePdf(id: 's2', info: info, colorTag: const Color(0xFF112233));
+      final a = SourcePdf(
+        id: 's1',
+        info: info,
+        colorTag: const Color(0xFF112233),
+      );
+      final b = SourcePdf(
+        id: 's1',
+        info: info,
+        colorTag: const Color(0xFF112233),
+      );
+      final c = SourcePdf(
+        id: 's2',
+        info: info,
+        colorTag: const Color(0xFF112233),
+      );
       expect(a, b);
       expect(a, isNot(c));
     });
@@ -71,8 +77,11 @@ void main() {
     });
 
     test('rotatedClockwise cycles 0 → 90 → 180 → 270 → 0', () {
-      PageRef ref =
-          const PageRef(instanceId: 'p1', sourceId: 's1', pageIndex: 0);
+      PageRef ref = const PageRef(
+        instanceId: 'p1',
+        sourceId: 's1',
+        pageIndex: 0,
+      );
       expect(ref.rotationDegrees, 0);
       ref = ref.rotatedClockwise();
       expect(ref.rotationDegrees, 90);
@@ -85,8 +94,11 @@ void main() {
     });
 
     test('rotatedCounterClockwise cycles 0 → 270 → 180 → 90 → 0', () {
-      PageRef ref =
-          const PageRef(instanceId: 'p1', sourceId: 's1', pageIndex: 0);
+      PageRef ref = const PageRef(
+        instanceId: 'p1',
+        sourceId: 's1',
+        pageIndex: 0,
+      );
       ref = ref.rotatedCounterClockwise();
       expect(ref.rotationDegrees, 270);
       ref = ref.rotatedCounterClockwise();
@@ -97,12 +109,14 @@ void main() {
       expect(ref.rotationDegrees, 0);
     });
 
-    test('two refs with same source+page but different instanceId are distinct',
-        () {
-      const a = PageRef(instanceId: 'p1', sourceId: 's1', pageIndex: 3);
-      const b = PageRef(instanceId: 'p2', sourceId: 's1', pageIndex: 3);
-      expect(a, isNot(b));
-    });
+    test(
+      'two refs with same source+page but different instanceId are distinct',
+      () {
+        const a = PageRef(instanceId: 'p1', sourceId: 's1', pageIndex: 3);
+        const b = PageRef(instanceId: 'p2', sourceId: 's1', pageIndex: 3);
+        expect(a, isNot(b));
+      },
+    );
 
     test('copyWith preserves unchanged fields', () {
       const base = PageRef(

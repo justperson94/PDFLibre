@@ -190,9 +190,9 @@ class _MainScreenState extends State<MainScreen> {
 
     if (!await QpdfService.isAvailable()) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(s.passwordToolUnavailable)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(s.passwordToolUnavailable)));
       return;
     }
 
@@ -249,7 +249,9 @@ class _MainScreenState extends State<MainScreen> {
       messenger.showSnackBar(SnackBar(content: Text(s.passwordSetSuccess)));
     } on QpdfException catch (e) {
       messenger.showSnackBar(
-        SnackBar(content: Text('${s.passwordOperationFailed} (${e.code.name})')),
+        SnackBar(
+          content: Text('${s.passwordOperationFailed} (${e.code.name})'),
+        ),
       );
     }
   }
@@ -259,7 +261,8 @@ class _MainScreenState extends State<MainScreen> {
     String currentPassword,
   ) async {
     final s = S.of(context);
-    final defaultName = '${_stripPdfExt(p.basename(inputPath))}-unprotected.pdf';
+    final defaultName =
+        '${_stripPdfExt(p.basename(inputPath))}-unprotected.pdf';
     final outputPath = await FileService.pickSaveFile(
       defaultName: defaultName,
       extension: 'pdf',
@@ -277,7 +280,9 @@ class _MainScreenState extends State<MainScreen> {
       messenger.showSnackBar(SnackBar(content: Text(s.passwordRemoveSuccess)));
     } on QpdfException catch (e) {
       messenger.showSnackBar(
-        SnackBar(content: Text('${s.passwordOperationFailed} (${e.code.name})')),
+        SnackBar(
+          content: Text('${s.passwordOperationFailed} (${e.code.name})'),
+        ),
       );
     }
   }

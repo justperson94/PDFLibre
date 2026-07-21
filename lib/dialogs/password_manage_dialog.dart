@@ -55,7 +55,9 @@ class _SetPasswordDialogState extends State<_SetPasswordDialog> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _newFocus.requestFocus());
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _newFocus.requestFocus(),
+    );
   }
 
   @override
@@ -165,9 +167,8 @@ class _SetPasswordDialogState extends State<_SetPasswordDialog> {
                     label: s.passwordConfirm,
                     controller: _confirmCtl,
                     obscure: _obscureConfirm,
-                    onToggleObscure: () => setState(
-                      () => _obscureConfirm = !_obscureConfirm,
-                    ),
+                    onToggleObscure: () =>
+                        setState(() => _obscureConfirm = !_obscureConfirm),
                     onSubmitted: (_) => _submit(),
                     showHint: s.passwordShow,
                     hideHint: s.passwordHide,
@@ -176,7 +177,11 @@ class _SetPasswordDialogState extends State<_SetPasswordDialog> {
                     const SizedBox(height: AppTheme.spacingSm),
                     Row(
                       children: [
-                        Icon(LucideIcons.alertCircle, size: 14, color: c.danger),
+                        Icon(
+                          LucideIcons.alertCircle,
+                          size: 14,
+                          color: c.danger,
+                        ),
                         const SizedBox(width: 6),
                         Expanded(
                           child: Text(
@@ -370,9 +375,7 @@ class _PasswordField extends StatelessWidget {
       focusNode: focusNode,
       obscureText: obscure,
       onSubmitted: onSubmitted,
-      inputFormatters: [
-        FilteringTextInputFormatter.deny(RegExp(r'[\r\n]')),
-      ],
+      inputFormatters: [FilteringTextInputFormatter.deny(RegExp(r'[\r\n]'))],
       decoration: InputDecoration(
         labelText: label,
         border: OutlineInputBorder(
@@ -380,10 +383,7 @@ class _PasswordField extends StatelessWidget {
         ),
         suffixIcon: IconButton(
           tooltip: obscure ? showHint : hideHint,
-          icon: Icon(
-            obscure ? LucideIcons.eye : LucideIcons.eyeOff,
-            size: 18,
-          ),
+          icon: Icon(obscure ? LucideIcons.eye : LucideIcons.eyeOff, size: 18),
           onPressed: onToggleObscure,
         ),
       ),

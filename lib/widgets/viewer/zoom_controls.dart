@@ -17,11 +17,7 @@ class ZoomControls extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(
-          LucideIcons.minus,
-          size: iconSize,
-          color: c.foregroundSecondary,
-        ),
+        Icon(LucideIcons.minus, size: iconSize, color: c.foregroundSecondary),
         SizedBox(
           width: 120,
           child: SliderTheme(
@@ -42,11 +38,7 @@ class ZoomControls extends StatelessWidget {
             ),
           ),
         ),
-        Icon(
-          LucideIcons.plus,
-          size: iconSize,
-          color: c.foregroundSecondary,
-        ),
+        Icon(LucideIcons.plus, size: iconSize, color: c.foregroundSecondary),
         const SizedBox(width: AppTheme.spacingSm),
         Text(
           '${zoom.round()}%',

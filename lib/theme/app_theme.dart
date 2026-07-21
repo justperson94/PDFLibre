@@ -105,13 +105,22 @@ class AppColors extends ThemeExtension<AppColors> {
       accentPrimary: Color.lerp(accentPrimary, other.accentPrimary, t)!,
       accentHover: Color.lerp(accentHover, other.accentHover, t)!,
       surfacePrimary: Color.lerp(surfacePrimary, other.surfacePrimary, t)!,
-      surfaceSecondary:
-          Color.lerp(surfaceSecondary, other.surfaceSecondary, t)!,
+      surfaceSecondary: Color.lerp(
+        surfaceSecondary,
+        other.surfaceSecondary,
+        t,
+      )!,
       surfaceTertiary: Color.lerp(surfaceTertiary, other.surfaceTertiary, t)!,
-      foregroundPrimary:
-          Color.lerp(foregroundPrimary, other.foregroundPrimary, t)!,
-      foregroundSecondary:
-          Color.lerp(foregroundSecondary, other.foregroundSecondary, t)!,
+      foregroundPrimary: Color.lerp(
+        foregroundPrimary,
+        other.foregroundPrimary,
+        t,
+      )!,
+      foregroundSecondary: Color.lerp(
+        foregroundSecondary,
+        other.foregroundSecondary,
+        t,
+      )!,
       foregroundMuted: Color.lerp(foregroundMuted, other.foregroundMuted, t)!,
       borderSubtle: Color.lerp(borderSubtle, other.borderSubtle, t)!,
       toolbarBg: Color.lerp(toolbarBg, other.toolbarBg, t)!,

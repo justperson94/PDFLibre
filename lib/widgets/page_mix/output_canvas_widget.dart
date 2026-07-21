@@ -64,7 +64,10 @@ class OutputCanvasWidget extends StatelessWidget {
                 child: Text(
                   output.isEmpty
                       ? s.outputEmptyTitle
-                      : s.outputPageAndSourceCount(output.length, uniqueSources),
+                      : s.outputPageAndSourceCount(
+                          output.length,
+                          uniqueSources,
+                        ),
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
@@ -75,8 +78,11 @@ class OutputCanvasWidget extends StatelessWidget {
               if (output.isNotEmpty)
                 TextButton.icon(
                   onPressed: onClear,
-                  icon: Icon(LucideIcons.trash2,
-                      size: 14, color: colors.foregroundSecondary),
+                  icon: Icon(
+                    LucideIcons.trash2,
+                    size: 14,
+                    color: colors.foregroundSecondary,
+                  ),
                   label: Text(
                     s.clearOutput,
                     style: TextStyle(
@@ -137,8 +143,11 @@ class _EmptyState extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(LucideIcons.layoutGrid,
-                    size: 28, color: colors.foregroundMuted),
+                Icon(
+                  LucideIcons.layoutGrid,
+                  size: 28,
+                  color: colors.foregroundMuted,
+                ),
                 const SizedBox(height: 6),
                 Text(
                   s.outputEmptyTitle,
@@ -152,10 +161,7 @@ class _EmptyState extends StatelessWidget {
                 Text(
                   s.outputEmptyHint,
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: colors.foregroundMuted,
-                  ),
+                  style: TextStyle(fontSize: 11, color: colors.foregroundMuted),
                 ),
               ],
             ),
@@ -201,11 +207,8 @@ class _OutputGrid extends StatelessWidget {
       buildDefaultDragHandles: false,
       itemCount: output.length,
       onReorder: onReorder,
-      proxyDecorator: (child, _, __) => Material(
-        color: Colors.transparent,
-        elevation: 6,
-        child: child,
-      ),
+      proxyDecorator: (child, _, __) =>
+          Material(color: Colors.transparent, elevation: 6, child: child),
       itemBuilder: (context, index) {
         final ref = output[index];
         final source = sourceFor(ref.sourceId);
@@ -220,11 +223,7 @@ class _OutputGrid extends StatelessWidget {
         final page = doc.pages[ref.pageIndex];
         final stem = _stem(source.info.fileName);
         final label = ref.rotationTurns != 0
-            ? s.pageLabelRotated(
-                stem,
-                ref.pageIndex + 1,
-                ref.rotationDegrees,
-              )
+            ? s.pageLabelRotated(stem, ref.pageIndex + 1, ref.rotationDegrees)
             : s.pageLabelShort(stem, ref.pageIndex + 1);
         return ReorderableDragStartListener(
           key: ValueKey(ref.instanceId),
@@ -232,25 +231,21 @@ class _OutputGrid extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.only(right: 12),
             child: OutputPageTile(
-            page: page,
-            globalIndex: index + 1,
-            sourceColor: source.colorTag,
-            label: label,
-            rotationTurns: ref.rotationTurns,
-            selected: selectedInstanceIds.contains(ref.instanceId),
-            onTap: onTileTap == null ? null : () => onTileTap!(ref),
-            onRotateCw:
-                onRotateCw == null ? null : () => onRotateCw!(ref),
-            onRotateCcw:
-                onRotateCcw == null ? null : () => onRotateCcw!(ref),
-            onRemove: onRemove == null ? null : () => onRemove!(ref),
-            onMoveLeft: index > 0
-                ? () => onReorder(index, index - 1)
-                : null,
-            onMoveRight: index < output.length - 1
-                ? () => onReorder(index, index + 2)
-                : null,
-          ),
+              page: page,
+              globalIndex: index + 1,
+              sourceColor: source.colorTag,
+              label: label,
+              rotationTurns: ref.rotationTurns,
+              selected: selectedInstanceIds.contains(ref.instanceId),
+              onTap: onTileTap == null ? null : () => onTileTap!(ref),
+              onRotateCw: onRotateCw == null ? null : () => onRotateCw!(ref),
+              onRotateCcw: onRotateCcw == null ? null : () => onRotateCcw!(ref),
+              onRemove: onRemove == null ? null : () => onRemove!(ref),
+              onMoveLeft: index > 0 ? () => onReorder(index, index - 1) : null,
+              onMoveRight: index < output.length - 1
+                  ? () => onReorder(index, index + 2)
+                  : null,
+            ),
           ),
         );
       },

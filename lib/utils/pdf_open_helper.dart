@@ -117,8 +117,9 @@ PdfPasswordProvider makePasswordProvider(
       }
     }
 
-    final completer =
-        cacheKey != null ? PdfPasswordCache.beginPrompt(cacheKey) : null;
+    final completer = cacheKey != null
+        ? PdfPasswordCache.beginPrompt(cacheKey)
+        : null;
     String? password;
     try {
       password = await showPasswordDialog(

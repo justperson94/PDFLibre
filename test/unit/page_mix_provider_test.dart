@@ -54,14 +54,16 @@ void main() {
       expect(() => provider.selectRange('a', 'abc'), throwsFormatException);
     });
 
-    test('selectOnlyPage replaces selection with a single page and anchors',
-        () {
-      provider.togglePageSelection('a', 1);
-      provider.togglePageSelection('a', 3);
-      provider.selectOnlyPage('a', 7);
-      expect(provider.selectionFor('a'), {7});
-      expect(provider.selectionAnchor('a'), 7);
-    });
+    test(
+      'selectOnlyPage replaces selection with a single page and anchors',
+      () {
+        provider.togglePageSelection('a', 1);
+        provider.togglePageSelection('a', 3);
+        provider.selectOnlyPage('a', 7);
+        expect(provider.selectionFor('a'), {7});
+        expect(provider.selectionAnchor('a'), 7);
+      },
+    );
 
     test('togglePageSelection updates the anchor to the toggled page', () {
       provider.togglePageSelection('a', 4);
@@ -123,8 +125,7 @@ void main() {
 
     test('addAllPagesToOutput appends every source page', () {
       provider.addAllPagesToOutput('b');
-      expect(provider.output.map((r) => r.pageIndex).toList(),
-          [0, 1, 2, 3, 4]);
+      expect(provider.output.map((r) => r.pageIndex).toList(), [0, 1, 2, 3, 4]);
     });
 
     test('addRangeToOutput parses 1-based input', () {
@@ -163,10 +164,12 @@ void main() {
       final r1 = provider.addPageToOutput('a', 0);
       final r2 = provider.addPageToOutput('a', 0);
       provider.rotateOutput(r1.instanceId, clockwise: true);
-      final updated1 =
-          provider.output.firstWhere((r) => r.instanceId == r1.instanceId);
-      final unchanged2 =
-          provider.output.firstWhere((r) => r.instanceId == r2.instanceId);
+      final updated1 = provider.output.firstWhere(
+        (r) => r.instanceId == r1.instanceId,
+      );
+      final unchanged2 = provider.output.firstWhere(
+        (r) => r.instanceId == r2.instanceId,
+      );
       expect(updated1.rotationTurns, 1);
       expect(unchanged2.rotationTurns, 0);
     });

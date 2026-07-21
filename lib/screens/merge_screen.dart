@@ -245,9 +245,7 @@ class _MergeScreenState extends State<MergeScreen> {
                           history: _pageMixHistory,
                           initialPaths: widget.initialPaths,
                         )
-                      : (_files.isEmpty
-                          ? _buildEmptyState()
-                          : _buildContent()),
+                      : (_files.isEmpty ? _buildEmptyState() : _buildContent()),
                 ),
                 if (_mode == _MergeMode.fileOrder) ...[
                   Divider(height: 1, color: context.colors.borderSubtle),
@@ -265,7 +263,9 @@ class _MergeScreenState extends State<MergeScreen> {
                       Icon(
                         LucideIcons.filePlus,
                         size: 48,
-                        color: context.colors.accentPrimary.withValues(alpha: 0.7),
+                        color: context.colors.accentPrimary.withValues(
+                          alpha: 0.7,
+                        ),
                       ),
                       const SizedBox(height: AppTheme.spacingMd),
                       Text(
@@ -273,7 +273,9 @@ class _MergeScreenState extends State<MergeScreen> {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: context.colors.accentPrimary.withValues(alpha: 0.7),
+                          color: context.colors.accentPrimary.withValues(
+                            alpha: 0.7,
+                          ),
                         ),
                       ),
                     ],
@@ -470,7 +472,10 @@ class _MergeScreenState extends State<MergeScreen> {
             ),
             decoration: BoxDecoration(
               border: Border(
-                bottom: BorderSide(color: context.colors.borderSubtle, width: 1),
+                bottom: BorderSide(
+                  color: context.colors.borderSubtle,
+                  width: 1,
+                ),
               ),
             ),
             child: Row(
@@ -606,9 +611,8 @@ class _MergeScreenState extends State<MergeScreen> {
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: active
-                                        ? context.colors.surfacePrimary.withValues(
-                                            alpha: 0.7,
-                                          )
+                                        ? context.colors.surfacePrimary
+                                              .withValues(alpha: 0.7)
                                         : context.colors.foregroundMuted,
                                   ),
                                 ),
@@ -812,7 +816,9 @@ class _MergeScreenState extends State<MergeScreen> {
       padding: const EdgeInsets.symmetric(horizontal: AppTheme.spacingXl),
       decoration: BoxDecoration(
         color: context.colors.toolbarBg,
-        border: Border(top: BorderSide(color: context.colors.borderSubtle, width: 1)),
+        border: Border(
+          top: BorderSide(color: context.colors.borderSubtle, width: 1),
+        ),
       ),
       child: Row(
         children: [

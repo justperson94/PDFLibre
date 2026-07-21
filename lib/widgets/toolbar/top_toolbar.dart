@@ -141,9 +141,7 @@ class TopToolbar extends StatelessWidget {
           ToolbarButton(
             icon: isEncrypted ? LucideIcons.lock : LucideIcons.unlock,
             tooltip: s.passwordManageTooltip,
-            iconColor: isEncrypted
-                ? context.colors.accentPrimary
-                : null,
+            iconColor: isEncrypted ? context.colors.accentPrimary : null,
             onTap: onPassword,
           ),
 

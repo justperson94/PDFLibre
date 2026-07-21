@@ -202,8 +202,9 @@ class _RadioDot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color =
-        selected ? context.colors.accentPrimary : context.colors.borderSubtle;
+    final color = selected
+        ? context.colors.accentPrimary
+        : context.colors.borderSubtle;
     return Container(
       width: 14,
       height: 14,

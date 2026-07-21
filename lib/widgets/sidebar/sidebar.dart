@@ -33,9 +33,7 @@ class Sidebar extends StatelessWidget {
       width: 240,
       decoration: BoxDecoration(
         color: colors.sidebarBg,
-        border: Border(
-          right: BorderSide(color: colors.borderSubtle, width: 1),
-        ),
+        border: Border(right: BorderSide(color: colors.borderSubtle, width: 1)),
       ),
       child: Column(
         children: [
@@ -60,10 +58,7 @@ class Sidebar extends StatelessWidget {
                 ),
                 Text(
                   '$pageCount',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: colors.foregroundMuted,
-                  ),
+                  style: TextStyle(fontSize: 13, color: colors.foregroundMuted),
                 ),
               ],
             ),
@@ -96,7 +91,11 @@ class Sidebar extends StatelessWidget {
         );
       },
       proxyDecorator: (child, index, animation) {
-        return Material(elevation: 4, color: context.colors.sidebarBg, child: child);
+        return Material(
+          elevation: 4,
+          color: context.colors.sidebarBg,
+          child: child,
+        );
       },
       itemBuilder: (context, index) {
         final displayPage = index + 1;

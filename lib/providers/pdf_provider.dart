@@ -191,8 +191,8 @@ class PdfProvider extends ChangeNotifier {
     // 이동 후 새 표시 위치를 되찾는다.
     final currentOriginal =
         (_currentPage >= 1 && _currentPage <= _pageOrder.length)
-            ? _pageOrder[_currentPage - 1]
-            : null;
+        ? _pageOrder[_currentPage - 1]
+        : null;
 
     final item = _pageOrder.removeAt(oldDisplayIndex);
     _pageOrder.insert(newDisplayIndex, item);
@@ -247,8 +247,7 @@ class PdfProvider extends ChangeNotifier {
       sourceDoc = await PdfDocument.openData(
         _originalPdfBytes!,
         sourceName: 'temp_source',
-        passwordProvider:
-            cachedPassword == null ? null : () => cachedPassword,
+        passwordProvider: cachedPassword == null ? null : () => cachedPassword,
       );
       targetDoc = await PdfDocument.createNew(sourceName: 'temp_target');
 

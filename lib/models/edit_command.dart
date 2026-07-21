@@ -42,7 +42,8 @@ class ReorderPageCommand extends EditCommand {
   final int newIndex;
 
   @override
-  String get description => S.current.reorderCommand(oldIndex + 1, newIndex + 1);
+  String get description =>
+      S.current.reorderCommand(oldIndex + 1, newIndex + 1);
 
   @override
   void execute(PdfProvider pdf) {

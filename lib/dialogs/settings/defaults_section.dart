@@ -157,9 +157,9 @@ class _DefaultsSectionState extends State<DefaultsSection> {
           _ruleSplitCtl.text = SettingsProvider.defaultFilenameRuleSplit;
           _ruleConvertCtl.text = SettingsProvider.defaultFilenameRuleConvert;
           if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(s.resetDefaultsDone)),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(s.resetDefaultsDone)));
           }
         },
         icon: Icon(

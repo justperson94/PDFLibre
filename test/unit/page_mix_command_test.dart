@@ -32,8 +32,10 @@ void main() {
 
   group('AddToOutputCommand', () {
     test('adds pages, undo removes them', () {
-      final cmd =
-          AddToOutputCommand(sourceId: 'a', pageIndices: const [0, 1, 2]);
+      final cmd = AddToOutputCommand(
+        sourceId: 'a',
+        pageIndices: const [0, 1, 2],
+      );
       history.execute(cmd, provider);
       expect(provider.totalOutputPages, 3);
       history.undo(provider);
@@ -41,8 +43,7 @@ void main() {
     });
 
     test('redo re-adds pages', () {
-      final cmd =
-          AddToOutputCommand(sourceId: 'b', pageIndices: const [0]);
+      final cmd = AddToOutputCommand(sourceId: 'b', pageIndices: const [0]);
       history.execute(cmd, provider);
       history.undo(provider);
       history.redo(provider);
@@ -51,8 +52,7 @@ void main() {
     });
 
     test('redo preserves instanceId so later redo commands stay valid', () {
-      final cmd =
-          AddToOutputCommand(sourceId: 'a', pageIndices: const [0]);
+      final cmd = AddToOutputCommand(sourceId: 'a', pageIndices: const [0]);
       history.execute(cmd, provider);
       final originalId = provider.output.single.instanceId;
 
@@ -84,10 +84,11 @@ void main() {
       expect(provider.totalOutputPages, 0);
 
       history.undo(provider);
-      expect(
-        provider.output.map((r) => r.instanceId).toList(),
-        [r0.instanceId, r1.instanceId, r2.instanceId],
-      );
+      expect(provider.output.map((r) => r.instanceId).toList(), [
+        r0.instanceId,
+        r1.instanceId,
+        r2.instanceId,
+      ]);
 
       history.redo(provider);
       expect(provider.totalOutputPages, 0);
@@ -95,8 +96,7 @@ void main() {
   });
 
   group('RemoveFromOutputCommand', () {
-    test('removes the target instance, undo restores it at original index',
-        () {
+    test('removes the target instance, undo restores it at original index', () {
       provider.addPageToOutput('a', 0);
       final ref2 = provider.addPageToOutput('a', 1);
       provider.addPageToOutput('a', 2);
@@ -156,8 +156,10 @@ void main() {
       final ref = provider.addPageToOutput('a', 0);
       expect(ref.rotationTurns, 0);
 
-      final cmd =
-          RotateOutputCommand(instanceId: ref.instanceId, clockwise: true);
+      final cmd = RotateOutputCommand(
+        instanceId: ref.instanceId,
+        clockwise: true,
+      );
       history.execute(cmd, provider);
       expect(provider.output.single.rotationTurns, 1);
 
@@ -168,8 +170,10 @@ void main() {
     test('counterclockwise rotation sets 270°, undo returns to 0°', () {
       final ref = provider.addPageToOutput('a', 0);
 
-      final cmd =
-          RotateOutputCommand(instanceId: ref.instanceId, clockwise: false);
+      final cmd = RotateOutputCommand(
+        instanceId: ref.instanceId,
+        clockwise: false,
+      );
       history.execute(cmd, provider);
       expect(provider.output.single.rotationTurns, 3);
 
@@ -198,7 +202,8 @@ void main() {
       );
       expect(provider.output.first.rotationTurns, 1);
       expect(
-        provider.output.firstWhere((r) => r.instanceId == r1.instanceId)
+        provider.output
+            .firstWhere((r) => r.instanceId == r1.instanceId)
             .rotationTurns,
         0,
       );

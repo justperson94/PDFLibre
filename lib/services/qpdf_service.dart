@@ -145,8 +145,7 @@ class QpdfService {
         lower.contains('incorrect password')) {
       return QpdfError.badPassword;
     }
-    if (lower.contains('no such file') ||
-        lower.contains('cannot open input')) {
+    if (lower.contains('no such file') || lower.contains('cannot open input')) {
       return QpdfError.inputMissing;
     }
     return QpdfError.unknown;

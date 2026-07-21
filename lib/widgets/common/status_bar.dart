@@ -52,9 +52,7 @@ class StatusBar extends StatelessWidget {
                   rightWidget ??
                   Text(
                     rightText,
-                    style: textStyle.copyWith(
-                      color: c.foregroundSecondary,
-                    ),
+                    style: textStyle.copyWith(color: c.foregroundSecondary),
                   ),
             ),
           ),

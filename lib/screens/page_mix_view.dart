@@ -111,9 +111,9 @@ class _PageMixBodyState extends State<_PageMixBody> {
     final s = context.s;
     final provider = context.read<PageMixProvider>();
     if (!provider.hasOutput) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(s.selectPagesForMerge)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(s.selectPagesForMerge)));
       return;
     }
 
@@ -178,86 +178,82 @@ class _PageMixBodyState extends State<_PageMixBody> {
               ),
             ),
             child: ListView.separated(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 24,
-                vertical: 12,
-              ),
-            itemCount: provider.sources.length,
-            separatorBuilder: (_, __) =>
-                const SizedBox(height: AppTheme.spacingMd),
-            itemBuilder: (_, i) {
-              final source = provider.sources[i];
-              final doc = provider.documentFor(source.id);
-              if (doc == null) return const SizedBox.shrink();
-              return SourceTrayWidget(
-                source: source,
-                document: doc,
-                selection: provider.selectionFor(source.id),
-                outputCountFor: (idx) =>
-                    provider.outputCountFor(source.id, idx),
-                onTogglePage: (idx) {
-                  final keys = HardwareKeyboard.instance.logicalKeysPressed;
-                  final shift = keys.contains(LogicalKeyboardKey.shiftLeft) ||
-                      keys.contains(LogicalKeyboardKey.shiftRight);
-                  final modifier =
-                      keys.contains(LogicalKeyboardKey.metaLeft) ||
-                          keys.contains(LogicalKeyboardKey.metaRight) ||
-                          keys.contains(LogicalKeyboardKey.controlLeft) ||
-                          keys.contains(LogicalKeyboardKey.controlRight);
-                  if (shift) {
-                    provider.selectRangeFromAnchor(source.id, idx);
-                  } else if (modifier) {
-                    provider.togglePageSelection(source.id, idx);
-                  } else {
-                    provider.selectOnlyPage(source.id, idx);
-                  }
-                },
-                onAddAll: () => history.execute(
-                  AddToOutputCommand(
-                    sourceId: source.id,
-                    pageIndices: List.generate(
-                      source.info.pageCount,
-                      (p) => p,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              itemCount: provider.sources.length,
+              separatorBuilder: (_, __) =>
+                  const SizedBox(height: AppTheme.spacingMd),
+              itemBuilder: (_, i) {
+                final source = provider.sources[i];
+                final doc = provider.documentFor(source.id);
+                if (doc == null) return const SizedBox.shrink();
+                return SourceTrayWidget(
+                  source: source,
+                  document: doc,
+                  selection: provider.selectionFor(source.id),
+                  outputCountFor: (idx) =>
+                      provider.outputCountFor(source.id, idx),
+                  onTogglePage: (idx) {
+                    final keys = HardwareKeyboard.instance.logicalKeysPressed;
+                    final shift =
+                        keys.contains(LogicalKeyboardKey.shiftLeft) ||
+                        keys.contains(LogicalKeyboardKey.shiftRight);
+                    final modifier =
+                        keys.contains(LogicalKeyboardKey.metaLeft) ||
+                        keys.contains(LogicalKeyboardKey.metaRight) ||
+                        keys.contains(LogicalKeyboardKey.controlLeft) ||
+                        keys.contains(LogicalKeyboardKey.controlRight);
+                    if (shift) {
+                      provider.selectRangeFromAnchor(source.id, idx);
+                    } else if (modifier) {
+                      provider.togglePageSelection(source.id, idx);
+                    } else {
+                      provider.selectOnlyPage(source.id, idx);
+                    }
+                  },
+                  onAddAll: () => history.execute(
+                    AddToOutputCommand(
+                      sourceId: source.id,
+                      pageIndices: List.generate(
+                        source.info.pageCount,
+                        (p) => p,
+                      ),
                     ),
+                    provider,
                   ),
-                  provider,
-                ),
-                onAddSelection: () {
-                  final sel = provider.selectionFor(source.id).toList()..sort();
-                  if (sel.isEmpty) return;
-                  history.execute(
-                    AddToOutputCommand(
-                      sourceId: source.id,
-                      pageIndices: sel,
-                    ),
-                    provider,
-                  );
-                },
-                onAddRange: (rangeText) {
-                  final indices = PdfService.parsePageRange(
-                    rangeText,
-                    source.info.pageCount,
-                  );
-                  history.execute(
-                    AddToOutputCommand(
-                      sourceId: source.id,
-                      pageIndices: indices,
-                    ),
-                    provider,
-                  );
-                },
-                onRemove: () {
-                  provider.removeSource(source.id);
-                  // 소스 제거는 되돌릴 수 없으므로(문서가 dispose됨) 남은
-                  // 히스토리가 사라진 소스를 가리켜 redo로 부활시키지 않도록
-                  // 스택을 비운다.
-                  history.clear();
-                },
-                onSelectAll: () => provider.selectAllPages(source.id),
-                onClearSelection: () => provider.clearSelection(source.id),
-              );
-            },
-          ),
+                  onAddSelection: () {
+                    final sel = provider.selectionFor(source.id).toList()
+                      ..sort();
+                    if (sel.isEmpty) return;
+                    history.execute(
+                      AddToOutputCommand(sourceId: source.id, pageIndices: sel),
+                      provider,
+                    );
+                  },
+                  onAddRange: (rangeText) {
+                    final indices = PdfService.parsePageRange(
+                      rangeText,
+                      source.info.pageCount,
+                    );
+                    history.execute(
+                      AddToOutputCommand(
+                        sourceId: source.id,
+                        pageIndices: indices,
+                      ),
+                      provider,
+                    );
+                  },
+                  onRemove: () {
+                    provider.removeSource(source.id);
+                    // 소스 제거는 되돌릴 수 없으므로(문서가 dispose됨) 남은
+                    // 히스토리가 사라진 소스를 가리켜 redo로 부활시키지 않도록
+                    // 스택을 비운다.
+                    history.clear();
+                  },
+                  onSelectAll: () => provider.selectAllPages(source.id),
+                  onClearSelection: () => provider.clearSelection(source.id),
+                );
+              },
+            ),
           ),
         ),
         // Output canvas — fixed height anchored at the bottom (above the
@@ -267,10 +263,7 @@ class _PageMixBodyState extends State<_PageMixBody> {
           height: 240,
           child: Container(
             color: colors.surfacePrimary,
-            padding: const EdgeInsets.symmetric(
-              horizontal: 24,
-              vertical: 12,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             child: OutputCanvasWidget(
               output: provider.output,
               sources: provider.sources,
@@ -308,8 +301,7 @@ class _PageMixBodyState extends State<_PageMixBody> {
                 RemoveFromOutputCommand(instanceId: ref.instanceId),
                 provider,
               ),
-              onClear: () =>
-                  history.execute(ClearOutputCommand(), provider),
+              onClear: () => history.execute(ClearOutputCommand(), provider),
             ),
           ),
         ),
@@ -391,11 +383,7 @@ class _EmptySources extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            LucideIcons.layoutGrid,
-            size: 48,
-            color: colors.foregroundMuted,
-          ),
+          Icon(LucideIcons.layoutGrid, size: 48, color: colors.foregroundMuted),
           const SizedBox(height: AppTheme.spacingLg),
           Text(
             s.addFilesPrompt,
@@ -408,10 +396,7 @@ class _EmptySources extends StatelessWidget {
           const SizedBox(height: AppTheme.spacingSm),
           Text(
             s.addFilesHint,
-            style: TextStyle(
-              fontSize: 13,
-              color: colors.foregroundMuted,
-            ),
+            style: TextStyle(fontSize: 13, color: colors.foregroundMuted),
           ),
           const SizedBox(height: AppTheme.spacingXl),
           FilledButton.icon(

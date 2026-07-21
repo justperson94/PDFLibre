@@ -212,10 +212,7 @@ class PageMixProvider extends ChangeNotifier {
     final source = sourceById(sourceId);
     final sel = _selections[sourceId];
     if (source == null || sel == null) return;
-    final indices = PdfService.parsePageRange(
-      rangeText,
-      source.info.pageCount,
-    );
+    final indices = PdfService.parsePageRange(rangeText, source.info.pageCount);
     sel
       ..clear()
       ..addAll(indices);
@@ -226,11 +223,7 @@ class PageMixProvider extends ChangeNotifier {
 
   PageRef _makeRef(String sourceId, int pageIndex) {
     final id = 'p${_nextInstanceSeq++}';
-    return PageRef(
-      instanceId: id,
-      sourceId: sourceId,
-      pageIndex: pageIndex,
-    );
+    return PageRef(instanceId: id, sourceId: sourceId, pageIndex: pageIndex);
   }
 
   /// Append a single page to the end of the output queue.
@@ -276,10 +269,7 @@ class PageMixProvider extends ChangeNotifier {
   List<PageRef> addRangeToOutput(String sourceId, String rangeText) {
     final source = sourceById(sourceId);
     if (source == null) return const [];
-    final indices = PdfService.parsePageRange(
-      rangeText,
-      source.info.pageCount,
-    );
+    final indices = PdfService.parsePageRange(rangeText, source.info.pageCount);
     final added = <PageRef>[];
     for (final idx in indices) {
       final ref = _makeRef(sourceId, idx);

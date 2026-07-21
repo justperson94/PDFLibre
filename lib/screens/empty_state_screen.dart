@@ -93,15 +93,16 @@ class _EmptyStateScreenState extends State<EmptyStateScreen> {
             colors.surfacePrimary,
           )
         : colors.surfacePrimary;
-    final dropZoneBorderColor =
-        dragging ? colors.accentPrimary : colors.borderSubtle;
+    final dropZoneBorderColor = dragging
+        ? colors.accentPrimary
+        : colors.borderSubtle;
     // NOTE: keep width constant. Border.all defaults to strokeAlignInside, so
     // changing width shifts the container size and visibly jitters the card.
     const dropZoneBorderWidth = 1.5;
-    final headingColor =
-        dragging ? colors.accentPrimary : colors.foregroundPrimary;
-    final iconColor =
-        dragging ? colors.accentPrimary : colors.foregroundMuted;
+    final headingColor = dragging
+        ? colors.accentPrimary
+        : colors.foregroundPrimary;
+    final iconColor = dragging ? colors.accentPrimary : colors.foregroundMuted;
 
     return Scaffold(
       backgroundColor: colors.surfacePrimary,
@@ -186,7 +187,8 @@ class _EmptyStateScreenState extends State<EmptyStateScreen> {
                                 ),
                                 style: FilledButton.styleFrom(
                                   backgroundColor: context.colors.accentPrimary,
-                                  foregroundColor: context.colors.surfacePrimary,
+                                  foregroundColor:
+                                      context.colors.surfacePrimary,
                                   minimumSize: const Size(180, 44),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(

@@ -141,8 +141,9 @@ class S {
       _ko ? '비밀번호가 필요한 PDF' : 'Password-protected PDF';
   String get passwordDialogSubtitle =>
       _ko ? '이 PDF를 열려면 비밀번호를 입력하세요.' : 'Enter the password to open this PDF.';
-  String get passwordWrong =>
-      _ko ? '비밀번호가 올바르지 않습니다. 다시 시도하세요.' : 'Incorrect password — please try again.';
+  String get passwordWrong => _ko
+      ? '비밀번호가 올바르지 않습니다. 다시 시도하세요.'
+      : 'Incorrect password — please try again.';
   String get passwordLabel => _ko ? '비밀번호' : 'Password';
   String get passwordOpen => _ko ? '열기' : 'Open';
   String get passwordShow => _ko ? '비밀번호 표시' : 'Show password';
@@ -164,20 +165,16 @@ class S {
   String get passwordCurrent => _ko ? '현재 비밀번호' : 'Current password';
   String get passwordMismatch =>
       _ko ? '두 비밀번호가 일치하지 않습니다.' : 'The two passwords do not match.';
-  String get passwordEmpty =>
-      _ko ? '비밀번호를 입력하세요.' : 'Please enter a password.';
+  String get passwordEmpty => _ko ? '비밀번호를 입력하세요.' : 'Please enter a password.';
   String get passwordApply => _ko ? '적용' : 'Apply';
-  String get passwordSaveAs =>
-      _ko ? '암호화된 PDF로 저장' : 'Save encrypted PDF as…';
+  String get passwordSaveAs => _ko ? '암호화된 PDF로 저장' : 'Save encrypted PDF as…';
   String get passwordSaveAsRemoved =>
       _ko ? '비밀번호 제거한 PDF로 저장' : 'Save decrypted PDF as…';
-  String get passwordSetSuccess =>
-      _ko ? '비밀번호가 설정되었습니다.' : 'Password set.';
+  String get passwordSetSuccess => _ko ? '비밀번호가 설정되었습니다.' : 'Password set.';
   String get passwordRemoveSuccess =>
       _ko ? '비밀번호가 제거되었습니다.' : 'Password removed.';
-  String get passwordToolUnavailable => _ko
-      ? '암호 변경 도구를 찾을 수 없습니다.'
-      : 'Password tool unavailable in this build.';
+  String get passwordToolUnavailable =>
+      _ko ? '암호 변경 도구를 찾을 수 없습니다.' : 'Password tool unavailable in this build.';
   String get passwordOperationFailed =>
       _ko ? '암호 변경에 실패했습니다.' : 'Password operation failed.';
 
@@ -291,13 +288,11 @@ class S {
 
   // ── Page mix: source tray ──────────────────────────────────
 
-  String get rangeInputHint =>
-      _ko ? '예: 1-3, 5, 7-10' : 'e.g. 1-3, 5, 7-10';
+  String get rangeInputHint => _ko ? '예: 1-3, 5, 7-10' : 'e.g. 1-3, 5, 7-10';
   String get addAll => _ko ? '전체 추가' : 'Add all';
   String get addSelection => _ko ? '선택 추가' : 'Add selection';
   String get addRange => _ko ? '범위 추가' : 'Add range';
-  String selectedCount(int count) =>
-      _ko ? '$count 선택' : '$count selected';
+  String selectedCount(int count) => _ko ? '$count 선택' : '$count selected';
   String pageMeta(int pageCount, String size) =>
       _ko ? '$pageCount 페이지 · $size' : '$pageCount pages · $size';
   String get collapseTray => _ko ? '접기' : 'Collapse';
@@ -307,8 +302,7 @@ class S {
 
   // ── Page mix: output canvas ────────────────────────────────
 
-  String get outputEmptyTitle =>
-      _ko ? '출력 페이지가 비어 있습니다' : 'Output is empty';
+  String get outputEmptyTitle => _ko ? '출력 페이지가 비어 있습니다' : 'Output is empty';
   String get outputEmptyHint => _ko
       ? '위 트레이에서 페이지를 선택해 추가하거나, 드래그해 이곳에 놓으세요'
       : 'Select pages in the tray above and add them, or drag them here';
@@ -320,9 +314,8 @@ class S {
   String get clearOutput => _ko ? '출력 비우기' : 'Clear output';
   String pageLabelShort(String name, int page) =>
       _ko ? '$name · p.$page' : '$name · p.$page';
-  String pageLabelRotated(String name, int page, int degrees) => _ko
-      ? '$name · p.$page · $degrees°'
-      : '$name · p.$page · $degrees°';
+  String pageLabelRotated(String name, int page, int degrees) =>
+      _ko ? '$name · p.$page · $degrees°' : '$name · p.$page · $degrees°';
   String get rotateCounterClockwise =>
       _ko ? '반시계방향 회전' : 'Rotate counterclockwise';
   String get rotateClockwise => _ko ? '시계방향 회전' : 'Rotate clockwise';
@@ -382,7 +375,8 @@ class S {
       ? '{페이지} 토큰이 없어 파일명이 겹칠 수 있습니다. 겹치는 파일에는 번호가 자동으로 붙습니다.'
       : 'No {페이지} token — names may collide; duplicates get a number suffix.';
   String get resetDefaults => _ko ? '기본값으로 초기화' : 'Reset to defaults';
-  String get resetDefaultsDone => _ko ? '출력 설정이 초기화되었습니다' : 'Output settings reset';
+  String get resetDefaultsDone =>
+      _ko ? '출력 설정이 초기화되었습니다' : 'Output settings reset';
 
   // Settings > About
   String get version => _ko ? '버전' : 'Version';

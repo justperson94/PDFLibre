@@ -134,11 +134,13 @@ class _OutputPageTileState extends State<OutputPageTile> {
       preview = RotatedBox(quarterTurns: turns, child: preview);
     }
 
-    final borderColor =
-        widget.selected ? widget.sourceColor : colors.borderSubtle;
+    final borderColor = widget.selected
+        ? widget.sourceColor
+        : colors.borderSubtle;
     final borderWidth = widget.selected ? 2.0 : 1.0;
 
-    final hasActions = widget.onRotateCw != null ||
+    final hasActions =
+        widget.onRotateCw != null ||
         widget.onRotateCcw != null ||
         widget.onRemove != null;
 
@@ -170,85 +172,85 @@ class _OutputPageTileState extends State<OutputPageTile> {
         },
         child: Focus(
           child: MouseRegion(
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
-      child: Builder(
-        builder: (context) => InkWell(
-        onTap: () {
-          Focus.of(context).requestFocus();
-          widget.onTap?.call();
-        },
-        borderRadius: BorderRadius.circular(AppTheme.roundedMd),
-        child: Container(
-          width: widget.width,
-          height: widget.height,
-          decoration: BoxDecoration(
-            color: colors.surfacePrimary,
-            borderRadius: BorderRadius.circular(AppTheme.roundedMd),
-            border: Border.all(color: borderColor, width: borderWidth),
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(
-                width: widget.width,
-                height: widget.previewHeight,
-                child: Stack(
-                  children: [
-                    Positioned.fill(
-                      child: Container(
-                        color: colors.surfaceSecondary,
-                        alignment: Alignment.center,
-                        child: preview,
-                      ),
-                    ),
-                    Positioned(
-                      top: 6,
-                      left: 6,
-                      child: _IndexBadge(
-                        index: widget.globalIndex,
-                        color: widget.sourceColor,
-                      ),
-                    ),
-                    if (hasActions && _hovered)
-                      Positioned(
-                        top: 4,
-                        right: 4,
-                        child: _HoverActions(
-                          onRotateCcw: widget.onRotateCcw,
-                          onRotateCw: widget.onRotateCw,
-                          onRemove: widget.onRemove,
+            onEnter: (_) => setState(() => _hovered = true),
+            onExit: (_) => setState(() => _hovered = false),
+            child: Builder(
+              builder: (context) => InkWell(
+                onTap: () {
+                  Focus.of(context).requestFocus();
+                  widget.onTap?.call();
+                },
+                borderRadius: BorderRadius.circular(AppTheme.roundedMd),
+                child: Container(
+                  width: widget.width,
+                  height: widget.height,
+                  decoration: BoxDecoration(
+                    color: colors.surfacePrimary,
+                    borderRadius: BorderRadius.circular(AppTheme.roundedMd),
+                    border: Border.all(color: borderColor, width: borderWidth),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: widget.width,
+                        height: widget.previewHeight,
+                        child: Stack(
+                          children: [
+                            Positioned.fill(
+                              child: Container(
+                                color: colors.surfaceSecondary,
+                                alignment: Alignment.center,
+                                child: preview,
+                              ),
+                            ),
+                            Positioned(
+                              top: 6,
+                              left: 6,
+                              child: _IndexBadge(
+                                index: widget.globalIndex,
+                                color: widget.sourceColor,
+                              ),
+                            ),
+                            if (hasActions && _hovered)
+                              Positioned(
+                                top: 4,
+                                right: 4,
+                                child: _HoverActions(
+                                  onRotateCcw: widget.onRotateCcw,
+                                  onRotateCw: widget.onRotateCw,
+                                  onRemove: widget.onRemove,
+                                ),
+                              ),
+                          ],
                         ),
                       ),
-                  ],
+                      const SizedBox(height: AppTheme.spacingXs),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppTheme.spacingXs,
+                        ),
+                        child: Text(
+                          widget.label,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                            color: colors.foregroundSecondary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                    ],
+                  ),
                 ),
-              ),
-            const SizedBox(height: AppTheme.spacingXs),
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppTheme.spacingXs,
-              ),
-              child: Text(
-                widget.label,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
-                  color: colors.foregroundSecondary,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
               ),
             ),
-            const SizedBox(height: 6),
-          ],
+          ),
         ),
       ),
-    ),
-      ),
-    ),
-        ),
-        ),
     );
   }
 }
@@ -262,11 +264,7 @@ class _MoveRightIntent extends Intent {
 }
 
 class _HoverActions extends StatelessWidget {
-  const _HoverActions({
-    this.onRotateCcw,
-    this.onRotateCw,
-    this.onRemove,
-  });
+  const _HoverActions({this.onRotateCcw, this.onRotateCw, this.onRemove});
 
   final VoidCallback? onRotateCcw;
   final VoidCallback? onRotateCw;
@@ -347,10 +345,7 @@ class _IndexBadge extends StatelessWidget {
       width: 22,
       height: 22,
       alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: color,
-        shape: BoxShape.circle,
-      ),
+      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
       child: Text(
         '$index',
         style: const TextStyle(
